@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smidas.Core", "Smidas.Core\Smidas.Core.csproj", "{81CE7576-833A-4CE6-9C9E-2FE71DBC9598}"
+	ProjectSection(ProjectDependencies) = postProject
+		{56572050-FBDC-4861-8979-63ED43B235B3} = {56572050-FBDC-4861-8979-63ED43B235B3}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smidas.Common", "Smidas.Common\Smidas.Common.csproj", "{56572050-FBDC-4861-8979-63ED43B235B3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{81CE7576-833A-4CE6-9C9E-2FE71DBC9598}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81CE7576-833A-4CE6-9C9E-2FE71DBC9598}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81CE7576-833A-4CE6-9C9E-2FE71DBC9598}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81CE7576-833A-4CE6-9C9E-2FE71DBC9598}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56572050-FBDC-4861-8979-63ED43B235B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56572050-FBDC-4861-8979-63ED43B235B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56572050-FBDC-4861-8979-63ED43B235B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56572050-FBDC-4861-8979-63ED43B235B3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B4A0B3C6-EB6D-470C-B1E2-458B3FF1D902}
+	EndGlobalSection
+EndGlobal
