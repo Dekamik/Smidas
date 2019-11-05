@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Smidas.Common.Extensions;
 
 namespace Smidas.Core.Analysis
 {
@@ -32,11 +33,16 @@ namespace Smidas.Core.Analysis
         {
             foreach (var stock in stocks)
             {
-                if (blacklist.Contains(stock.Name)) // Blacklisted stocks
+                // Blacklisted stocks
+                foreach (var name in blacklist)
                 {
-                    stock.Exclude("Blacklisted.");
+                    if (stock.Name.Contains(name))
+                    {
+                        stock.Exclude("Blacklisted.");
+                    }
                 }
-                else if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
+                
+                if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
                     stock.Exclude("Negative profit per stock.");
                 }
@@ -58,32 +64,25 @@ namespace Smidas.Core.Analysis
 
             foreach (var stock in series) // Count amount of doubles per series
             {
-                var companyName = GetCompanyName(stock.Name);
-                doublesCount[companyName] = doublesCount.ContainsKey(companyName) ? doublesCount[companyName] + 1 : 1;
+                doublesCount[stock.CompanyName] = doublesCount.ContainsKey(stock.CompanyName) ? doublesCount[stock.CompanyName] + 1 : 1;
             }
 
             // Select all series that have at least two stocks
-            var doubleStocks = series.Where(s => doublesCount[GetCompanyName(s.Name)] > 1);
-            var doubleCompanies = doubleStocks.Select(s => GetCompanyName(s.Name))
+            var doubleStocks = series.Where(s => doublesCount[s.CompanyName] > 1);
+            var doubleCompanies = doubleStocks.Select(s => s.CompanyName)
                                               .Distinct();
             var stocksToExclude = new HashSet<string>();
 
             foreach (var companyName in doubleCompanies)
             {
-                // Select series
+                // Select the company's stocks, ordered with largest turnover first
                 var company = doubleStocks.Where(s => s.Name.Contains(companyName))
-                                          .ToList();
+                                          .OrderByDescending(s => s.Turnover);
 
-                // Keep the one with the largest turnover. Exclude the rest.
-                company = company.OrderByDescending(s => s.Turnover).ToList();
-                for (int i = 0; i < company.Count(); i++)
-                {
-                    if (i == 0)
-                    {
-                        continue;
-                    }
-                    stocksToExclude.Add(company[i].Name);
-                }
+                // Keep the stock with the largest turnover (the first one). Exclude the rest.
+                company.Skip(1)
+                       .Take(company.Count() - 1)
+                       .ForEach(c => stocksToExclude.Add(c.Name));
             }
 
             foreach (var stock in stocks)
@@ -94,8 +93,6 @@ namespace Smidas.Core.Analysis
                 }
             }
         }
-
-        public static string GetCompanyName(string fullName) => fullName.Substring(0, fullName.Length - 2);
 
         public static void CalculateARank(ref List<Stock> stocks)
         {
@@ -108,7 +105,7 @@ namespace Smidas.Core.Analysis
 
         public static void CalculateBRank(ref List<Stock> stocks)
         {
-            stocks = stocks.OrderByDescending(s => s.JekPerStock).ToList();
+            stocks = stocks.OrderByDescending(s => s.AdjustedEquityPerStock).ToList();
             for (int i = 0; i < stocks.Count(); i++)
             {
                 stocks[i].BRank = i + 1;
@@ -121,7 +118,7 @@ namespace Smidas.Core.Analysis
             int realEstateStocksCap, 
             int bankingStocksCap)
         {
-            var index = 0;
+            var index = 1;
             var investmentStocks = 0;
             var realEstateStocks = 0;
             var bankingStocks = 0;

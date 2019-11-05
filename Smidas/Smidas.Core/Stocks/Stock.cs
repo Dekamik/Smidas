@@ -1,10 +1,13 @@
 ﻿using Smidas.Common.Extensions;
+using System.Text.RegularExpressions;
 
 namespace Smidas.Core.Stocks
 {
     public class Stock
     {
         public string Name { get; set; }
+
+        public string CompanyName => Regex.Replace(Name, " [A-Z]$", "");
 
         public Industry Industry { get; set; }
 
@@ -15,15 +18,19 @@ namespace Smidas.Core.Stocks
         /// </summary>
         public decimal Price { get; set; }
 
+        /// <summary>
+        /// Amount of stocks in circulation. (SE: Omsättning)
+        /// </summary>
         public decimal Turnover { get; set; }
 
-        public decimal JekPerStock { get; set; }
+        /// <summary>
+        /// SE: Justerat Eget Kapital per aktie
+        /// </summary>
+        public decimal AdjustedEquityPerStock { get; set; }
 
         public decimal DirectYield { get; set; }
 
         public decimal ProfitPerStock { get; set; }
-
-        public decimal ProfitPerJek { get; set; }
 
         public decimal Ep => Price != 0m ? ProfitPerStock / Price
                                          : 0m;
@@ -44,7 +51,7 @@ namespace Smidas.Core.Stocks
 
         public override string ToString() => $"{Name}, {Ep}";
 
-        public string ToFullString() => $"{Name}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Turnover}, {JekPerStock}, " +
-                                        $"{DirectYield}, {ProfitPerStock}, {ProfitPerJek}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
+        public string ToFullString() => $"{Name}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Turnover}, {AdjustedEquityPerStock}, " +
+                                        $"{DirectYield}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
     }
 }
