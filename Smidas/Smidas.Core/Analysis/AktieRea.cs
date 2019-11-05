@@ -1,26 +1,35 @@
 ﻿using Smidas.Core.Stocks;
-using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Smidas.Core.Analysis
 {
     public static class AktieRea
     {
-        private static readonly string PreferentialStocksPattern = ".* Pref$";
-
-        private static readonly string SeriesPattern = ".* [A-Z]$";
-
-        public static IEnumerable<Stock> Analyze(
+        public static List<Stock> Analyze(
             List<Stock> stocks, 
             IEnumerable<string> blacklist,
             int investmentStocksCap = 2,
             int realEstateStocksCap = 2,
             int bankingStocksCap = 2)
         {
-            // Exclusions
+            ExcludeDisqualifiedStocks(ref stocks, blacklist);
+
+            ExcludeDoubles(ref stocks);
+
+            CalculateARank(ref stocks);
+
+            CalculateBRank(ref stocks);
+
+            DetermineActions(ref stocks, investmentStocksCap, realEstateStocksCap, bankingStocksCap);
+
+            return stocks.OrderBy(s => s.AbRank)
+                         .ToList();
+        }
+
+        public static void ExcludeDisqualifiedStocks(ref List<Stock> stocks, IEnumerable<string> blacklist)
+        {
             foreach (var stock in stocks)
             {
                 if (blacklist.Contains(stock.Name)) // Blacklisted stocks
@@ -35,125 +44,38 @@ namespace Smidas.Core.Analysis
                 {
                     stock.Exclude("Zero direct yield.");
                 }
-                else if (Regex.IsMatch(stock.Name, PreferentialStocksPattern)) // Preferential stocks
+                else if (Regex.IsMatch(stock.Name, ".* Pref$")) // Preferential stocks
                 {
-                    stock.Exclude("Preferred stock");
+                    stock.Exclude("Preferred stock.");
                 }
             }
-
-            ExcludeDoubles(ref stocks);
-
-            // Calculate A-rank
-            stocks.OrderByDescending(s => s.Ep);
-            for (int i = 0; i < stocks.Count(); i++)
-            {
-                stocks[i].ARank = i + 1;
-            }
-
-            // Calculate B-rank
-            stocks.OrderByDescending(s => s.JekPerStock);
-            for (int i = 0; i < stocks.Count(); i++)
-            {
-                stocks[i].BRank = i + 1;
-            }
-
-            // Determine actions
-            var index = 0;
-            var investmentStocks = 0;
-            var realEstateStocks = 0;
-            var bankingStocks = 0;
-
-            stocks.OrderBy(s => s.AbRank);
-            foreach (var stock in stocks)
-            {
-                if (stock.Action == Stocks.Action.Exclude)
-                {
-                    continue;
-                }
-
-                switch (stock.Industry)
-                {
-                    case Industry.Investment:
-                        if (investmentStocks == investmentStocksCap)
-                        {
-                            stock.Exclude("Investment stocks cap reached.");
-                            continue;
-                        }
-                        else
-                        {
-                            investmentStocks++;
-                        }
-                        break;
-
-                    case Industry.RealEstate:
-                        if (realEstateStocks == realEstateStocksCap)
-                        {
-                            stock.Exclude("Real estate stocks cap reached.");
-                            continue;
-                        }
-                        else
-                        {
-                            realEstateStocks++;
-                        }
-                        break;
-
-                    case Industry.Banking:
-                        if (bankingStocks == bankingStocksCap)
-                        {
-                            stock.Exclude("Banking stocks cap reached.");
-                            continue;
-                        }
-                        else
-                        {
-                            bankingStocks++;
-                        }
-                        break;
-
-                    default:
-                    case Industry.Other:
-                        break;
-                }
-
-                stock.Action = DetermineAction(index);
-                index++;
-            }
-
-            // Return stocks
-            return stocks.OrderBy(s => s.AbRank);
         }
 
-        private static void ExcludeDoubles(ref List<Stock> stocks)
+        public static void ExcludeDoubles(ref List<Stock> stocks)
         {
-            var series = stocks.Where(s => Regex.IsMatch(s.Name, SeriesPattern));
+            var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
             var doublesCount = new Dictionary<string, int>();
 
             foreach (var stock in series) // Count amount of doubles per series
             {
-                var seriesName = GetSeriesName(stock.Name);
-                if (doublesCount.ContainsKey(seriesName))
-                {
-                    doublesCount[seriesName]++;
-                }
-                else
-                {
-                    doublesCount[seriesName] = 1;
-                }
+                var companyName = GetCompanyName(stock.Name);
+                doublesCount[companyName] = doublesCount.ContainsKey(companyName) ? doublesCount[companyName] + 1 : 1;
             }
 
             // Select all series that have at least two stocks
-            var doubleStocks = series.Where(s => doublesCount[GetSeriesName(s.Name)] > 1);
-            var doubleSeries = doubleStocks.Select(s => s.Name)
-                                           .Distinct();
+            var doubleStocks = series.Where(s => doublesCount[GetCompanyName(s.Name)] > 1);
+            var doubleCompanies = doubleStocks.Select(s => GetCompanyName(s.Name))
+                                              .Distinct();
             var stocksToExclude = new HashSet<string>();
 
-            foreach (var seriesName in doubleSeries)
+            foreach (var companyName in doubleCompanies)
             {
                 // Select series
-                var company = doubleStocks.Where(s => s.Name.Contains(seriesName))
+                var company = doubleStocks.Where(s => s.Name.Contains(companyName))
                                           .ToList();
 
-                // Only include the one with the largest turnover. Exclude the rest.
-                company.OrderByDescending(s => s.Turnover);
+                // Keep the one with the largest turnover. Exclude the rest.
+                company = company.OrderByDescending(s => s.Turnover).ToList();
                 for (int i = 0; i < company.Count(); i++)
                 {
                     if (i == 0)
@@ -173,21 +95,100 @@ namespace Smidas.Core.Analysis
             }
         }
 
-        private static string GetSeriesName(string fullName) => fullName.Substring(0, fullName.Length - 2);
+        public static string GetCompanyName(string fullName) => fullName.Substring(0, fullName.Length - 2);
 
-        private static Stocks.Action DetermineAction(int index)
+        public static void CalculateARank(ref List<Stock> stocks)
         {
+            stocks = stocks.OrderByDescending(s => s.Ep).ToList();
+            for (int i = 0; i < stocks.Count(); i++)
+            {
+                stocks[i].ARank = i + 1;
+            }
+        }
+
+        public static void CalculateBRank(ref List<Stock> stocks)
+        {
+            stocks = stocks.OrderByDescending(s => s.JekPerStock).ToList();
+            for (int i = 0; i < stocks.Count(); i++)
+            {
+                stocks[i].BRank = i + 1;
+            }
+        }
+
+        public static void DetermineActions(
+            ref List<Stock> stocks, 
+            int investmentStocksCap, 
+            int realEstateStocksCap, 
+            int bankingStocksCap)
+        {
+            var index = 0;
+            var investmentStocks = 0;
+            var realEstateStocks = 0;
+            var bankingStocks = 0;
+
+            stocks = stocks.OrderBy(s => s.AbRank).ToList();
+            foreach (var stock in stocks)
+            {
+                if (stock.Action == Action.Exclude)
+                {
+                    continue;
+                }
+
+                switch (stock.Industry)
+                {
+                    case Industry.Investment:
+                        if (investmentStocks == investmentStocksCap)
+                        {
+                            stock.Exclude("Investment stocks cap reached.");
+                            continue;
+                        }
+                        investmentStocks++;
+                        break;
+
+                    case Industry.RealEstate:
+                        if (realEstateStocks == realEstateStocksCap)
+                        {
+                            stock.Exclude("Real estate stocks cap reached.");
+                            continue;
+                        }
+                        realEstateStocks++;
+                        break;
+
+                    case Industry.Banking:
+                        if (bankingStocks == bankingStocksCap)
+                        {
+                            stock.Exclude("Banking stocks cap reached.");
+                            continue;
+                        }
+                        bankingStocks++;
+                        break;
+
+                    default:
+                    case Industry.Other:
+                        break;
+                }
+
+                stock.Action = DetermineActionByIndex(index);
+                index++;
+            }
+        }
+
+        public static Action DetermineActionByIndex(int index)
+        {
+            if (index <= 0)
+                throw new System.ArgumentOutOfRangeException(nameof(index));
+
             if (index <= 10)
             {
-                return Stocks.Action.Buy;
+                return Action.Buy;
             }
             else if (index <= 20)
             {
-                return Stocks.Action.Keep;
+                return Action.Keep;
             }
             else
             {
-                return Stocks.Action.Sell;
+                return Action.Sell;
             }
         }
     }

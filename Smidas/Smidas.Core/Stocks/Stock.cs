@@ -1,11 +1,8 @@
 ﻿using Smidas.Common.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Smidas.Core.Stocks
 {
-    public class Stock : IEquatable<Stock>
+    public class Stock
     {
         public string Name { get; set; }
 
@@ -14,11 +11,8 @@ namespace Smidas.Core.Stocks
         public Action Action { get; set; }
 
         /// <summary>
-        /// The stock price.
-        /// </summary>
-        /// <value>
         /// The latest stock price.
-        /// </value>
+        /// </summary>
         public decimal Price { get; set; }
 
         public decimal Turnover { get; set; }
@@ -31,7 +25,7 @@ namespace Smidas.Core.Stocks
 
         public decimal ProfitPerJek { get; set; }
 
-        public decimal Ep => Price != 0m ? ProfitPerStock / Price 
+        public decimal Ep => Price != 0m ? ProfitPerStock / Price
                                          : 0m;
 
         public int ARank { get; set; }
@@ -48,32 +42,9 @@ namespace Smidas.Core.Stocks
             Comments = reason;
         }
 
-        public override string ToString() => $"{Name}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Turnover}, {JekPerStock}, " +
-                                             $"{DirectYield}, {ProfitPerStock}, {ProfitPerJek}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
+        public override string ToString() => $"{Name}, {Ep}";
 
-        public override bool Equals(object obj) => obj.GetType() == typeof(Stock) ? Equals(obj as Stock) 
-                                                                                  : false;
-
-        public bool Equals(Stock other) => Name == other.Name;
-
-        public override int GetHashCode()
-        {
-            var hash = new HashCode();
-            hash.Add(Name);
-            hash.Add(Industry);
-            hash.Add(Action);
-            hash.Add(Price);
-            hash.Add(Turnover);
-            hash.Add(JekPerStock);
-            hash.Add(DirectYield);
-            hash.Add(ProfitPerStock);
-            hash.Add(ProfitPerJek);
-            hash.Add(Ep);
-            hash.Add(ARank);
-            hash.Add(BRank);
-            hash.Add(AbRank);
-            hash.Add(Comments);
-            return hash.ToHashCode();
-        }
+        public string ToFullString() => $"{Name}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Turnover}, {JekPerStock}, " +
+                                        $"{DirectYield}, {ProfitPerStock}, {ProfitPerJek}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
     }
 }
