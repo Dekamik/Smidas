@@ -22,7 +22,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = 1m,
                     DirectYield = 1m,
                 }
-            };
+            }.AsEnumerable();
             var blacklist = new[] { "AnyBlacklistedStock" };
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, blacklist);
@@ -42,7 +42,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = 1m,
                     DirectYield = 1m,
                 }
-            };
+            }.AsEnumerable();
             var blacklist = new[] { "AnyBlacklistedStock" };
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, blacklist);
@@ -62,7 +62,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = 1m,
                     DirectYield = 1m,
                 }
-            };
+            }.AsEnumerable();
             var blacklist = new[] { "AnyBlacklistedStock" };
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, blacklist);
@@ -82,7 +82,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = -1m,
                     DirectYield = 1m,
                 }
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
 
@@ -101,7 +101,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = 1m,
                     DirectYield = 1m,
                 }
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
 
@@ -120,7 +120,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = 1m,
                     DirectYield = 0m,
                 }
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
 
@@ -139,7 +139,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = 1m,
                     DirectYield = 1m,
                 }
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
 
@@ -158,7 +158,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = 0m,
                     DirectYield = 1m,
                 }
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
 
@@ -177,7 +177,7 @@ namespace Smidas.Core.Tests.Analysis
                     ProfitPerStock = 0m,
                     DirectYield = 1m,
                 }
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
 
@@ -205,7 +205,7 @@ namespace Smidas.Core.Tests.Analysis
                     Name = "AnyStock C",
                     Turnover = 1,
                 }
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDoubles(ref stocks);
 
@@ -229,7 +229,7 @@ namespace Smidas.Core.Tests.Analysis
                     Name = "OtherStock B",
                     Turnover = 3,
                 },
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDoubles(ref stocks);
 
@@ -261,7 +261,7 @@ namespace Smidas.Core.Tests.Analysis
                     Name = "DifferentStock",
                     Turnover = 1,
                 }
-            };
+            }.AsEnumerable();
 
             AktieRea.ExcludeDoubles(ref stocks);
 
@@ -299,12 +299,12 @@ namespace Smidas.Core.Tests.Analysis
                     Price = 4m,
                     ProfitPerStock = 10m,
                 },
-            };
+            }.AsEnumerable();
 
             AktieRea.CalculateARank(ref stocks);
 
-            stocks.Should().BeInDescendingOrder(s => s.Ep);
-            stocks.Should().BeInAscendingOrder(s => s.ARank);
+            stocks.OrderBy(s => s.ARank).Should().BeInDescendingOrder(s => s.Ep);
+            stocks.OrderByDescending(s => s.Ep).Should().BeInAscendingOrder(s => s.ARank);
         }
 
         [Fact]
@@ -332,12 +332,12 @@ namespace Smidas.Core.Tests.Analysis
                     Name = "Fourth",
                     AdjustedEquityPerStock = 3m,
                 },
-            };
+            }.AsEnumerable();
 
             AktieRea.CalculateBRank(ref stocks);
 
-            stocks.Should().BeInDescendingOrder(s => s.AdjustedEquityPerStock);
-            stocks.Should().BeInAscendingOrder(s => s.BRank);
+            stocks.OrderBy(s => s.BRank).Should().BeInDescendingOrder(s => s.AdjustedEquityPerStock);
+            stocks.OrderByDescending(s => s.AdjustedEquityPerStock).Should().BeInAscendingOrder(s => s.BRank);
         }
 
         [Fact]
@@ -353,9 +353,12 @@ namespace Smidas.Core.Tests.Analysis
                     BRank = i,
                 });
             }
-            stocks = stocks.OrderBy(s => System.Guid.NewGuid()).ToList(); // Shuffle list
 
-            AktieRea.DetermineActions(ref stocks, 2, 2, 2);
+            // Shuffle list
+            var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
+                                   .AsEnumerable();
+
+            AktieRea.DetermineActions(ref enumerable, 2, 2, 2);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
         }
@@ -373,10 +376,14 @@ namespace Smidas.Core.Tests.Analysis
                     BRank = i,
                 });
             }
-            stocks = stocks.OrderBy(s => System.Guid.NewGuid()).ToList(); // Shuffle list
+            
+            // Shuffle list
+            var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
+                                   .AsEnumerable();
 
-            AktieRea.DetermineActions(ref stocks, 2, 2, 2);
+            AktieRea.DetermineActions(ref enumerable, 2, 2, 2);
 
+            // Assert that 1 - 10 = Buy, 11 - 20 = Keep, 21> = Sell
             stocks.Take(10)
                   .ForEach(s => s.Action.Should().Be(Action.Buy));
             stocks.Skip(10)
@@ -401,9 +408,12 @@ namespace Smidas.Core.Tests.Analysis
                     BRank = i,
                 });
             }
-            stocks = stocks.OrderBy(s => System.Guid.NewGuid()).ToList(); // Shuffle list
 
-            AktieRea.DetermineActions(ref stocks, 2, 2, 2);
+            // Shuffle list
+            var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
+                                   .AsEnumerable();
+
+            AktieRea.DetermineActions(ref enumerable, 2, 2, 2);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
             stocks.Take(2)
@@ -425,9 +435,12 @@ namespace Smidas.Core.Tests.Analysis
                     BRank = i,
                 });
             }
-            stocks = stocks.OrderBy(s => System.Guid.NewGuid()).ToList(); // Shuffle list
 
-            AktieRea.DetermineActions(ref stocks, 2, 2, 2);
+            // Shuffle list
+            var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
+                                   .AsEnumerable();
+
+            AktieRea.DetermineActions(ref enumerable, 2, 2, 2);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
             stocks.Take(2)
@@ -449,9 +462,12 @@ namespace Smidas.Core.Tests.Analysis
                     BRank = i,
                 });
             }
-            stocks = stocks.OrderBy(s => System.Guid.NewGuid()).ToList(); // Shuffle list
 
-            AktieRea.DetermineActions(ref stocks, 2, 2, 2);
+            // Shuffle list
+            var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
+                                   .AsEnumerable();
+
+            AktieRea.DetermineActions(ref enumerable, 2, 2, 2);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
             stocks.Take(2)
@@ -460,21 +476,21 @@ namespace Smidas.Core.Tests.Analysis
         }
 
         [Fact]
-        public void DetermineActionByIndex_IndexOne_StockMarkedBuy()
+        public void DetermineActionByIndex_IndexOne_ReturnsBuy()
         {
             var action = AktieRea.DetermineActionByIndex(1);
             action.Should().Be(Action.Buy);
         }
 
         [Fact]
-        public void DetermineActionByIndex_IndexEleven_StockMarkedKeep()
+        public void DetermineActionByIndex_IndexEleven_ReturnsKeep()
         {
             var action = AktieRea.DetermineActionByIndex(11);
             action.Should().Be(Action.Keep);
         }
 
         [Fact]
-        public void DetermineActionByIndex_IndexTwentyOne_StockMarkedSell()
+        public void DetermineActionByIndex_IndexTwentyOne_ReturnsSell()
         {
             var action = AktieRea.DetermineActionByIndex(21);
             action.Should().Be(Action.Sell);

@@ -7,6 +7,9 @@ namespace Smidas.Core.Stocks
     {
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets the Name without series letter if present
+        /// </summary>
         public string CompanyName => Regex.Replace(Name, " [A-Z]$", "");
 
         public Industry Industry { get; set; }
@@ -28,10 +31,17 @@ namespace Smidas.Core.Stocks
         /// </summary>
         public decimal AdjustedEquityPerStock { get; set; }
 
+        /// <summary>
+        /// SE: Direktavkastning
+        /// </summary>
         public decimal DirectYield { get; set; }
 
         public decimal ProfitPerStock { get; set; }
 
+        /// <summary>
+        /// E/P, i.e. the reverse of P/E
+        /// The bigger the number, the more profitable the stock
+        /// </summary>
         public decimal Ep => Price != 0m ? ProfitPerStock / Price
                                          : 0m;
 
@@ -51,7 +61,7 @@ namespace Smidas.Core.Stocks
 
         public override string ToString() => $"{Name}, {Ep}";
 
-        public string ToFullString() => $"{Name}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Turnover}, {AdjustedEquityPerStock}, " +
-                                        $"{DirectYield}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
+        public string ToFullString() => $"{Name}, {CompanyName}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Turnover}, " +
+                                        $"{AdjustedEquityPerStock}, {DirectYield}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
     }
 }

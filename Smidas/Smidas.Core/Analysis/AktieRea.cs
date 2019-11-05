@@ -6,14 +6,15 @@ using Smidas.Common.Extensions;
 
 namespace Smidas.Core.Analysis
 {
-    public static class AktieRea
+    public class AktieRea : IAnalysis<Stock>
     {
-        public static List<Stock> Analyze(
-            List<Stock> stocks, 
-            IEnumerable<string> blacklist,
-            int investmentStocksCap = 2,
-            int realEstateStocksCap = 2,
-            int bankingStocksCap = 2)
+        public int InvestmentStocksCap { get; set; } = 2;
+
+        public int RealEstateStocksCap { get; set; } = 2;
+
+        public int BankingStocksCap { get; set; } = 2;
+
+        public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
         {
             ExcludeDisqualifiedStocks(ref stocks, blacklist);
 
@@ -23,13 +24,12 @@ namespace Smidas.Core.Analysis
 
             CalculateBRank(ref stocks);
 
-            DetermineActions(ref stocks, investmentStocksCap, realEstateStocksCap, bankingStocksCap);
+            DetermineActions(ref stocks, InvestmentStocksCap, RealEstateStocksCap, BankingStocksCap);
 
-            return stocks.OrderBy(s => s.AbRank)
-                         .ToList();
+            return stocks.OrderBy(s => s.AbRank);
         }
 
-        public static void ExcludeDisqualifiedStocks(ref List<Stock> stocks, IEnumerable<string> blacklist)
+        public static void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
         {
             foreach (var stock in stocks)
             {
@@ -57,7 +57,7 @@ namespace Smidas.Core.Analysis
             }
         }
 
-        public static void ExcludeDoubles(ref List<Stock> stocks)
+        public static void ExcludeDoubles(ref IEnumerable<Stock> stocks)
         {
             var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
             var doublesCount = new Dictionary<string, int>();
@@ -94,26 +94,22 @@ namespace Smidas.Core.Analysis
             }
         }
 
-        public static void CalculateARank(ref List<Stock> stocks)
+        public static void CalculateARank(ref IEnumerable<Stock> stocks)
         {
-            stocks = stocks.OrderByDescending(s => s.Ep).ToList();
-            for (int i = 0; i < stocks.Count(); i++)
-            {
-                stocks[i].ARank = i + 1;
-            }
+            int i = 1;
+            stocks.OrderByDescending(s => s.Ep)
+                  .ForEach(s => s.ARank = i++);
         }
 
-        public static void CalculateBRank(ref List<Stock> stocks)
+        public static void CalculateBRank(ref IEnumerable<Stock> stocks)
         {
-            stocks = stocks.OrderByDescending(s => s.AdjustedEquityPerStock).ToList();
-            for (int i = 0; i < stocks.Count(); i++)
-            {
-                stocks[i].BRank = i + 1;
-            }
+            int i = 1;
+            stocks.OrderByDescending(s => s.AdjustedEquityPerStock)
+                  .ForEach(s => s.BRank = i++);
         }
 
         public static void DetermineActions(
-            ref List<Stock> stocks, 
+            ref IEnumerable<Stock> stocks, 
             int investmentStocksCap, 
             int realEstateStocksCap, 
             int bankingStocksCap)
@@ -123,14 +119,14 @@ namespace Smidas.Core.Analysis
             var realEstateStocks = 0;
             var bankingStocks = 0;
 
-            stocks = stocks.OrderBy(s => s.AbRank).ToList();
-            foreach (var stock in stocks)
+            foreach (var stock in stocks.OrderBy(s => s.AbRank))
             {
                 if (stock.Action == Action.Exclude)
                 {
                     continue;
                 }
 
+                // Check if the stock belongs to a capped industry, and whether or not the cap has been reached.
                 switch (stock.Industry)
                 {
                     case Industry.Investment:
