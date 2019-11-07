@@ -31,7 +31,6 @@ namespace Smidas.Core.Stocks
         public decimal AdjustedEquityPerStock { get; set; }
 
         [Display(Name = "Direktavkastning", ShortName = "Dir.avk.")]
-        [Description("Direktavkastning.")]
         public decimal DirectYield { get; set; }
 
         [Display(Name = "Vinst per aktie", ShortName = "Vinst/aktie")]

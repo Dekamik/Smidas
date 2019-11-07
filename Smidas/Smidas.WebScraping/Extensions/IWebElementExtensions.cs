@@ -1,14 +1,11 @@
 ﻿using OpenQA.Selenium;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Smidas.WebScraping.Extensions
 {
     public static class IWebElementExtensions
     {
-        public static decimal TextAsDecimal(this IWebElement webElement) => decimal.Parse(webElement.Text.Replace(',', '.'));
+        public static decimal TextAsDecimal(this IWebElement webElement) => decimal.Parse(!string.IsNullOrEmpty(webElement.Text) ? webElement.Text : "0");
 
-        public static decimal TextAsKNumber(this IWebElement webElement) => decimal.Parse(webElement.Text.Split(',')[0].Replace("K", "000"));
+        public static decimal TextAsNumber(this IWebElement webElement) => decimal.Parse(!string.IsNullOrEmpty(webElement.Text) ? webElement.Text.Replace("K", "000") : "0");
     }
 }

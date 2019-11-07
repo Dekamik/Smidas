@@ -65,22 +65,30 @@ namespace Smidas.WebScraping.AffarsVarlden
 
         public void ClickNextButton()
         {
-            _logger.LogInformation($"Clicking to page 2");
+            _logger.LogInformation($"Navigating to next page");
             WebDriver.ExecuteScript("arguments[0].click();", WebDriver.FindElement(By.XPath("//a[text()='>']")));
         }
 
         public void ScrapeSharePrices(ref List<Stock> stockData)
         {
             _logger.LogInformation($"Scraping share prices");
+
             var table = WebDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
+
             foreach (var row in table)
             {
                 var cells = WebDriver.FindElements(By.TagName("td"));
+                var name = cells[_nameIndex].Text;
+                var price = cells[_priceIndex].TextAsDecimal();
+                var turnover = cells[_turnoverIndex].TextAsNumber();
+
+                _logger.LogDebug($"Name = {name},\tPrice = {price},\tTurnover = {turnover}");
+
                 stockData.Add(new Stock
                 {
-                    Name = cells[_nameIndex].Text,
-                    Price = cells[_priceIndex].TextAsDecimal(),
-                    Turnover = cells[_turnoverIndex].TextAsKNumber(),
+                    Name = name,
+                    Price = price,
+                    Turnover = turnover,
                 });
             }
         }
@@ -88,14 +96,23 @@ namespace Smidas.WebScraping.AffarsVarlden
         public void ScrapeStockIndicators(ref List<Stock> stockData)
         {
             _logger.LogInformation($"Scraping stock indicators");
+
             var table = WebDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
+
             foreach (var row in table)
             {
                 var cells = row.FindElements(By.TagName("td"));
                 var stock = stockData.Single(d => d.Name == cells[_nameIndex].Text);
-                stock.AdjustedEquityPerStock = cells[_adjustedEquityPerStock].TextAsDecimal();
-                stock.DirectYield = cells[_directYieldIndex].TextAsDecimal();
-                stock.ProfitPerStock = cells[_profitPerStock].TextAsDecimal();
+
+                var adjustedEquityPerStock = cells[_adjustedEquityPerStock].TextAsDecimal();
+                var directYield = cells[_directYieldIndex].TextAsDecimal();
+                var profitPerStock = cells[_profitPerStock].TextAsDecimal();
+
+                _logger.LogDebug($"Name = {stock.Name},\tAdjustedEquityPerStock = {adjustedEquityPerStock},\tDirectYield = {directYield},\tProfitPerStock = {profitPerStock}");
+
+                stock.AdjustedEquityPerStock = adjustedEquityPerStock;
+                stock.DirectYield = directYield;
+                stock.ProfitPerStock = profitPerStock;
             }
         }
     }
