@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
+using Smidas.Core.Stocks;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 
 namespace Smidas.WebScraping
 {
-    public abstract class WebScraper<T> : IWebScraper<T>
+    public abstract class WebScraper : IWebScraper
     {
         private Random _random;
 
@@ -25,7 +26,7 @@ namespace Smidas.WebScraping
             WebDriver = webDriver;
         }
 
-        public abstract IEnumerable<T> Scrape();
+        public abstract IEnumerable<Stock> Scrape();
 
         public void Wait()
         {

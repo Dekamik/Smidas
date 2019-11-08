@@ -9,8 +9,8 @@ namespace Smidas.Core.Analysis
     /// Interface for analysis classes
     /// </summary>
     /// <typeparam name="T">Data object type</typeparam>
-    public interface IAnalysis<T>
+    public interface IAnalysis
     {
-        IEnumerable<T> Analyze(IEnumerable<T> stocks, IEnumerable<string> blacklist);
+        IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks, IEnumerable<string> blacklist);
     }
 }

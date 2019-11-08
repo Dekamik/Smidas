@@ -3,16 +3,24 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Smidas.Common.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Smidas.Core.Analysis
 {
-    public class AktieRea : IAnalysis<Stock>
+    public class AktieRea : IAnalysis
     {
+        private readonly ILogger _logger;
+
         public int InvestmentStocksCap { get; set; } = 2;
 
         public int RealEstateStocksCap { get; set; } = 2;
 
         public int BankingStocksCap { get; set; } = 2;
+
+        public AktieRea(ILoggerFactory loggerFactory)
+        {
+            _logger = loggerFactory.CreateLogger<AktieRea>();
+        }
 
         public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
         {
@@ -29,8 +37,10 @@ namespace Smidas.Core.Analysis
             return stocks.OrderBy(s => s.AbRank);
         }
 
-        public static void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
+        public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
         {
+            _logger.LogDebug($"Exluding disqualified stocks");
+
             foreach (var stock in stocks)
             {
                 // Blacklisted stocks
@@ -38,27 +48,33 @@ namespace Smidas.Core.Analysis
                 {
                     if (stock.Name.Contains(name))
                     {
+                        _logger.LogTrace($"Excluding {stock.Name} - Blacklisted.");
                         stock.Exclude("Blacklisted.");
                     }
                 }
                 
                 if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
+                    _logger.LogTrace($"Excluding {stock.Name} - Negative profit per stock.");
                     stock.Exclude("Negative profit per stock.");
                 }
                 else if (stock.DirectYield == 0) // Stocks with zero direct yield
                 {
+                    _logger.LogTrace($"Excluding {stock.Name} - Zero direct yield.");
                     stock.Exclude("Zero direct yield.");
                 }
                 else if (Regex.IsMatch(stock.Name, ".* Pref$")) // Preferential stocks
                 {
+                    _logger.LogTrace($"Excluding {stock.Name} - Preferred stock.");
                     stock.Exclude("Preferred stock.");
                 }
             }
         }
 
-        public static void ExcludeDoubles(ref IEnumerable<Stock> stocks)
+        public void ExcludeDoubles(ref IEnumerable<Stock> stocks)
         {
+            _logger.LogDebug($"Exluding doubles");
+
             var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
             var doublesCount = new Dictionary<string, int>();
 
@@ -89,31 +105,38 @@ namespace Smidas.Core.Analysis
             {
                 if (stocksToExclude.Contains(stock.Name))
                 {
+                    _logger.LogTrace($"Excluding {stock.Name} - Is a double.");
                     stock.Exclude("Is a double");
                 }
             }
         }
 
-        public static void CalculateARank(ref IEnumerable<Stock> stocks)
+        public void CalculateARank(ref IEnumerable<Stock> stocks)
         {
+            _logger.LogDebug($"Calculating A-rank");
+
             int i = 1;
             stocks.OrderByDescending(s => s.Ep)
                   .ForEach(s => s.ARank = i++);
         }
 
-        public static void CalculateBRank(ref IEnumerable<Stock> stocks)
+        public void CalculateBRank(ref IEnumerable<Stock> stocks)
         {
+            _logger.LogDebug($"Calculating B-rank");
+
             int i = 1;
             stocks.OrderByDescending(s => s.AdjustedEquityPerStock)
                   .ForEach(s => s.BRank = i++);
         }
 
-        public static void DetermineActions(
+        public void DetermineActions(
             ref IEnumerable<Stock> stocks, 
             int investmentStocksCap, 
             int realEstateStocksCap, 
             int bankingStocksCap)
         {
+            _logger.LogDebug($"Determining actions");
+
             var index = 1;
             var investmentStocks = 0;
             var realEstateStocks = 0;
@@ -132,6 +155,7 @@ namespace Smidas.Core.Analysis
                     case Industry.Investment:
                         if (investmentStocks == investmentStocksCap)
                         {
+                            _logger.LogTrace($"Excluding {stock.Name} - Investment stocks cap reached.");
                             stock.Exclude("Investment stocks cap reached.");
                             continue;
                         }
@@ -141,6 +165,7 @@ namespace Smidas.Core.Analysis
                     case Industry.RealEstate:
                         if (realEstateStocks == realEstateStocksCap)
                         {
+                            _logger.LogTrace($"Excluding {stock.Name} - Real estate stocks cap reached.");
                             stock.Exclude("Real estate stocks cap reached.");
                             continue;
                         }
@@ -150,6 +175,7 @@ namespace Smidas.Core.Analysis
                     case Industry.Banking:
                         if (bankingStocks == bankingStocksCap)
                         {
+                            _logger.LogTrace($"Excluding {stock.Name} - Banking stocks cap reached.");
                             stock.Exclude("Banking stocks cap reached.");
                             continue;
                         }
@@ -166,8 +192,10 @@ namespace Smidas.Core.Analysis
             }
         }
 
-        public static Action DetermineActionByIndex(int index)
+        public Action DetermineActionByIndex(int index)
         {
+            _logger.LogDebug($"Determining action by index");
+
             if (index <= 0)
                 throw new System.ArgumentOutOfRangeException(nameof(index));
 

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Smidas.Core.Stocks;
+using System;
 using System.Collections.Generic;
 
 namespace Smidas.WebScraping
 {
-    public interface IWebScraper<T>
+    public interface IWebScraper
     {
-        IEnumerable<T> Scrape();
+        IEnumerable<Stock> Scrape();
 
         void Wait();
     }

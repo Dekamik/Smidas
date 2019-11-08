@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
+using Smidas.Common.Extensions;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.Extensions;
 using System;
@@ -8,7 +9,7 @@ using System.Linq;
 
 namespace Smidas.WebScraping.AffarsVarlden
 {
-    public class AffarsVarldenWebScraper : WebScraper<Stock>
+    public class AffarsVarldenWebScraper : WebScraper
     {
         // Share prices page
         private const int _nameIndex = 0;
@@ -20,12 +21,15 @@ namespace Smidas.WebScraping.AffarsVarlden
         private const int _directYieldIndex = 6;
         private const int _profitPerStock = 7;
 
-        public string SharePricesUrl { get; set; } = "https://www.affarsvarlden.se/bors/kurslistor/stockholm-large/kurs/";
+        private AffarsVarldenIndexes _stockIndex;
 
-        public string StockIndicatorsUrl { get; set; } = "https://www.affarsvarlden.se/bors/kurslistor/stockholm-large/aktieindikatorn/";
+        public string SharePricesUrl => $"https://www.affarsvarlden.se/bors/kurslistor/{_stockIndex.GetDescription()}/kurs/";
 
-        public AffarsVarldenWebScraper(IWebDriver webDriver, ILogger logger) : base(webDriver, logger)
+        public string StockIndicatorsUrl => $"https://www.affarsvarlden.se/bors/kurslistor/{_stockIndex.GetDescription()}/aktieindikatorn/";
+
+        public AffarsVarldenWebScraper(IWebDriver webDriver, ILoggerFactory loggerFactory, AffarsVarldenIndexes stockIndex) : base(webDriver, loggerFactory.CreateLogger<AffarsVarldenWebScraper>())
         {
+            _stockIndex = stockIndex;
         }
 
         public override IEnumerable<Stock> Scrape()
@@ -40,11 +44,15 @@ namespace Smidas.WebScraping.AffarsVarlden
 
             ScrapeSharePrices(ref stockData);
 
-            ClickNextButton();
+            // Pretty hacky, should support pagination instead
+            if (_stockIndex == AffarsVarldenIndexes.StockholmLargeCap)
+            {
+                ClickNextButton();
 
-            Wait();
+                Wait();
 
-            ScrapeSharePrices(ref stockData);
+                ScrapeSharePrices(ref stockData);
+            }
 
             _logger.LogInformation($"Navigating to {SharePricesUrl}");
             WebDriver.Navigate().GoToUrl(StockIndicatorsUrl);
@@ -53,11 +61,14 @@ namespace Smidas.WebScraping.AffarsVarlden
 
             ScrapeStockIndicators(ref stockData);
 
-            ClickNextButton();
+            if (_stockIndex == AffarsVarldenIndexes.StockholmLargeCap)
+            {
+                ClickNextButton();
 
-            Wait();
+                Wait();
 
-            ScrapeStockIndicators(ref stockData);
+                ScrapeStockIndicators(ref stockData);
+            }
 
             _logger.LogInformation($"Scraping completed");
             return stockData.AsEnumerable();
@@ -82,7 +93,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 var price = cells[_priceIndex].TextAsDecimal();
                 var turnover = cells[_turnoverIndex].TextAsNumber();
 
-                _logger.LogDebug($"Name = {name},\tPrice = {price},\tTurnover = {turnover}");
+                _logger.LogTrace($"Name = {name},\tPrice = {price},\tTurnover = {turnover}");
 
                 stockData.Add(new Stock
                 {
@@ -108,7 +119,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 var directYield = cells[_directYieldIndex].TextAsDecimal();
                 var profitPerStock = cells[_profitPerStock].TextAsDecimal();
 
-                _logger.LogDebug($"Name = {stock.Name},\tAdjustedEquityPerStock = {adjustedEquityPerStock},\tDirectYield = {directYield},\tProfitPerStock = {profitPerStock}");
+                _logger.LogTrace($"Name = {stock.Name},\tAdjustedEquityPerStock = {adjustedEquityPerStock},\tDirectYield = {directYield},\tProfitPerStock = {profitPerStock}");
 
                 stock.AdjustedEquityPerStock = adjustedEquityPerStock;
                 stock.DirectYield = directYield;
