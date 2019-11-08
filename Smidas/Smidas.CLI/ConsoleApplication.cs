@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using Smidas.CLI.Jobs;
 using Smidas.Core.Analysis;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping;
@@ -14,25 +16,35 @@ namespace Smidas.CLI
 {
     public class ConsoleApplication
     {
-        private readonly ILoggerFactory loggerFactory;
+        private readonly ILoggerFactory _loggerFactory;
 
-        private readonly ILogger _logger;
+        private readonly AppSettings _config;
 
-        public ConsoleApplication(ILoggerFactory loggerFactory, WebScrapingJob webScrapingJob)
+        public ConsoleApplication(ILoggerFactory loggerFactory, IOptions<AppSettings> config)
         {
-            _logger = loggerFactory.CreateLogger<ConsoleApplication>();
+            _loggerFactory = loggerFactory;
+            _config = config.Value;
         }
 
         public void Run()
         {
-            Console.WriteLine("   Smidas ver. 20191108");
-            Console.WriteLine("-----------------------------------------");
-            Console.WriteLine("1. AktieREA - Stockholm Large Cap");
-            Console.WriteLine("2. AktieREA - Köpenhamn Large Cap (N/A)");
-            Console.WriteLine("3. AktieREA - Helsingfors Large Cap (N/A)");
-            Console.WriteLine();
-            Console.WriteLine("0. Exit");
-            Console.WriteLine("-----------------------------------------");
+            var menu = @"
+   Smidas ver. 20191108
+
+---------------------------------------------
+   AktieREA-analyser
+
+1: AktieREA - OMX Stockholm Large Cap
+2: AktieREA - OMX Köpenhamn Large Cap (N/A)
+3: AktieREA - OMX Helsingfors Large Cap (N/A)
+
+---------------------------------------------
+   Övriga åtgärder
+
+0: Avsluta
+
+---------------------------------------------";
+            Console.WriteLine(menu);
             Console.Write(">> ");
             var input = Console.ReadLine();
 
@@ -40,10 +52,11 @@ namespace Smidas.CLI
 
             if (input == "0")
             {
-                Console.WriteLine("Exiting");
+                Console.WriteLine("Avslutar");
                 Environment.Exit(0);
             }
 
+            using var webDriver = new ChromeDriver(_config.ChromeDriverPath);
             IWebScraper webScraper = null;
             IAnalysis analysis = null;
 
@@ -51,15 +64,15 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1":
-                    webScraper = new AffarsVarldenWebScraper(new ChromeDriver(), loggerFactory, AffarsVarldenIndexes.StockholmLargeCap);
+                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.StockholmLargeCap);
                     break;
 
                 case "2":
-                    webScraper = new AffarsVarldenWebScraper(new ChromeDriver(), loggerFactory, AffarsVarldenIndexes.CopenhagenLargeCap);
+                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.CopenhagenLargeCap);
                     break;
 
                 case "3":
-                    webScraper = new AffarsVarldenWebScraper(new ChromeDriver(), loggerFactory, AffarsVarldenIndexes.HelsinkiLargeCap);
+                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.HelsinkiLargeCap);
                     break;
 
                 default:
@@ -72,7 +85,7 @@ namespace Smidas.CLI
                 case "1":
                 case "2":
                 case "3":
-                    analysis = new AktieRea(loggerFactory);
+                    analysis = new AktieRea(_loggerFactory);
                     break;
 
                 default:
@@ -81,7 +94,7 @@ namespace Smidas.CLI
 
             // Run
             var stockData = webScraper.Scrape();
-            var results = analysis.Analyze(stockData, null);
+            var results = analysis.Analyze(stockData, _config.Blacklist);
         }
     }
 }

@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Smidas.CLI.Jobs;
-using Smidas.Core.Stocks;
-using System.Collections.Generic;
+using System.IO;
 
 namespace Smidas.CLI
 {
@@ -15,9 +14,21 @@ namespace Smidas.CLI
             serviceProvider.GetService<ConsoleApplication>().Run();
         }
 
+        private static IConfigurationRoot LoadConfiguration()
+        {
+            return new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", false)
+                .Build();
+        }
+
         private static IServiceCollection ConfigureServices()
         {
             var services = new ServiceCollection();
+
+            var config = LoadConfiguration();
+            services.AddOptions();
+            services.Configure<AppSettings>(config.GetSection("Configuration"));
 
             services.AddLogging(logging =>
                 {
@@ -27,7 +38,6 @@ namespace Smidas.CLI
                 })
                 .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
 
-            services.AddScoped<WebScrapingJob>();
             services.AddScoped<ConsoleApplication>();
 
             return services;

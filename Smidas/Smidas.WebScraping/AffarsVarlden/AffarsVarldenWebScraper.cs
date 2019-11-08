@@ -88,7 +88,7 @@ namespace Smidas.WebScraping.AffarsVarlden
 
             foreach (var row in table)
             {
-                var cells = WebDriver.FindElements(By.TagName("td"));
+                var cells = row.FindElements(By.TagName("td"));
                 var name = cells[_nameIndex].Text;
                 var price = cells[_priceIndex].TextAsDecimal();
                 var turnover = cells[_turnoverIndex].TextAsNumber();
@@ -108,12 +108,15 @@ namespace Smidas.WebScraping.AffarsVarlden
         {
             _logger.LogInformation($"Scraping stock indicators");
 
+            var stockDictionary = new Dictionary<string, Stock>();
+            stockData.ForEach(s => stockDictionary.Add(s.Name, s));
+
             var table = WebDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
 
             foreach (var row in table)
             {
                 var cells = row.FindElements(By.TagName("td"));
-                var stock = stockData.Single(d => d.Name == cells[_nameIndex].Text);
+                var stock = stockDictionary[cells[_nameIndex].Text];
 
                 var adjustedEquityPerStock = cells[_adjustedEquityPerStock].TextAsDecimal();
                 var directYield = cells[_directYieldIndex].TextAsDecimal();
@@ -125,6 +128,8 @@ namespace Smidas.WebScraping.AffarsVarlden
                 stock.DirectYield = directYield;
                 stock.ProfitPerStock = profitPerStock;
             }
+
+            stockData = stockDictionary.Values.ToList();
         }
     }
 }
