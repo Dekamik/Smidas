@@ -2,20 +2,38 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using Smidas.Core.Analysis;
-using Smidas.Core.Stocks;
 using Smidas.WebScraping;
 using Smidas.WebScraping.AffarsVarlden;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Smidas.CLI
 {
     public class ConsoleApplication
     {
+        private readonly string _menu = @"
+    Smidas
+
+-----------------------------------------------------
+    AktieREA-analyser
+
+1a: AktieREA - OMX Stockholm Large Cap
+1b: AktieREA - OMX Köpenhamn Large Cap (N/A)
+1c: AktieREA - OMX Helsingfors Large Cap (N/A)
+
+-----------------------------------------------------
+    Testkörningar
+
+2a: AffarsVarldenWebScraper (OMX Stockholm Large Cap)
+
+-----------------------------------------------------
+    Övriga åtgärder
+
+0:  Avsluta
+
+-----------------------------------------------------";
+
         private readonly ILoggerFactory _loggerFactory;
 
         private readonly AppSettings _config;
@@ -28,23 +46,7 @@ namespace Smidas.CLI
 
         public void Run()
         {
-            var menu = @"
-   Smidas ver. 20191108
-
----------------------------------------------
-   AktieREA-analyser
-
-1: AktieREA - OMX Stockholm Large Cap
-2: AktieREA - OMX Köpenhamn Large Cap (N/A)
-3: AktieREA - OMX Helsingfors Large Cap (N/A)
-
----------------------------------------------
-   Övriga åtgärder
-
-0: Avsluta
-
----------------------------------------------";
-            Console.WriteLine(menu);
+            Console.WriteLine(_menu);
             Console.Write(">> ");
             var input = Console.ReadLine();
 
@@ -63,15 +65,16 @@ namespace Smidas.CLI
             // Select webscraper
             switch (input)
             {
-                case "1":
+                case "1a":
+                case "2a":
                     webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.StockholmLargeCap);
                     break;
 
-                case "2":
+                case "1b":
                     webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.CopenhagenLargeCap);
                     break;
 
-                case "3":
+                case "1c":
                     webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.HelsinkiLargeCap);
                     break;
 
@@ -82,9 +85,9 @@ namespace Smidas.CLI
             // Select analysis
             switch (input)
             {
-                case "1":
-                case "2":
-                case "3":
+                case "1a":
+                case "1b":
+                case "1c":
                     analysis = new AktieRea(_loggerFactory);
                     break;
 
@@ -93,8 +96,8 @@ namespace Smidas.CLI
             }
 
             // Run
-            var stockData = webScraper.Scrape();
-            var results = analysis.Analyze(stockData, _config.Blacklist);
+            var stockData = webScraper?.Scrape();
+            var results = analysis?.Analyze(stockData, _config.Blacklist);
         }
     }
 }

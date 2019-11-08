@@ -194,8 +194,6 @@ namespace Smidas.Core.Analysis
 
         public Action DetermineActionByIndex(int index)
         {
-            _logger.LogDebug($"Determining action by index");
-
             if (index <= 0)
                 throw new System.ArgumentOutOfRangeException(nameof(index));
 
