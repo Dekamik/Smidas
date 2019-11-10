@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Smidas.Common.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Smidas.Common;
 
 namespace Smidas.Core.Analysis
 {
@@ -11,15 +13,21 @@ namespace Smidas.Core.Analysis
     {
         private readonly ILogger _logger;
 
-        public int InvestmentStocksCap { get; set; } = 2;
+        private readonly int _investmentStocksCap;
 
-        public int RealEstateStocksCap { get; set; } = 2;
+        private readonly int _realEstateStocksCap;
 
-        public int BankingStocksCap { get; set; } = 2;
+        private readonly int _bankingStocksCap;
 
-        public AktieRea(ILoggerFactory loggerFactory)
+        public AktieRea(ILoggerFactory loggerFactory, AppSettings config)
         {
             _logger = loggerFactory.CreateLogger<AktieRea>();
+
+            _investmentStocksCap = config.Industries.Single(i => i.Enum == Industry.Investment.ToString()).Cap;
+
+            _realEstateStocksCap = config.Industries.Single(i => i.Enum == Industry.RealEstate.ToString()).Cap;
+
+            _bankingStocksCap = config.Industries.Single(i => i.Enum == Industry.Banking.ToString()).Cap;
         }
 
         public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
@@ -32,14 +40,15 @@ namespace Smidas.Core.Analysis
 
             CalculateBRank(ref stocks);
 
-            DetermineActions(ref stocks, InvestmentStocksCap, RealEstateStocksCap, BankingStocksCap);
+            DetermineActions(ref stocks, _investmentStocksCap, _realEstateStocksCap, _bankingStocksCap);
 
-            return stocks.OrderBy(s => s.AbRank);
+            return stocks.OrderBy(s => s.AbRank)
+                         .ThenByDescending(s => s.DirectYield);
         }
 
         public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
         {
-            _logger.LogDebug($"Exluding disqualified stocks");
+            _logger.LogInformation($"Exluding disqualified stocks");
 
             foreach (var stock in stocks)
             {
@@ -73,7 +82,7 @@ namespace Smidas.Core.Analysis
 
         public void ExcludeDoubles(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Exluding doubles");
+            _logger.LogInformation($"Exluding doubles");
 
             var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
             var doublesCount = new Dictionary<string, int>();
@@ -113,7 +122,7 @@ namespace Smidas.Core.Analysis
 
         public void CalculateARank(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Calculating A-rank");
+            _logger.LogInformation($"Calculating A-rank");
 
             int i = 1;
             stocks.OrderByDescending(s => s.Ep)
@@ -122,7 +131,7 @@ namespace Smidas.Core.Analysis
 
         public void CalculateBRank(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Calculating B-rank");
+            _logger.LogInformation($"Calculating B-rank");
 
             int i = 1;
             stocks.OrderByDescending(s => s.AdjustedEquityPerStock)
@@ -135,14 +144,15 @@ namespace Smidas.Core.Analysis
             int realEstateStocksCap, 
             int bankingStocksCap)
         {
-            _logger.LogDebug($"Determining actions");
+            _logger.LogInformation($"Determining actions");
 
             var index = 1;
             var investmentStocks = 0;
             var realEstateStocks = 0;
             var bankingStocks = 0;
 
-            foreach (var stock in stocks.OrderBy(s => s.AbRank))
+            foreach (var stock in stocks.OrderBy(s => s.AbRank)
+                                        .ThenByDescending(s => s.DirectYield))
             {
                 if (stock.Action == Action.Exclude)
                 {

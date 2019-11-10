@@ -4,16 +4,16 @@ namespace Smidas.Core.Stocks
 {
     public enum Industry
     {
-        [Display(Name = "Other")]
+        [Display(Name = "Övrig")]
         Other = 0,
 
-        [Display(Name = "Investment")]
+        [Display(Name = "Investering")]
         Investment = 1,
 
-        [Display(Name = "Real estate")]
+        [Display(Name = "Fastigheter")]
         RealEstate = 2,
 
-        [Display(Name = "Banking")]
+        [Display(Name = "Bank")]
         Banking = 3,
     }
 }

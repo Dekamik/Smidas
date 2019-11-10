@@ -1,4 +1,5 @@
-﻿using Smidas.Common.Extensions;
+﻿using Smidas.Common.Excel;
+using Smidas.Common.Extensions;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
@@ -7,7 +8,7 @@ namespace Smidas.Core.Stocks
 {
     public class Stock
     {
-        [Display(Name = "Namn")]
+        [Excel(FullName = "Namn", Column = "A")]
         public string Name { get; set; }
 
         /// <summary>
@@ -15,49 +16,49 @@ namespace Smidas.Core.Stocks
         /// </summary>
         public string CompanyName => Regex.Replace(Name, " [A-Z]$", "");
 
-        [Display(Name = "Bransch")]
+        [Excel(FullName = "Bransch", Column = "B")]
         public Industry Industry { get; set; }
 
-        [Display(Name = "Åtgärd")]
+        [Excel(FullName = "Åtgärd", Column = "C")]
         public Action Action { get; set; }
 
-        [Display(Name = "Aktiekurs", ShortName = "Kurs")]
+        [Excel(FullName = "Aktiekurs", ShortName = "Kurs", Column = "D")]
         public decimal Price { get; set; }
 
-        [Display(Name = "Omsättning", ShortName = "Omsättn.")]
+        [Excel(FullName = "Omsättning", ShortName = "Omsättn.", Column = "E")]
         public decimal Turnover { get; set; }
 
-        [Display(Name = "Justerat eget kapital per aktie", ShortName = "JEK/aktie")]
+        [Excel(FullName = "Justerat eget kapital per aktie", ShortName = "JEK/aktie", Column = "F")]
         public decimal AdjustedEquityPerStock { get; set; }
 
-        [Display(Name = "Direktavkastning", ShortName = "Dir.avk.")]
+        [Excel(FullName = "Direktavkastning", ShortName = "Dir.avk.", Column = "G")]
         public decimal DirectYield { get; set; }
 
-        [Display(Name = "Vinst per aktie", ShortName = "Vinst/aktie")]
+        [Excel(FullName = "Vinst per aktie", ShortName = "Vinst/aktie", Column = "H")]
         public decimal ProfitPerStock { get; set; }
 
         /// <summary>
         /// E/P, i.e. the reverse of P/E
         /// The bigger the number, the more profitable the stock
         /// </summary>
-        [Display(Name = "Earnings-to-Price ratio", ShortName = "E/P")]
+        [Excel(FullName = "Earnings-to-Price ratio", ShortName = "E/P", Column = "I")]
         [Description("Vinst/aktie delat på aktiekurs.")]
         public decimal Ep => Price != 0m ? ProfitPerStock / Price
                                          : 0m;
 
-        [Display(Name = "A-rang", ShortName = "A")]
+        [Excel(FullName = "A-rang", ShortName = "A", Column = "J")]
         [Description("Rangordning efter E/P-tal.")]
         public int ARank { get; set; }
 
-        [Display(Name = "B-rang", ShortName = "B")]
+        [Excel(FullName = "B-rang", ShortName = "B", Column = "K")]
         [Description("Rangordning efter JEK/aktie.")]
         public int BRank { get; set; }
 
-        [Display(Name = "A+B-rang", ShortName = "A+B")]
+        [Excel(FullName = "A+B-rang", ShortName = "A+B", Column = "L")]
         [Description("A- och B-rangordningen kombinerad. Exkluderade aktier sätts till 10000-serien.")]
         public int AbRank => ARank + BRank + (Action == Action.Exclude ? 10000 : 0);
 
-        [Display(Name = "Kommentarer")]
+        [Excel(FullName = "Kommentarer", Column = "M")]
         [Description("Eventuella kommentarer. Anledning till exkludering ifylles automatiskt.")]
         public string Comments { get; set; }
 

@@ -3,10 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenQA.Selenium.Chrome;
+using Smidas.Common;
 using Smidas.Core.Analysis;
+using Smidas.Exporting.Excel;
 using Smidas.WebScraping;
 using Smidas.WebScraping.AffarsVarlden;
 using System;
+using System.Linq;
 
 namespace Smidas.CLI
 {
@@ -38,10 +41,13 @@ namespace Smidas.CLI
 
         private readonly AppSettings _config;
 
-        public ConsoleApplication(ILoggerFactory loggerFactory, IOptions<AppSettings> config)
+        private readonly ExcelExporter _excelExporter;
+
+        public ConsoleApplication(ILoggerFactory loggerFactory, IOptions<AppSettings> config, ExcelExporter excelExporter)
         {
             _loggerFactory = loggerFactory;
             _config = config.Value;
+            _excelExporter = excelExporter;
         }
 
         public void Run()
@@ -58,24 +64,36 @@ namespace Smidas.CLI
                 Environment.Exit(0);
             }
 
-            using var webDriver = new ChromeDriver(_config.ChromeDriverPath);
+            using var webDriver = new ChromeDriver(_config.ChromeDriverDirectory);
+            string exportPath = null;
             IWebScraper webScraper = null;
             IAnalysis analysis = null;
+
+            switch (input)
+            {
+                case "1a":
+                case "2a":
+                    exportPath = _config.ExportDirectory + $"\\AktieREA_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    break;
+
+                default:
+                    break;
+            }
 
             // Select webscraper
             switch (input)
             {
                 case "1a":
                 case "2a":
-                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.StockholmLargeCap);
+                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.StockholmLargeCap);
                     break;
 
                 case "1b":
-                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.CopenhagenLargeCap);
+                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.CopenhagenLargeCap);
                     break;
 
                 case "1c":
-                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, AffarsVarldenIndexes.HelsinkiLargeCap);
+                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.HelsinkiLargeCap);
                     break;
 
                 default:
@@ -88,7 +106,7 @@ namespace Smidas.CLI
                 case "1a":
                 case "1b":
                 case "1c":
-                    analysis = new AktieRea(_loggerFactory);
+                    analysis = new AktieRea(_loggerFactory, _config);
                     break;
 
                 default:
@@ -98,6 +116,11 @@ namespace Smidas.CLI
             // Run
             var stockData = webScraper?.Scrape();
             var results = analysis?.Analyze(stockData, _config.Blacklist);
+
+            if (!string.IsNullOrEmpty(exportPath))
+            {
+                _excelExporter.Export(results.ToList(), exportPath);
+            }
         }
     }
 }

@@ -4,19 +4,19 @@ namespace Smidas.Core.Stocks
 {
     public enum Action
     {
-        [Display(Name = "Undetermined")]
+        [Display(Name = "Obestämd")]
         Undetermined = 0,
 
-        [Display(Name = "Buy")]
+        [Display(Name = "Köp")]
         Buy = 1,
 
-        [Display(Name = "Keep")]
+        [Display(Name = "Behåll")]
         Keep = 2,
 
-        [Display(Name = "Sell")]
+        [Display(Name = "Sälj")]
         Sell = 3,
 
-        [Display(Name = "Exclude")]
+        [Display(Name = "Exkludera")]
         Exclude = 4,
     }
 }

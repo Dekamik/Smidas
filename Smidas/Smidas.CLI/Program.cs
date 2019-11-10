@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Smidas.Common;
+using Smidas.Exporting.Excel;
+using Smidas.WebScraping.AffarsVarlden;
 using System.IO;
 
 namespace Smidas.CLI
@@ -38,6 +41,7 @@ namespace Smidas.CLI
                 })
                 .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
 
+            services.AddScoped<ExcelExporter>();
             services.AddScoped<ConsoleApplication>();
 
             return services;

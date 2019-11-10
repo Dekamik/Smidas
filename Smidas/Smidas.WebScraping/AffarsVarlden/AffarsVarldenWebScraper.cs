@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
+using Smidas.Common;
 using Smidas.Common.Extensions;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.Extensions;
@@ -21,21 +23,22 @@ namespace Smidas.WebScraping.AffarsVarlden
         private const int _directYieldIndex = 6;
         private const int _profitPerStock = 7;
 
-        private AffarsVarldenIndexes _stockIndex;
+        private readonly AppSettings _config;
 
-        public string SharePricesUrl => $"https://www.affarsvarlden.se/bors/kurslistor/{_stockIndex.GetDescription()}/kurs/";
+        private readonly AffarsVarldenIndexes _index;
 
-        public string StockIndicatorsUrl => $"https://www.affarsvarlden.se/bors/kurslistor/{_stockIndex.GetDescription()}/aktieindikatorn/";
-
-        public AffarsVarldenWebScraper(IWebDriver webDriver, ILoggerFactory loggerFactory, AffarsVarldenIndexes stockIndex) : base(webDriver, loggerFactory.CreateLogger<AffarsVarldenWebScraper>())
+        public AffarsVarldenWebScraper(IWebDriver webDriver, ILoggerFactory loggerFactory, AppSettings config, AffarsVarldenIndexes index) : base(webDriver, loggerFactory.CreateLogger<AffarsVarldenWebScraper>())
         {
-            _stockIndex = stockIndex;
+            _config = config;
+            _index = index;
         }
 
         public override IEnumerable<Stock> Scrape()
         {
             _logger.LogInformation($"Scraping started");
             var stockData = new List<Stock>();
+            var SharePricesUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{_index.GetDescription()}/kurs/";
+            var StockIndicatorsUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{_index.GetDescription()}/aktieindikatorn/";
 
             _logger.LogInformation($"Navigating to {SharePricesUrl}");
             WebDriver.Navigate().GoToUrl(SharePricesUrl);
@@ -45,7 +48,7 @@ namespace Smidas.WebScraping.AffarsVarlden
             ScrapeSharePrices(ref stockData);
 
             // Pretty hacky, should support pagination instead
-            if (_stockIndex == AffarsVarldenIndexes.StockholmLargeCap)
+            if (_index == AffarsVarldenIndexes.StockholmLargeCap)
             {
                 ClickNextButton();
 
@@ -61,7 +64,7 @@ namespace Smidas.WebScraping.AffarsVarlden
 
             ScrapeStockIndicators(ref stockData);
 
-            if (_stockIndex == AffarsVarldenIndexes.StockholmLargeCap)
+            if (_index == AffarsVarldenIndexes.StockholmLargeCap)
             {
                 ClickNextButton();
 
@@ -69,6 +72,8 @@ namespace Smidas.WebScraping.AffarsVarlden
 
                 ScrapeStockIndicators(ref stockData);
             }
+
+            SetIndustries(ref stockData);
 
             _logger.LogInformation($"Scraping completed");
             return stockData.AsEnumerable();
@@ -130,6 +135,21 @@ namespace Smidas.WebScraping.AffarsVarlden
             }
 
             stockData = stockDictionary.Values.ToList();
+        }
+
+        public void SetIndustries(ref List<Stock> stockData)
+        {
+            _logger.LogInformation($"Setting industries");
+
+            foreach(var industryData in _config.Industries)
+            {
+                var industry = Enum.Parse<Industry>(industryData.Enum);
+                foreach(var companyName in industryData.Stocks)
+                {
+                    stockData.Where(s => s.Name.Contains(companyName))
+                             .ForEach(s => s.Industry = industry);
+                }
+            }
         }
     }
 }
