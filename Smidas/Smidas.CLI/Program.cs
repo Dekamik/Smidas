@@ -37,6 +37,7 @@ namespace Smidas.CLI
                 {
                     logging.AddConsole();
                     logging.AddFilter("Smidas", LogLevel.Debug);
+                    logging.AddFilter("Smidas.Core", LogLevel.Trace);
                     logging.AddFilter("Smidas.WebScraping", LogLevel.Trace);
                 })
                 .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);

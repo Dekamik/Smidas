@@ -32,6 +32,8 @@ namespace Smidas.Core.Analysis
 
         public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
         {
+            _logger.LogInformation($"Analyserar {stocks.Count()} aktier enligt AktieREA-metoden");
+
             ExcludeDisqualifiedStocks(ref stocks, blacklist);
 
             ExcludeDoubles(ref stocks);
@@ -42,13 +44,22 @@ namespace Smidas.Core.Analysis
 
             DetermineActions(ref stocks, _investmentStocksCap, _realEstateStocksCap, _bankingStocksCap);
 
+            _logger.LogInformation($"Analys slutförd\n" +
+                                   $"\n" +
+                                   $"Köpes          : {stocks.Count(s => s.Action == Action.Buy)} \t(Inv: {stocks.Count(s => s.Action == Action.Buy && s.Industry == Industry.Investment)} \tFast: {stocks.Count(s => s.Action == Action.Buy && s.Industry == Industry.RealEstate)} \tBank: {stocks.Count(s => s.Action == Action.Buy && s.Industry == Industry.Banking)})\n" +
+                                   $"Behålles       : {stocks.Count(s => s.Action == Action.Keep)} \t(Inv: {stocks.Count(s => s.Action == Action.Keep && s.Industry == Industry.Investment)} \tFast: {stocks.Count(s => s.Action == Action.Keep && s.Industry == Industry.RealEstate)} \tBank: {stocks.Count(s => s.Action == Action.Keep && s.Industry == Industry.Banking)})\n" +
+                                   $"Säljes         : {stocks.Count(s => s.Action == Action.Sell)} \t(Inv: {stocks.Count(s => s.Action == Action.Sell && s.Industry == Industry.Investment)} \tFast: {stocks.Count(s => s.Action == Action.Sell && s.Industry == Industry.RealEstate)} \tBank: {stocks.Count(s => s.Action == Action.Sell && s.Industry == Industry.Banking)})\n" +
+                                   $"Bortsållade    : {stocks.Count(s => s.Action == Action.Exclude)} \t(Inv: {stocks.Count(s => s.Action == Action.Exclude && s.Industry == Industry.Investment)} \tFast: {stocks.Count(s => s.Action == Action.Exclude && s.Industry == Industry.RealEstate)} \tBank: {stocks.Count(s => s.Action == Action.Exclude && s.Industry == Industry.Banking)})\n" +
+                                   $"\n" +
+                                   $"S:a            : {stocks.Count()} \t(Inv: {stocks.Count(s => s.Industry == Industry.Investment)} \tFast: {stocks.Count(s => s.Industry == Industry.RealEstate)} \tBank: {stocks.Count(s => s.Industry == Industry.Banking)})\n");
+
             return stocks.OrderBy(s => s.AbRank)
                          .ThenByDescending(s => s.DirectYield);
         }
 
         public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
         {
-            _logger.LogInformation($"Exluding disqualified stocks");
+            _logger.LogDebug($"Sållar diskvalivicerade aktier");
 
             foreach (var stock in stocks)
             {
@@ -57,32 +68,32 @@ namespace Smidas.Core.Analysis
                 {
                     if (stock.Name.Contains(name))
                     {
-                        _logger.LogTrace($"Excluding {stock.Name} - Blacklisted.");
-                        stock.Exclude("Blacklisted.");
+                        _logger.LogTrace($"Sållade {stock.Name} - Svartlistad");
+                        stock.Exclude("Svartlistad.");
                     }
                 }
                 
                 if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
-                    _logger.LogTrace($"Excluding {stock.Name} - Negative profit per stock.");
+                    _logger.LogTrace($"Sållade {stock.Name} - Negativ vinst per aktie");
                     stock.Exclude("Negative profit per stock.");
                 }
                 else if (stock.DirectYield == 0) // Stocks with zero direct yield
                 {
-                    _logger.LogTrace($"Excluding {stock.Name} - Zero direct yield.");
-                    stock.Exclude("Zero direct yield.");
+                    _logger.LogTrace($"Sållade {stock.Name} - Noll direktavkastning");
+                    stock.Exclude("Noll direktavkastning");
                 }
                 else if (Regex.IsMatch(stock.Name, ".* Pref$")) // Preferential stocks
                 {
-                    _logger.LogTrace($"Excluding {stock.Name} - Preferred stock.");
-                    stock.Exclude("Preferred stock.");
+                    _logger.LogTrace($"Sållade {stock.Name} - Preferensaktie");
+                    stock.Exclude("Preferensaktie");
                 }
             }
         }
 
         public void ExcludeDoubles(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogInformation($"Exluding doubles");
+            _logger.LogDebug($"Sållar dubbletter");
 
             var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
             var doublesCount = new Dictionary<string, int>();
@@ -114,15 +125,15 @@ namespace Smidas.Core.Analysis
             {
                 if (stocksToExclude.Contains(stock.Name))
                 {
-                    _logger.LogTrace($"Excluding {stock.Name} - Is a double.");
-                    stock.Exclude("Is a double");
+                    _logger.LogTrace($"Sållade {stock.Name} - Dubblett");
+                    stock.Exclude("Dubblett");
                 }
             }
         }
 
         public void CalculateARank(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogInformation($"Calculating A-rank");
+            _logger.LogDebug($"Räknar ut A-rang");
 
             int i = 1;
             stocks.OrderByDescending(s => s.Ep)
@@ -131,7 +142,7 @@ namespace Smidas.Core.Analysis
 
         public void CalculateBRank(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogInformation($"Calculating B-rank");
+            _logger.LogDebug($"Räknar ut B-rang");
 
             int i = 1;
             stocks.OrderByDescending(s => s.AdjustedEquityPerStock)
@@ -144,7 +155,7 @@ namespace Smidas.Core.Analysis
             int realEstateStocksCap, 
             int bankingStocksCap)
         {
-            _logger.LogInformation($"Determining actions");
+            _logger.LogDebug($"Beslutar åtgärder");
 
             var index = 1;
             var investmentStocks = 0;
@@ -165,8 +176,8 @@ namespace Smidas.Core.Analysis
                     case Industry.Investment:
                         if (investmentStocks == investmentStocksCap)
                         {
-                            _logger.LogTrace($"Excluding {stock.Name} - Investment stocks cap reached.");
-                            stock.Exclude("Investment stocks cap reached.");
+                            _logger.LogTrace($"Sållade {stock.Name} - Max antal investeringsbolag nådd");
+                            stock.Exclude("Max antal investeringsbolag nådd");
                             continue;
                         }
                         investmentStocks++;
@@ -175,8 +186,8 @@ namespace Smidas.Core.Analysis
                     case Industry.RealEstate:
                         if (realEstateStocks == realEstateStocksCap)
                         {
-                            _logger.LogTrace($"Excluding {stock.Name} - Real estate stocks cap reached.");
-                            stock.Exclude("Real estate stocks cap reached.");
+                            _logger.LogTrace($"Sållade {stock.Name} - Max antal fastighetsbolag nådd");
+                            stock.Exclude("Max antal fastighetsbolag nådd");
                             continue;
                         }
                         realEstateStocks++;
@@ -185,8 +196,8 @@ namespace Smidas.Core.Analysis
                     case Industry.Banking:
                         if (bankingStocks == bankingStocksCap)
                         {
-                            _logger.LogTrace($"Excluding {stock.Name} - Banking stocks cap reached.");
-                            stock.Exclude("Banking stocks cap reached.");
+                            _logger.LogTrace($"Sållade {stock.Name} - Max antal bankbolag nådd");
+                            stock.Exclude("Max antal bankbolag nådd");
                             continue;
                         }
                         bankingStocks++;
@@ -197,27 +208,10 @@ namespace Smidas.Core.Analysis
                         break;
                 }
 
-                stock.Action = DetermineActionByIndex(index);
+                stock.Action = index <= 10 ? Action.Buy :
+                               index <= 20 ? Action.Keep :
+                                             Action.Sell;
                 index++;
-            }
-        }
-
-        public Action DetermineActionByIndex(int index)
-        {
-            if (index <= 0)
-                throw new System.ArgumentOutOfRangeException(nameof(index));
-
-            if (index <= 10)
-            {
-                return Action.Buy;
-            }
-            else if (index <= 20)
-            {
-                return Action.Keep;
-            }
-            else
-            {
-                return Action.Sell;
             }
         }
     }

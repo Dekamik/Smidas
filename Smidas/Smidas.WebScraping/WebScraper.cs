@@ -30,9 +30,12 @@ namespace Smidas.WebScraping
 
         public void Wait()
         {
-            var sleepMillis = _random.Next(MinWaitMillis, MaxWaitMillis);
-            _logger.LogInformation($"Sleeping for {sleepMillis}ms");
-            Thread.Sleep(sleepMillis);
+            if (MinWaitMillis + MaxWaitMillis != 0)
+            {
+                var sleepMillis = _random.Next(MinWaitMillis, MaxWaitMillis);
+                _logger.LogInformation($"Sleeping for {sleepMillis}ms");
+                Thread.Sleep(sleepMillis);
+            }
         }
     }
 }

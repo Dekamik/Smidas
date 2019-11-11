@@ -8,6 +8,7 @@ using Xunit;
 using Smidas.Common.Extensions;
 using Microsoft.Extensions.Logging;
 using FakeItEasy;
+using Smidas.Common;
 
 namespace Smidas.Core.Tests.Analysis
 {
@@ -18,7 +19,9 @@ namespace Smidas.Core.Tests.Analysis
         public AktieReaTests()
         {
             var loggerFactory = A.Fake<ILoggerFactory>();
-            _aktieRea = new AktieRea(loggerFactory);
+            var config = A.Fake<AppSettings>();
+
+            _aktieRea = new AktieRea(loggerFactory, config);
         }
 
         [Fact]
@@ -483,33 +486,6 @@ namespace Smidas.Core.Tests.Analysis
             stocks.Take(2)
                   .ForEach(s => s.Action.Should().Be(Action.Buy));
             stocks.Last().Action.Should().Be(Action.Exclude);
-        }
-
-        [Fact]
-        public void DetermineActionByIndex_IndexOne_ReturnsBuy()
-        {
-            var action = _aktieRea.DetermineActionByIndex(1);
-            action.Should().Be(Action.Buy);
-        }
-
-        [Fact]
-        public void DetermineActionByIndex_IndexEleven_ReturnsKeep()
-        {
-            var action = _aktieRea.DetermineActionByIndex(11);
-            action.Should().Be(Action.Keep);
-        }
-
-        [Fact]
-        public void DetermineActionByIndex_IndexTwentyOne_ReturnsSell()
-        {
-            var action = _aktieRea.DetermineActionByIndex(21);
-            action.Should().Be(Action.Sell);
-        }
-
-        [Fact]
-        public void DetermineActionByIndex_InvalidIndexMinusOne_ThrowsArgumentOutOfRangeException()
-        {
-            Invoking(() => _aktieRea.DetermineActionByIndex(-1)).Should().Throw<System.ArgumentOutOfRangeException>();
         }
     }
 }

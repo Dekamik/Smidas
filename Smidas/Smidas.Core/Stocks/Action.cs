@@ -16,7 +16,7 @@ namespace Smidas.Core.Stocks
         [Display(Name = "Sälj")]
         Sell = 3,
 
-        [Display(Name = "Exkludera")]
+        [Display(Name = "Bortsållad")]
         Exclude = 4,
     }
 }

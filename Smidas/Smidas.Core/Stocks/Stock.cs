@@ -55,11 +55,11 @@ namespace Smidas.Core.Stocks
         public int BRank { get; set; }
 
         [Excel(FullName = "A+B-rang", ShortName = "A+B", Column = "L")]
-        [Description("A- och B-rangordningen kombinerad. Exkluderade aktier sätts till 10000-serien.")]
+        [Description("A- och B-rangordningen kombinerad. Uteslutet aktier sätts till 10000-serien.")]
         public int AbRank => ARank + BRank + (Action == Action.Exclude ? 10000 : 0);
 
         [Excel(FullName = "Kommentarer", Column = "M")]
-        [Description("Eventuella kommentarer. Anledning till exkludering ifylles automatiskt.")]
+        [Description("Eventuella kommentarer. Anledning till sållning ifylles automatiskt.")]
         public string Comments { get; set; }
 
         public void Exclude(string reason)

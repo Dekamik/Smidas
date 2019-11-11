@@ -21,7 +21,7 @@ namespace Smidas.Exporting.Excel
 
         public void Export(List<Stock> stocks, string exportFile)
         {
-            _logger.LogDebug($"Exporting data to {exportFile}");
+            _logger.LogInformation($"Exporterar analys om {stocks.Count()} aktier till {exportFile}");
 
             using var excel = new ExcelPackage(new FileInfo(exportFile));
             var worksheet = excel.Workbook.Worksheets.Add($"AktieREA {DateTime.Today.ToString("yyyy-MM-dd")}");
@@ -42,7 +42,7 @@ namespace Smidas.Exporting.Excel
 
             excel.Save();
 
-            _logger.LogDebug("Export complete");
+            _logger.LogDebug("Exporering slutförd");
         }
     }
 }

@@ -35,12 +35,12 @@ namespace Smidas.WebScraping.AffarsVarlden
 
         public override IEnumerable<Stock> Scrape()
         {
-            _logger.LogInformation($"Scraping started");
+            _logger.LogInformation($"Skrapar affärsvärlden.se");
             var stockData = new List<Stock>();
             var SharePricesUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{_index.GetDescription()}/kurs/";
             var StockIndicatorsUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{_index.GetDescription()}/aktieindikatorn/";
 
-            _logger.LogInformation($"Navigating to {SharePricesUrl}");
+            _logger.LogInformation($"Surfar in på {SharePricesUrl}");
             WebDriver.Navigate().GoToUrl(SharePricesUrl);
 
             Wait();
@@ -57,7 +57,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 ScrapeSharePrices(ref stockData);
             }
 
-            _logger.LogInformation($"Navigating to {SharePricesUrl}");
+            _logger.LogInformation($"Surfar in på {SharePricesUrl}");
             WebDriver.Navigate().GoToUrl(StockIndicatorsUrl);
 
             Wait();
@@ -75,19 +75,19 @@ namespace Smidas.WebScraping.AffarsVarlden
 
             SetIndustries(ref stockData);
 
-            _logger.LogInformation($"Scraping completed");
+            _logger.LogInformation($"Skrapning slutförd");
             return stockData.AsEnumerable();
         }
 
         public void ClickNextButton()
         {
-            _logger.LogInformation($"Navigating to next page");
+            _logger.LogInformation($"Klickar till nästa sida");
             WebDriver.ExecuteScript("arguments[0].click();", WebDriver.FindElement(By.XPath("//a[text()='>']")));
         }
 
         public void ScrapeSharePrices(ref List<Stock> stockData)
         {
-            _logger.LogInformation($"Scraping share prices");
+            _logger.LogDebug($"Skrapar aktiekurser");
 
             var table = WebDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
 
@@ -98,7 +98,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 var price = cells[_priceIndex].TextAsDecimal();
                 var turnover = cells[_turnoverIndex].TextAsNumber();
 
-                _logger.LogTrace($"Name = {name},\tPrice = {price},\tTurnover = {turnover}");
+                _logger.LogTrace($"Namn = {name},\tKurs = {price},\tOmsättn. = {turnover}");
 
                 stockData.Add(new Stock
                 {
@@ -111,7 +111,7 @@ namespace Smidas.WebScraping.AffarsVarlden
 
         public void ScrapeStockIndicators(ref List<Stock> stockData)
         {
-            _logger.LogInformation($"Scraping stock indicators");
+            _logger.LogDebug($"Skrapar aktieindikatorer");
 
             var stockDictionary = new Dictionary<string, Stock>();
             stockData.ForEach(s => stockDictionary.Add(s.Name, s));
@@ -127,7 +127,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 var directYield = cells[_directYieldIndex].TextAsDecimal();
                 var profitPerStock = cells[_profitPerStock].TextAsDecimal();
 
-                _logger.LogTrace($"Name = {stock.Name},\tAdjustedEquityPerStock = {adjustedEquityPerStock},\tDirectYield = {directYield},\tProfitPerStock = {profitPerStock}");
+                _logger.LogTrace($"Namn = {stock.Name},\tJEK/aktie = {adjustedEquityPerStock},\tDir.avk. = {directYield},\tVinst/aktie = {profitPerStock}");
 
                 stock.AdjustedEquityPerStock = adjustedEquityPerStock;
                 stock.DirectYield = directYield;
@@ -139,7 +139,7 @@ namespace Smidas.WebScraping.AffarsVarlden
 
         public void SetIndustries(ref List<Stock> stockData)
         {
-            _logger.LogInformation($"Setting industries");
+            _logger.LogDebug($"Tillsätter branscher");
 
             foreach(var industryData in _config.Industries)
             {

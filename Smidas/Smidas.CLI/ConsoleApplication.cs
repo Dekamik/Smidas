@@ -9,6 +9,7 @@ using Smidas.Exporting.Excel;
 using Smidas.WebScraping;
 using Smidas.WebScraping.AffarsVarlden;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Smidas.CLI
@@ -39,6 +40,8 @@ namespace Smidas.CLI
 
         private readonly ILoggerFactory _loggerFactory;
 
+        private readonly ILogger _logger;
+
         private readonly AppSettings _config;
 
         private readonly ExcelExporter _excelExporter;
@@ -46,6 +49,7 @@ namespace Smidas.CLI
         public ConsoleApplication(ILoggerFactory loggerFactory, IOptions<AppSettings> config, ExcelExporter excelExporter)
         {
             _loggerFactory = loggerFactory;
+            _logger = _loggerFactory.CreateLogger<ConsoleApplication>();
             _config = config.Value;
             _excelExporter = excelExporter;
         }
@@ -63,6 +67,9 @@ namespace Smidas.CLI
                 Console.WriteLine("Avslutar");
                 Environment.Exit(0);
             }
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             using var webDriver = new ChromeDriver(_config.ChromeDriverDirectory);
             string exportPath = null;
@@ -121,6 +128,9 @@ namespace Smidas.CLI
             {
                 _excelExporter.Export(results.ToList(), exportPath);
             }
+
+            stopwatch.Stop();
+            _logger.LogInformation($"Smidas avslutad. Körtid för åtgärd: {stopwatch.Elapsed}");
         }
     }
 }
