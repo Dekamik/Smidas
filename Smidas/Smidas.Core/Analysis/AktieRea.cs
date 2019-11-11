@@ -75,13 +75,13 @@ namespace Smidas.Core.Analysis
                 
                 if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
-                    _logger.LogTrace($"Sållade {stock.Name} - Negativ vinst per aktie");
-                    stock.Exclude("Negative profit per stock.");
+                    _logger.LogTrace($"Sållade {stock.Name} - Negativ vinst");
+                    stock.Exclude("Negativ vinst");
                 }
                 else if (stock.DirectYield == 0) // Stocks with zero direct yield
                 {
-                    _logger.LogTrace($"Sållade {stock.Name} - Noll direktavkastning");
-                    stock.Exclude("Noll direktavkastning");
+                    _logger.LogTrace($"Sållade {stock.Name} - Ingen direktavkastning");
+                    stock.Exclude("Ingen direktavkastning");
                 }
                 else if (Regex.IsMatch(stock.Name, ".* Pref$")) // Preferential stocks
                 {

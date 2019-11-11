@@ -53,13 +53,12 @@ namespace Smidas.Exporting.Excel
 
             // Styling
             var sellEndRow = 21 + stocks.Count(s => s.Action == Action.Sell);
-            var lastRow = stocks.Count() + 1;
 
-            worksheet.Cells[$"A2:M{lastRow}"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+            worksheet.Cells[$"A2:M{worksheet.Dimension.Rows}"].Style.Fill.PatternType = ExcelFillStyle.Solid;
             worksheet.Cells["A2:M11"].Style.Fill.BackgroundColor.SetColor(_green); // Buy
             worksheet.Cells["A12:M21"].Style.Fill.BackgroundColor.SetColor(_blue); // Keep
             worksheet.Cells[$"A22:M{sellEndRow}"].Style.Fill.BackgroundColor.SetColor(_yellow); // Sell
-            worksheet.Cells[$"A{sellEndRow + 1}:M{lastRow}"].Style.Fill.BackgroundColor.SetColor(_red); // Exclude
+            worksheet.Cells[$"A{sellEndRow + 1}:M{worksheet.Dimension.Rows}"].Style.Fill.BackgroundColor.SetColor(_red); // Exclude
 
             worksheet.Cells["A1:M1"].Style.Font.Bold = true;
             worksheet.Cells["A1:M1"].AutoFilter = true;
@@ -68,7 +67,7 @@ namespace Smidas.Exporting.Excel
 
             excel.Save();
 
-            _logger.LogDebug("Exporering slutförd");
+            _logger.LogDebug("Exportering slutförd");
         }
     }
 }

@@ -17,19 +17,19 @@ namespace Smidas.CLI
     public class ConsoleApplication
     {
         private readonly string _menu = @"
-    Smidas
+   Smidas
 
 -----------------------------------------------------
-    AktieREA-analyser
+   AktieREA-analyser
 
-1a: AktieREA - OMX Stockholm Large Cap
-1b: AktieREA - OMX Köpenhamn Large Cap
-1c: AktieREA - OMX Helsingfors Large Cap
+1: AktieREA - OMX Stockholm Large Cap
+2: AktieREA - OMX Köpenhamn Large Cap
+3: AktieREA - OMX Helsingfors Large Cap
 
 -----------------------------------------------------
-    Övriga åtgärder
+   Övriga åtgärder
 
-0:  Avsluta
+0: Avsluta
 
 -----------------------------------------------------";
 
@@ -73,15 +73,15 @@ namespace Smidas.CLI
 
             switch (input)
             {
-                case "1a":
+                case "1":
                     exportPath = _config.ExportDirectory + $"\\AktieREA_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
-                case "1b":
+                case "2":
                     exportPath = _config.ExportDirectory + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
-                case "1c":
+                case "3":
                     exportPath = _config.ExportDirectory + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
@@ -92,15 +92,15 @@ namespace Smidas.CLI
             // Select webscraper
             switch (input)
             {
-                case "1a":
+                case "1":
                     webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.StockholmLargeCap);
                     break;
 
-                case "1b":
+                case "2":
                     webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.CopenhagenLargeCap);
                     break;
 
-                case "1c":
+                case "3":
                     webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.HelsinkiLargeCap);
                     break;
 
@@ -111,9 +111,9 @@ namespace Smidas.CLI
             // Select analysis
             switch (input)
             {
-                case "1a":
-                case "1b":
-                case "1c":
+                case "1":
+                case "2":
+                case "3":
                     analysis = new AktieRea(_loggerFactory, _config);
                     break;
 
