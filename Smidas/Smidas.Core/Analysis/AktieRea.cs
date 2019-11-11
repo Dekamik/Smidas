@@ -69,7 +69,7 @@ namespace Smidas.Core.Analysis
                     if (stock.Name.Contains(name))
                     {
                         _logger.LogTrace($"Sållade {stock.Name} - Svartlistad");
-                        stock.Exclude("Svartlistad.");
+                        stock.Exclude("Svartlistad");
                     }
                 }
                 
