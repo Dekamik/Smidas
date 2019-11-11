@@ -59,7 +59,7 @@ namespace Smidas.Core.Stocks
         public int AbRank => ARank + BRank + (Action == Action.Exclude ? 10000 : 0);
 
         [Excel(FullName = "Kommentarer", Column = "M")]
-        [Description("Eventuella kommentarer. Anledning till sållning ifylles automatiskt.")]
+        [Description("Eventuella kommentarer. Anledning till bortsållning ifylles automatiskt.")]
         public string Comments { get; set; }
 
         public void Exclude(string reason)

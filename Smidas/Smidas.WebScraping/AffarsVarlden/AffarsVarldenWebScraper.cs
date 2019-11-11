@@ -57,7 +57,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 ScrapeSharePrices(ref stockData);
             }
 
-            _logger.LogInformation($"Surfar in på {SharePricesUrl}");
+            _logger.LogInformation($"Surfar in på {StockIndicatorsUrl}");
             WebDriver.Navigate().GoToUrl(StockIndicatorsUrl);
 
             Wait();
@@ -98,7 +98,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 var price = cells[_priceIndex].TextAsDecimal();
                 var turnover = cells[_turnoverIndex].TextAsNumber();
 
-                _logger.LogTrace($"Namn = {name},\tKurs = {price},\tOmsättn. = {turnover}");
+                _logger.LogTrace($"Namn = {name}\tKurs = {price}\tOmsättn. = {turnover}");
 
                 stockData.Add(new Stock
                 {
@@ -127,7 +127,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 var directYield = cells[_directYieldIndex].TextAsDecimal();
                 var profitPerStock = cells[_profitPerStock].TextAsDecimal();
 
-                _logger.LogTrace($"Namn = {stock.Name},\tJEK/aktie = {adjustedEquityPerStock},\tDir.avk. = {directYield},\tVinst/aktie = {profitPerStock}");
+                _logger.LogTrace($"Namn = {stock.Name}\tJEK/aktie = {adjustedEquityPerStock}\tDir.avk. = {directYield}\tVinst/aktie = {profitPerStock}");
 
                 stock.AdjustedEquityPerStock = adjustedEquityPerStock;
                 stock.DirectYield = directYield;

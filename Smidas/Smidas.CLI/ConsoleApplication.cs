@@ -23,13 +23,8 @@ namespace Smidas.CLI
     AktieREA-analyser
 
 1a: AktieREA - OMX Stockholm Large Cap
-1b: AktieREA - OMX Köpenhamn Large Cap (N/A)
-1c: AktieREA - OMX Helsingfors Large Cap (N/A)
-
------------------------------------------------------
-    Testkörningar
-
-2a: AffarsVarldenWebScraper (OMX Stockholm Large Cap)
+1b: AktieREA - OMX Köpenhamn Large Cap
+1c: AktieREA - OMX Helsingfors Large Cap
 
 -----------------------------------------------------
     Övriga åtgärder
@@ -79,8 +74,15 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1a":
-                case "2a":
                     exportPath = _config.ExportDirectory + $"\\AktieREA_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    break;
+
+                case "1b":
+                    exportPath = _config.ExportDirectory + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    break;
+
+                case "1c":
+                    exportPath = _config.ExportDirectory + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 default:
@@ -91,7 +93,6 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1a":
-                case "2a":
                     webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.StockholmLargeCap);
                     break;
 
@@ -130,7 +131,7 @@ namespace Smidas.CLI
             }
 
             stopwatch.Stop();
-            _logger.LogInformation($"Smidas avslutad. Körtid för åtgärd: {stopwatch.Elapsed}");
+            _logger.LogInformation($"Smidas avslutad. Körtid för utvald åtgärd: {stopwatch.Elapsed}");
         }
     }
 }
