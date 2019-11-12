@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
 using Smidas.Common;
 using Smidas.Core.Stocks;
-using Smidas.WebScraping.WebDriver;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -14,35 +12,43 @@ namespace Smidas.WebScraping
     {
         private Random _random;
 
+        private int _minWaitMillis;
+
+        private int _maxWaitMillis;
+
         protected ILogger _logger;
 
-        public IWebDriver WebDriver { get; set; }
+        protected IWebDriver _webDriver;
 
-        public int MinWaitMillis { get; set; }
-
-        public int MaxWaitMillis { get; set; }
-
-        public WebScraper(IWebDriverFactory webDriverFactory, ILogger logger, IOptions<AppSettings> config)
+        public WebScraper(IWebDriver webDriver, ILogger logger, AppSettings config)
         {
             _random = new Random();
-            WebDriver = webDriverFactory.Create(config.Value.ChromeDriverDirectory);
+            _minWaitMillis = config.MinWaitMillis;
+            _maxWaitMillis = config.MaxWaitMillis;
+            _webDriver = webDriver;
             _logger = logger;
         }
 
         public void Dispose()
         {
             _logger.LogTrace("Förstör webbskrapare");
-            WebDriver.Dispose();
+            _webDriver.Dispose();
         }
 
         public abstract IEnumerable<Stock> Scrape();
 
+        public void NavigateTo(string url)
+        {
+            _logger.LogInformation($"Surfar in på {url}");
+            _webDriver.Navigate().GoToUrl(url);
+        }
+
         public void Wait()
         {
-            if (MinWaitMillis + MaxWaitMillis != 0)
+            if (_minWaitMillis + _maxWaitMillis != 0)
             {
-                var sleepMillis = _random.Next(MinWaitMillis, MaxWaitMillis);
-                _logger.LogInformation($"Sleeping for {sleepMillis}ms");
+                var sleepMillis = _random.Next(_minWaitMillis, _maxWaitMillis);
+                _logger.LogInformation($"Väntar i {sleepMillis} ms");
                 Thread.Sleep(sleepMillis);
             }
         }

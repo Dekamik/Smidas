@@ -28,7 +28,14 @@ namespace Smidas.WebScraping.AffarsVarlden
 
         public AffarsVarldenIndexes Index { get; set; } = AffarsVarldenIndexes.StockholmLargeCap;
 
-        public AffarsVarldenWebScraper(IWebDriverFactory webDriverFactory, ILoggerFactory loggerFactory, IOptions<AppSettings> config) : base(webDriverFactory, loggerFactory.CreateLogger<AffarsVarldenWebScraper>(), config)
+        public AffarsVarldenWebScraper(
+            IWebDriverFactory webDriverFactory, 
+            ILoggerFactory loggerFactory, 
+            IOptions<AppSettings> config) 
+            : base(
+                  webDriverFactory.Create(config.Value.ChromeDriverDirectory), 
+                  loggerFactory.CreateLogger<AffarsVarldenWebScraper>(),
+                  config.Value)
         {
             _industries = config.Value.Industries;
         }
@@ -37,11 +44,8 @@ namespace Smidas.WebScraping.AffarsVarlden
         {
             _logger.LogInformation($"Skrapar affärsvärlden.se");
             var stockData = new List<Stock>();
-            var SharePricesUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{Index.GetDescription()}/kurs/";
-            var StockIndicatorsUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{Index.GetDescription()}/aktieindikatorn/";
 
-            _logger.LogInformation($"Surfar in på {SharePricesUrl}");
-            WebDriver.Navigate().GoToUrl(SharePricesUrl);
+            NavigateTo($"https://www.affarsvarlden.se/bors/kurslistor/{Index.GetDescription()}/kurs/");
 
             Wait();
 
@@ -57,8 +61,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 ScrapeSharePrices(ref stockData);
             }
 
-            _logger.LogInformation($"Surfar in på {StockIndicatorsUrl}");
-            WebDriver.Navigate().GoToUrl(StockIndicatorsUrl);
+            NavigateTo($"https://www.affarsvarlden.se/bors/kurslistor/{Index.GetDescription()}/aktieindikatorn/");
 
             Wait();
 
@@ -82,14 +85,14 @@ namespace Smidas.WebScraping.AffarsVarlden
         public void ClickNextButton()
         {
             _logger.LogInformation($"Klickar till nästa sida");
-            WebDriver.ExecuteScript("arguments[0].click();", WebDriver.FindElement(By.XPath("//a[text()='>']")));
+            _webDriver.ExecuteScript("arguments[0].click();", _webDriver.FindElement(By.XPath("//a[text()='>']")));
         }
 
         public void ScrapeSharePrices(ref List<Stock> stockData)
         {
             _logger.LogInformation($"Skrapar aktiekurser");
 
-            var table = WebDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
+            var table = _webDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
 
             foreach (var row in table)
             {
@@ -116,7 +119,7 @@ namespace Smidas.WebScraping.AffarsVarlden
             var stockDictionary = new Dictionary<string, Stock>();
             stockData.ForEach(s => stockDictionary.Add(s.Name, s));
 
-            var table = WebDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
+            var table = _webDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
 
             foreach (var row in table)
             {

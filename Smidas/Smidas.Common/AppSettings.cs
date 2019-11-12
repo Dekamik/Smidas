@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Smidas.Common
+﻿namespace Smidas.Common
 {
     public class AppSettings
     {
@@ -22,5 +18,9 @@ namespace Smidas.Common
         public string ExportDirectory { get; set; }
 
         public IndustriesData[] Industries { get; set; }
+
+        public int MinWaitMillis { get; set; }
+
+        public int MaxWaitMillis { get; set; }
     }
 }
