@@ -37,15 +37,21 @@ namespace Smidas.CLI
 
         private readonly ILogger _logger;
 
-        private readonly AppSettings _config;
+        private readonly IOptions<AppSettings> _config;
+
+        private readonly IWebScraper _webScraper;
+
+        private readonly IAnalysis _analysis;
 
         private readonly ExcelExporter _excelExporter;
 
-        public ConsoleApplication(ILoggerFactory loggerFactory, IOptions<AppSettings> config, ExcelExporter excelExporter)
+        public ConsoleApplication(ILoggerFactory loggerFactory, IOptions<AppSettings> config, AffarsVarldenWebScraper webScraper, AktieRea aktieRea, ExcelExporter excelExporter)
         {
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory.CreateLogger<ConsoleApplication>();
-            _config = config.Value;
+            _config = config;
+            _webScraper = webScraper;
+            _analysis = aktieRea;
             _excelExporter = excelExporter;
         }
 
@@ -66,23 +72,20 @@ namespace Smidas.CLI
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            using var webDriver = new ChromeDriver(_config.ChromeDriverDirectory);
             string exportPath = null;
-            IWebScraper webScraper = null;
-            IAnalysis analysis = null;
 
             switch (input)
             {
                 case "1":
-                    exportPath = _config.ExportDirectory + $"\\AktieREA_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = _config.Value.ExportDirectory + $"\\AktieREA_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "2":
-                    exportPath = _config.ExportDirectory + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = _config.Value.ExportDirectory + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "3":
-                    exportPath = _config.ExportDirectory + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = _config.Value.ExportDirectory + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 default:
@@ -93,28 +96,15 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1":
-                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.StockholmLargeCap);
+                    (_webScraper as AffarsVarldenWebScraper).Index = AffarsVarldenIndexes.StockholmLargeCap;
                     break;
 
                 case "2":
-                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.CopenhagenLargeCap);
+                    (_webScraper as AffarsVarldenWebScraper).Index = AffarsVarldenIndexes.CopenhagenLargeCap;
                     break;
 
                 case "3":
-                    webScraper = new AffarsVarldenWebScraper(webDriver, _loggerFactory, _config, AffarsVarldenIndexes.HelsinkiLargeCap);
-                    break;
-
-                default:
-                    break;
-            }
-
-            // Select analysis
-            switch (input)
-            {
-                case "1":
-                case "2":
-                case "3":
-                    analysis = new AktieRea(_loggerFactory, _config);
+                    (_webScraper as AffarsVarldenWebScraper).Index = AffarsVarldenIndexes.HelsinkiLargeCap;
                     break;
 
                 default:
@@ -122,8 +112,8 @@ namespace Smidas.CLI
             }
 
             // Run
-            var stockData = webScraper?.Scrape();
-            var results = analysis?.Analyze(stockData, _config.Blacklist);
+            var stockData = _webScraper?.Scrape();
+            var results = _analysis?.Analyze(stockData);
 
             if (!string.IsNullOrEmpty(exportPath))
             {

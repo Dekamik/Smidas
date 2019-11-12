@@ -19,22 +19,26 @@ namespace Smidas.Core.Analysis
 
         private readonly int _bankingStocksCap;
 
-        public AktieRea(ILoggerFactory loggerFactory, AppSettings config)
+        private readonly IEnumerable<string> _blacklist;
+
+        public AktieRea(ILoggerFactory loggerFactory, IOptions<AppSettings> config)
         {
             _logger = loggerFactory.CreateLogger<AktieRea>();
 
-            _investmentStocksCap = config.Industries.Single(i => i.Enum == Industry.Investment.ToString()).Cap;
+            _investmentStocksCap = config.Value.Industries.Single(i => i.Enum == Industry.Investment.ToString()).Cap;
 
-            _realEstateStocksCap = config.Industries.Single(i => i.Enum == Industry.RealEstate.ToString()).Cap;
+            _realEstateStocksCap = config.Value.Industries.Single(i => i.Enum == Industry.RealEstate.ToString()).Cap;
 
-            _bankingStocksCap = config.Industries.Single(i => i.Enum == Industry.Banking.ToString()).Cap;
+            _bankingStocksCap = config.Value.Industries.Single(i => i.Enum == Industry.Banking.ToString()).Cap;
+
+            _blacklist = config.Value.Blacklist;
         }
 
-        public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
+        public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks)
         {
             _logger.LogInformation($"Analyserar {stocks.Count()} aktier enligt AktieREA-metoden");
 
-            ExcludeDisqualifiedStocks(ref stocks, blacklist);
+            ExcludeDisqualifiedStocks(ref stocks);
 
             ExcludeDoubles(ref stocks);
 
@@ -57,14 +61,14 @@ namespace Smidas.Core.Analysis
                          .ThenByDescending(s => s.DirectYield);
         }
 
-        public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, IEnumerable<string> blacklist)
+        public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks)
         {
             _logger.LogDebug($"Sållar diskvalivicerade aktier");
 
             foreach (var stock in stocks)
             {
                 // Blacklisted stocks
-                foreach (var name in blacklist)
+                foreach (var name in _blacklist)
                 {
                     if (stock.Name.Contains(name))
                     {

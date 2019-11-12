@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Smidas.Common;
+using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
 using Smidas.WebScraping.AffarsVarlden;
+using Smidas.WebScraping.WebDriver;
 using System.IO;
 
 namespace Smidas.CLI
@@ -12,7 +15,7 @@ namespace Smidas.CLI
     {
         public static void Main(string[] args)
         {
-            var serviceProvider = ConfigureServices().BuildServiceProvider();
+            using var serviceProvider = ConfigureServices().BuildServiceProvider();
 
             serviceProvider.GetService<ConsoleApplication>().Run();
         }
@@ -27,21 +30,22 @@ namespace Smidas.CLI
 
         private static IServiceCollection ConfigureServices()
         {
-            var services = new ServiceCollection();
-
             var config = LoadConfiguration();
+
+            var services = new ServiceCollection();
             services.AddOptions();
+            services.AddLogging(logging => 
+            { 
+                logging.AddConsole();
+                logging.AddConfiguration(config.GetSection("Logging"));
+            });
+            
             services.Configure<AppSettings>(config.GetSection("Configuration"));
+            services.Configure<ConsoleLoggerOptions>(config.GetSection("Logging"));
 
-            services.AddLogging(logging =>
-                {
-                    logging.AddConsole();
-                    logging.AddFilter("Smidas", LogLevel.Debug);
-                    logging.AddFilter("Smidas.Core", LogLevel.Trace);
-                    logging.AddFilter("Smidas.WebScraping", LogLevel.Trace);
-                })
-                .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
-
+            services.AddScoped<IWebDriverFactory, WebDriverFactory>();
+            services.AddScoped<AffarsVarldenWebScraper>();
+            services.AddScoped<AktieRea>();
             services.AddScoped<ExcelExporter>();
             services.AddScoped<ConsoleApplication>();
 

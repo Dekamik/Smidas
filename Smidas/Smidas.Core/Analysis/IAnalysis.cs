@@ -11,6 +11,6 @@ namespace Smidas.Core.Analysis
     /// <typeparam name="T">Data object type</typeparam>
     public interface IAnalysis
     {
-        IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks, IEnumerable<string> blacklist);
+        IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks);
     }
 }

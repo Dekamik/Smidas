@@ -5,6 +5,7 @@ using Smidas.Common;
 using Smidas.Common.Extensions;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.Extensions;
+using Smidas.WebScraping.WebDriver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,22 +24,21 @@ namespace Smidas.WebScraping.AffarsVarlden
         private const int _directYieldIndex = 6;
         private const int _profitPerStock = 7;
 
-        private readonly AppSettings _config;
+        private IEnumerable<AppSettings.IndustriesData> _industries;
 
-        private readonly AffarsVarldenIndexes _index;
+        public AffarsVarldenIndexes Index { get; set; } = AffarsVarldenIndexes.StockholmLargeCap;
 
-        public AffarsVarldenWebScraper(IWebDriver webDriver, ILoggerFactory loggerFactory, AppSettings config, AffarsVarldenIndexes index) : base(webDriver, loggerFactory.CreateLogger<AffarsVarldenWebScraper>())
+        public AffarsVarldenWebScraper(IWebDriverFactory webDriverFactory, ILoggerFactory loggerFactory, IOptions<AppSettings> config) : base(webDriverFactory, loggerFactory.CreateLogger<AffarsVarldenWebScraper>(), config)
         {
-            _config = config;
-            _index = index;
+            _industries = config.Value.Industries;
         }
 
         public override IEnumerable<Stock> Scrape()
         {
             _logger.LogInformation($"Skrapar affärsvärlden.se");
             var stockData = new List<Stock>();
-            var SharePricesUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{_index.GetDescription()}/kurs/";
-            var StockIndicatorsUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{_index.GetDescription()}/aktieindikatorn/";
+            var SharePricesUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{Index.GetDescription()}/kurs/";
+            var StockIndicatorsUrl = $"https://www.affarsvarlden.se/bors/kurslistor/{Index.GetDescription()}/aktieindikatorn/";
 
             _logger.LogInformation($"Surfar in på {SharePricesUrl}");
             WebDriver.Navigate().GoToUrl(SharePricesUrl);
@@ -48,7 +48,7 @@ namespace Smidas.WebScraping.AffarsVarlden
             ScrapeSharePrices(ref stockData);
 
             // Pretty hacky, should support pagination instead
-            if (_index == AffarsVarldenIndexes.StockholmLargeCap)
+            if (Index == AffarsVarldenIndexes.StockholmLargeCap)
             {
                 ClickNextButton();
 
@@ -64,7 +64,7 @@ namespace Smidas.WebScraping.AffarsVarlden
 
             ScrapeStockIndicators(ref stockData);
 
-            if (_index == AffarsVarldenIndexes.StockholmLargeCap)
+            if (Index == AffarsVarldenIndexes.StockholmLargeCap)
             {
                 ClickNextButton();
 
@@ -87,7 +87,7 @@ namespace Smidas.WebScraping.AffarsVarlden
 
         public void ScrapeSharePrices(ref List<Stock> stockData)
         {
-            _logger.LogDebug($"Skrapar aktiekurser");
+            _logger.LogInformation($"Skrapar aktiekurser");
 
             var table = WebDriver.FindElements(By.XPath("//table[contains(@class, 'afv-table-body-list')]/tbody/tr"));
 
@@ -111,7 +111,7 @@ namespace Smidas.WebScraping.AffarsVarlden
 
         public void ScrapeStockIndicators(ref List<Stock> stockData)
         {
-            _logger.LogDebug($"Skrapar aktieindikatorer");
+            _logger.LogInformation($"Skrapar aktieindikatorer");
 
             var stockDictionary = new Dictionary<string, Stock>();
             stockData.ForEach(s => stockDictionary.Add(s.Name, s));
@@ -141,10 +141,10 @@ namespace Smidas.WebScraping.AffarsVarlden
         {
             _logger.LogDebug($"Tillsätter branscher");
 
-            foreach(var industryData in _config.Industries)
+            foreach (var industryData in _industries)
             {
                 var industry = Enum.Parse<Industry>(industryData.Enum);
-                foreach(var companyName in industryData.Stocks)
+                foreach (var companyName in industryData.Stocks)
                 {
                     stockData.Where(s => s.Name.Contains(companyName))
                              .ForEach(s => s.Industry = industry);
