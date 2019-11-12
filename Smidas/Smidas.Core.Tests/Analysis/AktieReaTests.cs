@@ -9,6 +9,7 @@ using Smidas.Common.Extensions;
 using Microsoft.Extensions.Logging;
 using FakeItEasy;
 using Smidas.Common;
+using Microsoft.Extensions.Options;
 
 namespace Smidas.Core.Tests.Analysis
 {
@@ -19,7 +20,7 @@ namespace Smidas.Core.Tests.Analysis
         public AktieReaTests()
         {
             var loggerFactory = A.Fake<ILoggerFactory>();
-            var config = A.Fake<AppSettings>();
+            var config = A.Fake<IOptions<AppSettings>>();
 
             _aktieRea = new AktieRea(loggerFactory, config);
         }
@@ -38,7 +39,7 @@ namespace Smidas.Core.Tests.Analysis
             }.AsEnumerable();
             var blacklist = new[] { "AnyBlacklistedStock" };
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, blacklist);
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
             stocks.Single().Comments.Should().Be("Blacklisted.");
@@ -58,7 +59,7 @@ namespace Smidas.Core.Tests.Analysis
             }.AsEnumerable();
             var blacklist = new[] { "AnyBlacklistedStock" };
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, blacklist);
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
             stocks.Single().Comments.Should().Be("Blacklisted.");
@@ -78,7 +79,7 @@ namespace Smidas.Core.Tests.Analysis
             }.AsEnumerable();
             var blacklist = new[] { "AnyBlacklistedStock" };
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, blacklist);
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
             stocks.Single().Comments.Should().NotBe("Blacklisted.");
@@ -97,7 +98,7 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
             stocks.Single().Comments.Should().Be("Negative profit per stock.");
@@ -116,7 +117,7 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
             stocks.Single().Comments.Should().NotBe("Negative profit per stock.");
@@ -135,7 +136,7 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
             stocks.Single().Comments.Should().Be("Zero direct yield.");
@@ -154,7 +155,7 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
             stocks.Single().Comments.Should().NotBe("Zero direct yield.");
@@ -173,7 +174,7 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
             stocks.Single().Comments.Should().Be("Preferred stock.");
@@ -192,7 +193,7 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, new List<string>());
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
             stocks.Single().Comments.Should().NotBe("Preferred stock.");

@@ -24,20 +24,35 @@ namespace Smidas.WebScraping.AffarsVarlden
         private const int _directYieldIndex = 6;
         private const int _profitPerStock = 7;
 
-        private IEnumerable<AppSettings.IndustriesData> _industries;
+        private readonly IOptions<AppSettings> _config;
 
-        public AffarsVarldenIndexes Index { get; set; } = AffarsVarldenIndexes.StockholmLargeCap;
+        private IDictionary<string, AppSettings.IndexSettings.IndustryData> _industries;
+
+        private StockIndex _index;
+
+        public StockIndex Index 
+        {
+            get 
+            {
+                return _index;
+            }
+            set 
+            {
+                _index = value;
+                _industries = _config.Value.AktieRea[_index.ToString()].Industries;
+            } 
+        }
 
         public AffarsVarldenWebScraper(
             IWebDriverFactory webDriverFactory, 
             ILoggerFactory loggerFactory, 
             IOptions<AppSettings> config) 
             : base(
-                  webDriverFactory.Create(config.Value.ChromeDriverDirectory), 
+                  webDriverFactory.Create(config.Value.WebScraper.ChromeDriverDirectory), 
                   loggerFactory.CreateLogger<AffarsVarldenWebScraper>(),
                   config.Value)
         {
-            _industries = config.Value.Industries;
+            _config = config;
         }
 
         public override IEnumerable<Stock> Scrape()
@@ -52,7 +67,7 @@ namespace Smidas.WebScraping.AffarsVarlden
             ScrapeSharePrices(ref stockData);
 
             // Pretty hacky, should support pagination instead
-            if (Index == AffarsVarldenIndexes.StockholmLargeCap)
+            if (Index == StockIndex.OmxStockholmLargeCap)
             {
                 ClickNextButton();
 
@@ -67,7 +82,7 @@ namespace Smidas.WebScraping.AffarsVarlden
 
             ScrapeStockIndicators(ref stockData);
 
-            if (Index == AffarsVarldenIndexes.StockholmLargeCap)
+            if (Index == StockIndex.OmxStockholmLargeCap)
             {
                 ClickNextButton();
 
@@ -146,8 +161,8 @@ namespace Smidas.WebScraping.AffarsVarlden
 
             foreach (var industryData in _industries)
             {
-                var industry = Enum.Parse<Industry>(industryData.Enum);
-                foreach (var companyName in industryData.Stocks)
+                var industry = Enum.Parse<Industry>(industryData.Key);
+                foreach (var companyName in industryData.Value.Companies)
                 {
                     stockData.Where(s => s.Name.Contains(companyName))
                              .ForEach(s => s.Industry = industry);

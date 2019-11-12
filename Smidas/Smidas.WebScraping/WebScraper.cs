@@ -10,21 +10,21 @@ namespace Smidas.WebScraping
 {
     public abstract class WebScraper : IWebScraper, IDisposable
     {
-        private Random _random;
+        private readonly Random _random;
 
-        private int _minWaitMillis;
+        private readonly int _minWaitMillis;
 
-        private int _maxWaitMillis;
+        private readonly int _maxWaitMillis;
 
-        protected ILogger _logger;
+        protected readonly ILogger _logger;
 
-        protected IWebDriver _webDriver;
+        protected readonly IWebDriver _webDriver;
 
         public WebScraper(IWebDriver webDriver, ILogger logger, AppSettings config)
         {
             _random = new Random();
-            _minWaitMillis = config.MinWaitMillis;
-            _maxWaitMillis = config.MaxWaitMillis;
+            _minWaitMillis = config.WebScraper.MinWaitMillis;
+            _maxWaitMillis = config.WebScraper.MaxWaitMillis;
             _webDriver = webDriver;
             _logger = logger;
         }

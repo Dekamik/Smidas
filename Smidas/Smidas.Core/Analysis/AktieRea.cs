@@ -13,25 +13,40 @@ namespace Smidas.Core.Analysis
     {
         private readonly ILogger _logger;
 
-        private readonly int _investmentStocksCap;
+        private readonly IOptions<AppSettings> _options;
 
-        private readonly int _realEstateStocksCap;
+        private int _investmentStocksCap;
 
-        private readonly int _bankingStocksCap;
+        private int _realEstateStocksCap;
 
-        private readonly IEnumerable<string> _blacklist;
+        private int _bankingStocksCap;
 
-        public AktieRea(ILoggerFactory loggerFactory, IOptions<AppSettings> config)
+        private IEnumerable<string> _blacklist;
+
+        private StockIndex _index;
+
+        public StockIndex Index
+        {
+            get
+            {
+                return _index;
+            }
+            set
+            {
+                _index = value;
+
+                _investmentStocksCap = _options.Value.AktieRea[_index.ToString()].Industries[Industry.Investment.ToString()].Cap;
+                _realEstateStocksCap = _options.Value.AktieRea[_index.ToString()].Industries[Industry.RealEstate.ToString()].Cap;
+                _bankingStocksCap = _options.Value.AktieRea[_index.ToString()].Industries[Industry.Banking.ToString()].Cap;
+
+                _blacklist = _options.Value.AktieRea[_index.ToString()].Blacklist;
+            }
+        }
+
+        public AktieRea(ILoggerFactory loggerFactory, IOptions<AppSettings> options)
         {
             _logger = loggerFactory.CreateLogger<AktieRea>();
-
-            _investmentStocksCap = config.Value.Industries.Single(i => i.Enum == Industry.Investment.ToString()).Cap;
-
-            _realEstateStocksCap = config.Value.Industries.Single(i => i.Enum == Industry.RealEstate.ToString()).Cap;
-
-            _bankingStocksCap = config.Value.Industries.Single(i => i.Enum == Industry.Banking.ToString()).Cap;
-
-            _blacklist = config.Value.Blacklist;
+            _options = options;
         }
 
         public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks)

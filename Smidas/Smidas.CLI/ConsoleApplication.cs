@@ -37,7 +37,7 @@ namespace Smidas.CLI
 
         private readonly ILogger _logger;
 
-        private readonly IOptions<AppSettings> _config;
+        private readonly IOptions<AppSettings> _options;
 
         private readonly IWebScraper _webScraper;
 
@@ -45,11 +45,11 @@ namespace Smidas.CLI
 
         private readonly ExcelExporter _excelExporter;
 
-        public ConsoleApplication(ILoggerFactory loggerFactory, IOptions<AppSettings> config, AffarsVarldenWebScraper webScraper, AktieRea aktieRea, ExcelExporter excelExporter)
+        public ConsoleApplication(ILoggerFactory loggerFactory, IOptions<AppSettings> options, AffarsVarldenWebScraper webScraper, AktieRea aktieRea, ExcelExporter excelExporter)
         {
             _loggerFactory = loggerFactory;
             _logger = _loggerFactory.CreateLogger<ConsoleApplication>();
-            _config = config;
+            _options = options;
             _webScraper = webScraper;
             _analysis = aktieRea;
             _excelExporter = excelExporter;
@@ -77,15 +77,15 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1":
-                    exportPath = _config.Value.ExportDirectory + $"\\AktieREA_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = _options.Value.ExportDirectory + $"\\AktieREA_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "2":
-                    exportPath = _config.Value.ExportDirectory + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = _options.Value.ExportDirectory + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "3":
-                    exportPath = _config.Value.ExportDirectory + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = _options.Value.ExportDirectory + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 default:
@@ -96,15 +96,18 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1":
-                    (_webScraper as AffarsVarldenWebScraper).Index = AffarsVarldenIndexes.StockholmLargeCap;
+                    (_webScraper as AffarsVarldenWebScraper).Index = StockIndex.OmxStockholmLargeCap;
+                    (_analysis as AktieRea).Index = StockIndex.OmxStockholmLargeCap;
                     break;
 
                 case "2":
-                    (_webScraper as AffarsVarldenWebScraper).Index = AffarsVarldenIndexes.CopenhagenLargeCap;
+                    (_webScraper as AffarsVarldenWebScraper).Index = StockIndex.OmxCopenhagenLargeCap;
+                    (_analysis as AktieRea).Index = StockIndex.OmxCopenhagenLargeCap;
                     break;
 
                 case "3":
-                    (_webScraper as AffarsVarldenWebScraper).Index = AffarsVarldenIndexes.HelsinkiLargeCap;
+                    (_webScraper as AffarsVarldenWebScraper).Index = StockIndex.OmxHelsinkiLargeCap;
+                    (_analysis as AktieRea).Index = StockIndex.OmxHelsinkiLargeCap;
                     break;
 
                 default:

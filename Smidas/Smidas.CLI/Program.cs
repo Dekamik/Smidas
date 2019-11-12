@@ -40,7 +40,7 @@ namespace Smidas.CLI
                 logging.AddConfiguration(config.GetSection("Logging"));
             });
             
-            services.Configure<AppSettings>(config.GetSection("Configuration"));
+            services.Configure<AppSettings>(config.GetSection("App"));
             services.Configure<ConsoleLoggerOptions>(config.GetSection("Logging"));
 
             services.AddScoped<IWebDriverFactory, WebDriverFactory>();
