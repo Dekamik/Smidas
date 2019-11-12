@@ -83,12 +83,15 @@ namespace Smidas.Core.Analysis
             foreach (var stock in stocks)
             {
                 // Blacklisted stocks
-                foreach (var name in _blacklist)
+                if (_blacklist != null && _blacklist.Count() != 0)
                 {
-                    if (stock.Name.Contains(name))
+                    foreach (var name in _blacklist)
                     {
-                        _logger.LogTrace($"Sållade {stock.Name} - Svartlistad");
-                        stock.Exclude("Svartlistad");
+                        if (stock.Name.Contains(name))
+                        {
+                            _logger.LogTrace($"Sållade {stock.Name} - Svartlistad");
+                            stock.Exclude("Svartlistad");
+                        }
                     }
                 }
                 
