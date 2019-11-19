@@ -91,6 +91,7 @@ namespace Smidas.CLI
 
             string exportPath = null;
             IWebScraper webScraper = null;
+            string currency = null;
 
             switch (input)
             {
@@ -126,36 +127,42 @@ namespace Smidas.CLI
                     webScraper = _serviceProvider.GetService<AffarsVarldenWebScraper>();
                     (webScraper as AffarsVarldenWebScraper).Index = StockIndex.OmxStockholmLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxStockholmLargeCap;
+                    currency = StockIndex.OmxStockholmLargeCap.GetAffarsVarldenInfo().Currency;
                     break;
 
                 case "2":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxStockholmLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxStockholmLargeCap;
+                    currency = StockIndex.OmxStockholmLargeCap.GetDagensIndustriInfo().Currency;
                     break;
 
                 case "3":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxCopenhagenLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxCopenhagenLargeCap;
+                    currency = StockIndex.OmxCopenhagenLargeCap.GetDagensIndustriInfo().Currency;
                     break;
 
                 case "4":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxHelsinkiLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxHelsinkiLargeCap;
+                    currency = StockIndex.OmxHelsinkiLargeCap.GetDagensIndustriInfo().Currency;
                     break;
 
                 case "5":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OsloObx;
                     (_analysis as AktieRea).Index = StockIndex.OsloObx;
+                    currency = StockIndex.OsloObx.GetDagensIndustriInfo().Currency;
                     break;
 
                 case "6":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.SNP500;
                     (_analysis as AktieRea).Index = StockIndex.SNP500;
+                    currency = StockIndex.SNP500.GetDagensIndustriInfo().Currency;
                     break;
 
                 default:
@@ -168,7 +175,7 @@ namespace Smidas.CLI
 
             if (!string.IsNullOrEmpty(exportPath))
             {
-                _excelExporter.Export(results.ToList(), exportPath);
+                _excelExporter.Export(results.ToList(), exportPath, currency);
             }
 
             stopwatch.Stop();

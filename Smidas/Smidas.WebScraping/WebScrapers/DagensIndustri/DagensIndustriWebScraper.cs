@@ -16,10 +16,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 {
     public class DagensIndustriWebScraper : WebScraperService<DagensIndustriWebScraper>
     {
-        // TODO: Ändra kolumner
         // Share prices page
-        private const int _nameCol = 0;
-
         private const int _priceCol = 0;
         private const int _volumeCol = 5;
 

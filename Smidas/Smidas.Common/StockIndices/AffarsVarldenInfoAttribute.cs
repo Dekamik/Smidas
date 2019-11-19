@@ -5,7 +5,7 @@ using System.Text;
 namespace Smidas.Common.StockIndices
 {
     [AttributeUsage(AttributeTargets.Field)]
-    public class AffarsVarldenInfoAttribute : Attribute
+    public class AffarsVarldenInfoAttribute : StockInfoAttribute
     {
         public string StockIndexUrl { get; set; }
 

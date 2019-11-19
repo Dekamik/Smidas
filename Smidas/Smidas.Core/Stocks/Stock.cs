@@ -22,7 +22,7 @@ namespace Smidas.Core.Stocks
         [Excel(FullName = "Åtgärd", Column = "C")]
         public Action Action { get; set; }
 
-        [Excel(FullName = "Aktiekurs", ShortName = "Kurs", Column = "D")]
+        [Excel(FullName = "Aktiekurs i {0}", ShortName = "Kurs ({0})", Column = "D")]
         public decimal Price { get; set; }
 
         [Excel(FullName = "Volym", Column = "E")]

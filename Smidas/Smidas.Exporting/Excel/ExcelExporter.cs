@@ -28,7 +28,7 @@ namespace Smidas.Exporting.Excel
             _logger = loggerFactory.CreateLogger<ExcelExporter>();
         }
 
-        public void Export(List<Stock> stocks, string exportFile)
+        public void Export(List<Stock> stocks, string exportFile, string currency)
         {
             _logger.LogInformation($"Exporterar analys om {stocks.Count()} aktier till {exportFile}");
 
@@ -41,6 +41,11 @@ namespace Smidas.Exporting.Excel
                 var excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
                 if (excelAttr != null)
                 {
+                    if (prop.Name == nameof(Stock.Price))
+                    {
+                        worksheet.Cells[excelAttr.Column + "1"].Value = string.Format(excelAttr.ShortName ?? excelAttr.FullName ?? "{0}", currency);
+                        continue;
+                    }
                     worksheet.Cells[excelAttr.Column + "1"].Value = excelAttr.ShortName ?? excelAttr.FullName;
                 }
             }
