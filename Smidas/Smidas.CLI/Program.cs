@@ -5,8 +5,9 @@ using Microsoft.Extensions.Logging.Console;
 using Smidas.Common;
 using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
-using Smidas.WebScraping.AffarsVarlden;
 using Smidas.WebScraping.WebDriver;
+using Smidas.WebScraping.WebScrapers.AffarsVarlden;
+using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System.IO;
 
 namespace Smidas.CLI
@@ -16,7 +17,6 @@ namespace Smidas.CLI
         public static void Main(string[] args)
         {
             using var serviceProvider = ConfigureServices().BuildServiceProvider();
-
             serviceProvider.GetService<ConsoleApplication>().Run();
         }
 
@@ -45,6 +45,7 @@ namespace Smidas.CLI
 
             services.AddScoped<IWebDriverFactory, WebDriverFactory>();
             services.AddScoped<AffarsVarldenWebScraper>();
+            services.AddScoped<DagensIndustriWebScraper>();
             services.AddScoped<AktieRea>();
             services.AddScoped<ExcelExporter>();
             services.AddScoped<ConsoleApplication>();

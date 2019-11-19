@@ -6,6 +6,7 @@ using Smidas.Common.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Smidas.Common;
+using Smidas.Common.StockIndices;
 
 namespace Smidas.Core.Analysis
 {
@@ -14,6 +15,10 @@ namespace Smidas.Core.Analysis
         private readonly ILogger _logger;
 
         private readonly IOptions<AppSettings> _options;
+
+        private int _amountToBuy;
+
+        private int _amountToKeep;
 
         private int _investmentStocksCap;
 
@@ -27,13 +32,13 @@ namespace Smidas.Core.Analysis
 
         public StockIndex Index
         {
-            get
-            {
-                return _index;
-            }
+            get => _index;
             set
             {
                 _index = value;
+
+                _amountToBuy = _options.Value.AktieRea[_index.ToString()].AmountToBuy;
+                _amountToKeep = _options.Value.AktieRea[_index.ToString()].AmountToKeep;
 
                 _investmentStocksCap = _options.Value.AktieRea[_index.ToString()].Industries[Industry.Investment.ToString()].Cap;
                 _realEstateStocksCap = _options.Value.AktieRea[_index.ToString()].Industries[Industry.RealEstate.ToString()].Cap;
@@ -83,7 +88,7 @@ namespace Smidas.Core.Analysis
             foreach (var stock in stocks)
             {
                 // Blacklisted stocks
-                if (_blacklist != null && _blacklist.Count() != 0)
+                if (_blacklist != null)
                 {
                     foreach (var name in _blacklist)
                     {
@@ -135,7 +140,7 @@ namespace Smidas.Core.Analysis
             {
                 // Select the company's stocks, ordered with largest turnover first
                 var company = doubleStocks.Where(s => s.Name.Contains(companyName))
-                                          .OrderByDescending(s => s.Turnover);
+                                          .OrderByDescending(s => s.Volume);
 
                 // Keep the stock with the largest turnover (the first one). Exclude the rest.
                 company.Skip(1)
@@ -196,7 +201,7 @@ namespace Smidas.Core.Analysis
                 switch (stock.Industry)
                 {
                     case Industry.Investment:
-                        if (investmentStocks == investmentStocksCap)
+                        if (investmentStocksCap != -1 && investmentStocks == investmentStocksCap)
                         {
                             _logger.LogTrace($"Sållade {stock.Name} - Max antal investeringsbolag nådd");
                             stock.Exclude("Max antal investeringsbolag nådd");
@@ -206,7 +211,7 @@ namespace Smidas.Core.Analysis
                         break;
 
                     case Industry.RealEstate:
-                        if (realEstateStocks == realEstateStocksCap)
+                        if (realEstateStocksCap != -1 && realEstateStocks == realEstateStocksCap)
                         {
                             _logger.LogTrace($"Sållade {stock.Name} - Max antal fastighetsbolag nådd");
                             stock.Exclude("Max antal fastighetsbolag nådd");
@@ -216,7 +221,7 @@ namespace Smidas.Core.Analysis
                         break;
 
                     case Industry.Banking:
-                        if (bankingStocks == bankingStocksCap)
+                        if (bankingStocksCap != -1 && bankingStocks == bankingStocksCap)
                         {
                             _logger.LogTrace($"Sållade {stock.Name} - Max antal bankbolag nådd");
                             stock.Exclude("Max antal bankbolag nådd");
@@ -230,9 +235,9 @@ namespace Smidas.Core.Analysis
                         break;
                 }
 
-                stock.Action = index <= 10 ? Action.Buy :
-                               index <= 20 ? Action.Keep :
-                                             Action.Sell;
+                stock.Action = index <= _amountToBuy ? Action.Buy :
+                               index <= _amountToBuy + _amountToKeep ? Action.Keep :
+                                                                       Action.Sell;
                 index++;
             }
         }

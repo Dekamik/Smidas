@@ -9,8 +9,10 @@ namespace Smidas.WebScraping.Extensions
     {
         public static object ExecuteScript(this IWebDriver driver, string script, params object[] args) => (driver as IJavaScriptExecutor).ExecuteScript(script, args);
 
-        public static decimal TextAsDecimal(this IWebElement webElement) => decimal.Parse(!string.IsNullOrEmpty(webElement.Text) ? webElement.Text : "0");
+        public static decimal DecimalTextAsDecimal(this IWebElement webElement) => decimal.Parse(!string.IsNullOrEmpty(webElement.Text) ? webElement.Text : "0");
 
-        public static decimal TextAsNumber(this IWebElement webElement) => decimal.Parse(!string.IsNullOrEmpty(webElement.Text) ? webElement.Text.Replace("K", "000") : "0");
+        public static decimal NumberTextAsDecimal(this IWebElement webElement) => decimal.Parse(!string.IsNullOrEmpty(webElement.Text) ? webElement.Text.Replace("K", "000") : "0");
+
+        public static decimal PercentageTextAsDecimal(this IWebElement webElement) => decimal.Parse(!string.IsNullOrEmpty(webElement.Text) ? webElement.Text.Replace("%", "") : "0");
     }
 }

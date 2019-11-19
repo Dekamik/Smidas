@@ -25,8 +25,8 @@ namespace Smidas.Core.Stocks
         [Excel(FullName = "Aktiekurs", ShortName = "Kurs", Column = "D")]
         public decimal Price { get; set; }
 
-        [Excel(FullName = "Omsättning", ShortName = "Omsättn.", Column = "E")]
-        public decimal Turnover { get; set; }
+        [Excel(FullName = "Volym", Column = "E")]
+        public decimal Volume { get; set; }
 
         [Excel(FullName = "Justerat eget kapital per aktie", ShortName = "JEK/aktie", Column = "F")]
         public decimal AdjustedEquityPerStock { get; set; }
@@ -68,9 +68,7 @@ namespace Smidas.Core.Stocks
             Comments = reason;
         }
 
-        public override string ToString() => $"{Name}";
-
-        public string ToFullString() => $"{Name}, {CompanyName}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Turnover}, " +
-                                        $"{AdjustedEquityPerStock}, {DirectYield}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
+        public override string ToString() => $"{Name}, {CompanyName}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Volume}, " +
+                                             $"{AdjustedEquityPerStock}, {DirectYield}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
     }
 }

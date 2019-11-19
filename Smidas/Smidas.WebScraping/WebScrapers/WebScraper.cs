@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Smidas.WebScraping
+namespace Smidas.WebScraping.WebScrapers
 {
     public abstract class WebScraper : IWebScraper, IDisposable
     {

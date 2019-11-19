@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using OpenQA.Selenium;
 using Smidas.Common;
 using Smidas.Common.Extensions;
+using Smidas.Common.StockIndices;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.Extensions;
 using Smidas.WebScraping.WebDriver;
@@ -10,49 +11,45 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Smidas.WebScraping.AffarsVarlden
+namespace Smidas.WebScraping.WebScrapers.AffarsVarlden
 {
-    public class AffarsVarldenWebScraper : WebScraper
+    public class AffarsVarldenWebScraper : WebScraperService<AffarsVarldenWebScraper>
     {
         // Share prices page
-        private const int _nameIndex = 0;
-        private const int _priceIndex = 6;
-        private const int _turnoverIndex = 10;
+        private const int _nameCol = 0;
+        private const int _priceCol = 6;
+        private const int _turnoverCol = 10;
 
         // Stock indicators page
-        private const int _adjustedEquityPerStock = 3;
-        private const int _directYieldIndex = 6;
-        private const int _profitPerStock = 7;
-
-        private readonly IOptions<AppSettings> _config;
+        private const int _adjustedEquityPerStockCol = 3;
+        private const int _directYieldCol = 6;
+        private const int _profitPerStockCol = 7;
 
         private IDictionary<string, AppSettings.IndexSettings.IndustryData> _industries;
 
+        private string _stockIndexUrl;
+
+        private string _stockIndicatorsUrl;
+
         private StockIndex _index;
 
-        public StockIndex Index 
+        public StockIndex Index
         {
-            get 
-            {
-                return _index;
-            }
-            set 
+            get => _index;
+            set
             {
                 _index = value;
+
+                var info = _index.GetAffarsVarldenInfo();
+                _stockIndexUrl = info.StockIndexUrl;
+                _stockIndicatorsUrl = info.StockIndicatorsUrl;
+
                 _industries = _config.Value.AktieRea[_index.ToString()].Industries;
-            } 
+            }
         }
 
-        public AffarsVarldenWebScraper(
-            IWebDriverFactory webDriverFactory, 
-            ILoggerFactory loggerFactory, 
-            IOptions<AppSettings> config) 
-            : base(
-                  webDriverFactory.Create(config.Value.WebScraper.ChromeDriverDirectory), 
-                  loggerFactory.CreateLogger<AffarsVarldenWebScraper>(),
-                  config.Value)
+        public AffarsVarldenWebScraper(IWebDriverFactory webDriverFactory, ILoggerFactory loggerFactory, IOptions<AppSettings> config) : base(webDriverFactory, loggerFactory, config)
         {
-            _config = config;
         }
 
         public override IEnumerable<Stock> Scrape()
@@ -60,7 +57,7 @@ namespace Smidas.WebScraping.AffarsVarlden
             _logger.LogInformation($"Skrapar affärsvärlden.se");
             var stockData = new List<Stock>();
 
-            NavigateTo($"https://www.affarsvarlden.se/bors/kurslistor/{Index.GetDescription()}/kurs/");
+            NavigateTo(_stockIndexUrl);
 
             Wait();
 
@@ -76,7 +73,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 ScrapeSharePrices(ref stockData);
             }
 
-            NavigateTo($"https://www.affarsvarlden.se/bors/kurslistor/{Index.GetDescription()}/aktieindikatorn/");
+            NavigateTo(_stockIndicatorsUrl);
 
             Wait();
 
@@ -112,9 +109,9 @@ namespace Smidas.WebScraping.AffarsVarlden
             foreach (var row in table)
             {
                 var cells = row.FindElements(By.TagName("td"));
-                var name = cells[_nameIndex].Text;
-                var price = cells[_priceIndex].TextAsDecimal();
-                var turnover = cells[_turnoverIndex].TextAsNumber();
+                var name = cells[_nameCol].Text;
+                var price = cells[_priceCol].DecimalTextAsDecimal();
+                var turnover = cells[_turnoverCol].NumberTextAsDecimal();
 
                 _logger.LogTrace($"Namn = {name}\tKurs = {price}\tOmsättn. = {turnover}");
 
@@ -122,7 +119,7 @@ namespace Smidas.WebScraping.AffarsVarlden
                 {
                     Name = name,
                     Price = price,
-                    Turnover = turnover,
+                    Volume = turnover,
                 });
             }
         }
@@ -139,11 +136,11 @@ namespace Smidas.WebScraping.AffarsVarlden
             foreach (var row in table)
             {
                 var cells = row.FindElements(By.TagName("td"));
-                var stock = stockDictionary[cells[_nameIndex].Text];
+                var stock = stockDictionary[cells[_nameCol].Text];
 
-                var adjustedEquityPerStock = cells[_adjustedEquityPerStock].TextAsDecimal();
-                var directYield = cells[_directYieldIndex].TextAsDecimal();
-                var profitPerStock = cells[_profitPerStock].TextAsDecimal();
+                var adjustedEquityPerStock = cells[_adjustedEquityPerStockCol].DecimalTextAsDecimal();
+                var directYield = cells[_directYieldCol].DecimalTextAsDecimal();
+                var profitPerStock = cells[_profitPerStockCol].DecimalTextAsDecimal();
 
                 _logger.LogTrace($"Namn = {stock.Name}\tJEK/aktie = {adjustedEquityPerStock}\tDir.avk. = {directYield}\tVinst/aktie = {profitPerStock}");
 

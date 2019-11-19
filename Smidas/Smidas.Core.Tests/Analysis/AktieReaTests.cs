@@ -207,17 +207,17 @@ namespace Smidas.Core.Tests.Analysis
                 new Stock
                 {
                     Name = "AnyStock A",
-                    Turnover = 2,
+                    Volume = 2,
                 },
                 new Stock
                 {
                     Name = "AnyStock B",
-                    Turnover = 3,
+                    Volume = 3,
                 },
                 new Stock
                 {
                     Name = "AnyStock C",
-                    Turnover = 1,
+                    Volume = 1,
                 }
             }.AsEnumerable();
 
@@ -236,12 +236,12 @@ namespace Smidas.Core.Tests.Analysis
                 new Stock
                 {
                     Name = "AnyStock A",
-                    Turnover = 2,
+                    Volume = 2,
                 },
                 new Stock
                 {
                     Name = "OtherStock B",
-                    Turnover = 3,
+                    Volume = 3,
                 },
             }.AsEnumerable();
 
@@ -258,22 +258,22 @@ namespace Smidas.Core.Tests.Analysis
                 new Stock
                 {
                     Name = "AnyStock A",
-                    Turnover = 2,
+                    Volume = 2,
                 },
                 new Stock
                 {
                     Name = "OtherStock B",
-                    Turnover = 3,
+                    Volume = 3,
                 },
                 new Stock
                 {
                     Name = "OtherStock R",
-                    Turnover = 1,
+                    Volume = 1,
                 },
                 new Stock
                 {
                     Name = "DifferentStock",
-                    Turnover = 1,
+                    Volume = 1,
                 }
             }.AsEnumerable();
 

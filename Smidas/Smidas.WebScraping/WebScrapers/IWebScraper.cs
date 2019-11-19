@@ -1,7 +1,7 @@
 ﻿using Smidas.Core.Stocks;
 using System.Collections.Generic;
 
-namespace Smidas.WebScraping
+namespace Smidas.WebScraping.WebScrapers
 {
     public interface IWebScraper
     {

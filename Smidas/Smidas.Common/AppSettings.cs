@@ -15,6 +15,10 @@ namespace Smidas.Common
                 public string[] Companies { get; set; }
             }
 
+            public int AmountToBuy { get; set; }
+
+            public int AmountToKeep { get; set; }
+
             public string[] Blacklist { get; set; }
 
             public IDictionary<string, IndustryData> Industries { get; set; }

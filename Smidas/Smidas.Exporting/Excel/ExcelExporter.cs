@@ -52,12 +52,14 @@ namespace Smidas.Exporting.Excel
             }
 
             // Styling
-            var sellEndRow = 21 + stocks.Count(s => s.Action == Action.Sell);
+            var buyEndRow = 1 + stocks.Count(s => s.Action == Action.Buy);
+            var keepEndRow = buyEndRow + stocks.Count(s => s.Action == Action.Keep);
+            var sellEndRow = keepEndRow + stocks.Count(s => s.Action == Action.Sell);
 
             worksheet.Cells[$"A2:M{worksheet.Dimension.Rows}"].Style.Fill.PatternType = ExcelFillStyle.Solid;
-            worksheet.Cells["A2:M11"].Style.Fill.BackgroundColor.SetColor(_green); // Buy
-            worksheet.Cells["A12:M21"].Style.Fill.BackgroundColor.SetColor(_blue); // Keep
-            worksheet.Cells[$"A22:M{sellEndRow}"].Style.Fill.BackgroundColor.SetColor(_yellow); // Sell
+            worksheet.Cells[$"A2:M{buyEndRow}"].Style.Fill.BackgroundColor.SetColor(_green); // Buy
+            worksheet.Cells[$"A{buyEndRow + 1}:M{keepEndRow}"].Style.Fill.BackgroundColor.SetColor(_blue); // Keep
+            worksheet.Cells[$"A{keepEndRow + 1}:M{sellEndRow}"].Style.Fill.BackgroundColor.SetColor(_yellow); // Sell
             worksheet.Cells[$"A{sellEndRow + 1}:M{worksheet.Dimension.Rows}"].Style.Fill.BackgroundColor.SetColor(_red); // Exclude
 
             worksheet.Cells["A1:M1"].Style.Font.Bold = true;
