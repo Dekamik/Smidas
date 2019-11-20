@@ -102,36 +102,10 @@ namespace Smidas.CLI
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            
             string exportPath = null;
             IWebScraper webScraper = null;
             string currency = null;
-
-            switch (input)
-            {
-                case "1":
-                case "2":
-                    exportPath = _options.Value.ExportDirectory + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
-                    break;
-
-                case "3":
-                    exportPath = _options.Value.ExportDirectory + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
-                    break;
-
-                case "4":
-                    exportPath = _options.Value.ExportDirectory + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
-                    break;
-
-                case "5":
-                    exportPath = _options.Value.ExportDirectory + $"\\AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
-                    break;
-
-                case "6":
-                    exportPath = _options.Value.ExportDirectory + $"\\AktieREA_S&P_500_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
-                    break;
-
-                default:
-                    break;
-            }
 
             // Select action
             switch (input)
@@ -141,6 +115,7 @@ namespace Smidas.CLI
                     (webScraper as AffarsVarldenWebScraper).Index = StockIndex.OmxStockholmLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxStockholmLargeCap;
                     currency = _options.Value.AktieRea[StockIndex.OmxStockholmLargeCap.ToString()].CurrencyCode;
+                    exportPath = (_options.Value.AktieRea[StockIndex.OmxStockholmLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "2":
@@ -148,6 +123,7 @@ namespace Smidas.CLI
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxStockholmLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxStockholmLargeCap;
                     currency = _options.Value.AktieRea[StockIndex.OmxStockholmLargeCap.ToString()].CurrencyCode;
+                    exportPath = (_options.Value.AktieRea[StockIndex.OmxStockholmLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "3":
@@ -155,6 +131,7 @@ namespace Smidas.CLI
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxCopenhagenLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxCopenhagenLargeCap;
                     currency = _options.Value.AktieRea[StockIndex.OmxCopenhagenLargeCap.ToString()].CurrencyCode;
+                    exportPath = (_options.Value.AktieRea[StockIndex.OmxCopenhagenLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "4":
@@ -162,6 +139,7 @@ namespace Smidas.CLI
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxHelsinkiLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxHelsinkiLargeCap;
                     currency = _options.Value.AktieRea[StockIndex.OmxHelsinkiLargeCap.ToString()].CurrencyCode;
+                    exportPath = (_options.Value.AktieRea[StockIndex.OmxHelsinkiLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "5":
@@ -169,6 +147,7 @@ namespace Smidas.CLI
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OsloObx;
                     (_analysis as AktieRea).Index = StockIndex.OsloObx;
                     currency = _options.Value.AktieRea[StockIndex.OsloObx.ToString()].CurrencyCode;
+                    exportPath = (_options.Value.AktieRea[StockIndex.OsloObx.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "6":
@@ -176,6 +155,7 @@ namespace Smidas.CLI
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.SNP500;
                     (_analysis as AktieRea).Index = StockIndex.SNP500;
                     currency = _options.Value.AktieRea[StockIndex.SNP500.ToString()].CurrencyCode;
+                    exportPath = (_options.Value.AktieRea[StockIndex.SNP500.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_S&P_500_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 default:

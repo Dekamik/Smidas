@@ -21,7 +21,11 @@ namespace Smidas.Common
 
             public string CurrencyCode { get; set; }
 
+            public string ExportDirectory { get; set; }
+
             public IDictionary<string, IndustryData> Industries { get; set; }
+
+            public string[] Whitelist { get; set; }
         }
 
         public class WebScraperSettings
@@ -35,7 +39,7 @@ namespace Smidas.Common
 
         public IDictionary<string, IndexSettings> AktieRea { get; set; }
 
-        public string ExportDirectory { get; set; }
+        public string DefaultExportDirectory { get; set; }
 
         public WebScraperSettings WebScraper { get; set; }
     }
