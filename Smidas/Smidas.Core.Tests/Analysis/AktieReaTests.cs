@@ -372,7 +372,7 @@ namespace Smidas.Core.Tests.Analysis
             var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
                                    .AsEnumerable();
 
-            _aktieRea.DetermineActions(ref enumerable, 2, 2, 2);
+            _aktieRea.DetermineActions(ref enumerable);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
         }
@@ -395,7 +395,7 @@ namespace Smidas.Core.Tests.Analysis
             var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
                                    .AsEnumerable();
 
-            _aktieRea.DetermineActions(ref enumerable, 2, 2, 2);
+            _aktieRea.DetermineActions(ref enumerable);
 
             // Assert that 1 - 10 = Buy, 11 - 20 = Keep, 21> = Sell
             stocks.Take(10)
@@ -417,7 +417,7 @@ namespace Smidas.Core.Tests.Analysis
                 stocks.Add(new Stock
                 {
                     Name = i.ToString(),
-                    Industry = Industry.Investment,
+                    Industry = "Investment",
                     ARank = i,
                     BRank = i,
                 });
@@ -427,7 +427,7 @@ namespace Smidas.Core.Tests.Analysis
             var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
                                    .AsEnumerable();
 
-            _aktieRea.DetermineActions(ref enumerable, 2, 2, 2);
+            _aktieRea.DetermineActions(ref enumerable);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
             stocks.Take(2)
@@ -444,7 +444,7 @@ namespace Smidas.Core.Tests.Analysis
                 stocks.Add(new Stock
                 {
                     Name = i.ToString(),
-                    Industry = Industry.RealEstate,
+                    Industry = "RealEstate",
                     ARank = i,
                     BRank = i,
                 });
@@ -454,7 +454,7 @@ namespace Smidas.Core.Tests.Analysis
             var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
                                    .AsEnumerable();
 
-            _aktieRea.DetermineActions(ref enumerable, 2, 2, 2);
+            _aktieRea.DetermineActions(ref enumerable);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
             stocks.Take(2)
@@ -471,7 +471,7 @@ namespace Smidas.Core.Tests.Analysis
                 stocks.Add(new Stock
                 {
                     Name = i.ToString(),
-                    Industry = Industry.Banking,
+                    Industry = "Banking",
                     ARank = i,
                     BRank = i,
                 });
@@ -481,7 +481,7 @@ namespace Smidas.Core.Tests.Analysis
             var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
                                    .AsEnumerable();
 
-            _aktieRea.DetermineActions(ref enumerable, 2, 2, 2);
+            _aktieRea.DetermineActions(ref enumerable);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
             stocks.Take(2)

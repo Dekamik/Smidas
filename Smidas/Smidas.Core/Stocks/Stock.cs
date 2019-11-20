@@ -8,6 +8,8 @@ namespace Smidas.Core.Stocks
 {
     public class Stock
     {
+        public static readonly string OtherIndustries = "Övrig";
+
         [Excel(FullName = "Namn", Column = "A")]
         public string Name { get; set; }
 
@@ -17,7 +19,7 @@ namespace Smidas.Core.Stocks
         public string CompanyName => Regex.Replace(Name, " [A-Z]$", "");
 
         [Excel(FullName = "Bransch", Column = "B")]
-        public Industry Industry { get; set; }
+        public string Industry { get; set; } = OtherIndustries;
 
         [Excel(FullName = "Åtgärd", Column = "C")]
         public Action Action { get; set; }
@@ -68,7 +70,7 @@ namespace Smidas.Core.Stocks
             Comments = reason;
         }
 
-        public override string ToString() => $"{Name}, {CompanyName}, {Industry.GetDisplayName()}, {Action.GetDisplayName()}, {Price}, {Volume}, " +
+        public override string ToString() => $"{Name}, {CompanyName}, {Industry}, {Action.GetDisplayName()}, {Price}, {Volume}, " +
                                              $"{AdjustedEquityPerStock}, {DirectYield}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
     }
 }

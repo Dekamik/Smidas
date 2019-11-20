@@ -158,7 +158,7 @@ namespace Smidas.WebScraping.WebScrapers.AffarsVarlden
 
             foreach (var industryData in _industries)
             {
-                var industry = Enum.Parse<Industry>(industryData.Key);
+                var industry = industryData.Key;
                 foreach (var companyName in industryData.Value.Companies)
                 {
                     stockData.Where(s => s.Name.Contains(companyName))

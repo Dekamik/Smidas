@@ -161,7 +161,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             {
                 if (industryData.Value.Companies != null)
                 {
-                    var industry = Enum.Parse<Industry>(industryData.Key);
+                    var industry = industryData.Key;
                     foreach (var companyName in industryData.Value.Companies)
                     {
                         stockData.Where(s => s.Name.Contains(companyName))
