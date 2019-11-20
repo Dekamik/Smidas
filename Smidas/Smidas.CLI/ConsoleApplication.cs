@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OpenQA.Selenium.Chrome;
 using Smidas.Common;
 using Smidas.Common.StockIndices;
 using Smidas.Core.Analysis;
@@ -74,16 +72,31 @@ namespace Smidas.CLI
 
         public void Run()
         {
-            Console.WriteLine(_menu);
-            Console.Write(">> ");
-            var input = Console.ReadLine();
+            string input = null;
 
-            Console.WriteLine();
-
-            if (input == "0")
+            if (Environment.UserInteractive)
             {
-                Console.WriteLine("Avslutar");
-                Environment.Exit(0);
+                Console.WriteLine(_menu);
+                Console.Write(">> ");
+                input = Console.ReadLine();
+
+                Console.WriteLine();
+
+                if (input == "0")
+                {
+                    Console.WriteLine("Avslutar");
+                    Environment.Exit(0);
+                }
+            }
+            else
+            {
+                input = Environment.GetCommandLineArgs()[1];
+
+                if (input == "h" || input == "help")
+                {
+                    Console.WriteLine(_menu);
+                    Environment.Exit(0);
+                }
             }
 
             var stopwatch = new Stopwatch();
@@ -127,42 +140,42 @@ namespace Smidas.CLI
                     webScraper = _serviceProvider.GetService<AffarsVarldenWebScraper>();
                     (webScraper as AffarsVarldenWebScraper).Index = StockIndex.OmxStockholmLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxStockholmLargeCap;
-                    currency = StockIndex.OmxStockholmLargeCap.GetAffarsVarldenInfo().Currency;
+                    currency = _options.Value.AktieRea[StockIndex.OmxStockholmLargeCap.ToString()].CurrencyCode;
                     break;
 
                 case "2":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxStockholmLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxStockholmLargeCap;
-                    currency = StockIndex.OmxStockholmLargeCap.GetDagensIndustriInfo().Currency;
+                    currency = _options.Value.AktieRea[StockIndex.OmxStockholmLargeCap.ToString()].CurrencyCode;
                     break;
 
                 case "3":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxCopenhagenLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxCopenhagenLargeCap;
-                    currency = StockIndex.OmxCopenhagenLargeCap.GetDagensIndustriInfo().Currency;
+                    currency = _options.Value.AktieRea[StockIndex.OmxCopenhagenLargeCap.ToString()].CurrencyCode;
                     break;
 
                 case "4":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OmxHelsinkiLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OmxHelsinkiLargeCap;
-                    currency = StockIndex.OmxHelsinkiLargeCap.GetDagensIndustriInfo().Currency;
+                    currency = _options.Value.AktieRea[StockIndex.OmxHelsinkiLargeCap.ToString()].CurrencyCode;
                     break;
 
                 case "5":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OsloObx;
                     (_analysis as AktieRea).Index = StockIndex.OsloObx;
-                    currency = StockIndex.OsloObx.GetDagensIndustriInfo().Currency;
+                    currency = _options.Value.AktieRea[StockIndex.OsloObx.ToString()].CurrencyCode;
                     break;
 
                 case "6":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.SNP500;
                     (_analysis as AktieRea).Index = StockIndex.SNP500;
-                    currency = StockIndex.SNP500.GetDagensIndustriInfo().Currency;
+                    currency = _options.Value.AktieRea[StockIndex.SNP500.ToString()].CurrencyCode;
                     break;
 
                 default:

@@ -10,8 +10,6 @@ namespace Smidas.Common
             {
                 public int Cap { get; set; }
 
-                public string Enum { get; set; }
-
                 public string[] Companies { get; set; }
             }
 
@@ -20,6 +18,8 @@ namespace Smidas.Common
             public int AmountToKeep { get; set; }
 
             public string[] Blacklist { get; set; }
+
+            public string CurrencyCode { get; set; }
 
             public IDictionary<string, IndustryData> Industries { get; set; }
         }
