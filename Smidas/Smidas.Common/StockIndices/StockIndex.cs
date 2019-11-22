@@ -2,30 +2,39 @@
 {
     public enum StockIndex
     {
-        #region Northern Europe
+        #region Nordics
 
         [AffarsVarldenInfo(
             StockIndexUrl = "https://www.affarsvarlden.se/bors/kurslistor/stockholm-large/kurs/",
             StockIndicatorsUrl = "https://www.affarsvarlden.se/bors/kurslistor/stockholm-large/aktieindikatorn/")]
         [DagensIndustriInfo(Url = "https://www.di.se/bors/aktier/?Countries=SE&Lists=4&Lists=&Lists=&Lists=&Lists=&RootSectors=&RootSectors=")]
-        OmxStockholmLargeCap = 0,
+        OMXStockholmLargeCap = 0,
 
         [DagensIndustriInfo(Url = "https://www.di.se/bors/aktier/?Countries=DK&Lists=2&Lists=&Lists=&RootSectors=&RootSectors=")]
-        OmxCopenhagenLargeCap = 1,
+        OMXCopenhagenLargeCap = 1,
 
         [DagensIndustriInfo(Url = "https://www.di.se/bors/aktier/?Countries=FI&Lists=&Lists=&Lists=3&Lists=&RootSectors=&RootSectors=")]
-        OmxHelsinkiLargeCap = 2,
+        OMXHelsinkiLargeCap = 2,
 
         [DagensIndustriInfo(Url = "https://www.di.se/bors/aktier/?Countries=NO&Lists=&Lists=92580&Lists=&RootSectors=&RootSectors=")]
-        OsloObx = 3,
+        OsloOBX = 3,
+
+        #endregion
+
+        #region Europe
+
+        [NordnetInfo(Url = "https://www.nordnet.se/marknaden/aktiekurser?exchangeCountry=DE&exchangeList=de%3Adehdax")]
+        HDAX = 4,
 
         #endregion
 
         #region North America
 
-        [DagensIndustriInfo(Url = "https://www.di.se/bors/aktier/?Countries=US&Lists=&Lists=46295&RootSectors=&RootSectors=")]
-        [DagensIndustriInfo(Url = "https://www.di.se/bors/aktier/?Countries=US&Lists=&Lists=&Lists=&Lists=&Lists=71213&RootSectors=&RootSectors=")]
-        SNP500 = 4,
+        [NordnetInfo(Url = "https://www.nordnet.se/marknaden/aktiekurser?exchangeCountry=US&exchangeList=us%3Aussp100&exchangeList=us%3Ausnas100")]
+        Nasdaq100AndSnP100 = 5,
+
+        [NordnetInfo(Url = "https://www.nordnet.se/marknaden/aktiekurser?exchangeCountry=CA&exchangeList=ca%3Acatsx60")]
+        TSX60 = 6,
 
         #endregion
     }

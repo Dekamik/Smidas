@@ -7,7 +7,6 @@ using Smidas.Common.StockIndices;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.Extensions;
 using Smidas.WebScraping.WebDriver;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -64,7 +63,7 @@ namespace Smidas.WebScraping.WebScrapers.AffarsVarlden
             ScrapeSharePrices(ref stockData);
 
             // Pretty hacky, should support pagination instead
-            if (Index == StockIndex.OmxStockholmLargeCap)
+            if (Index == StockIndex.OMXStockholmLargeCap)
             {
                 ClickNextButton();
 
@@ -79,7 +78,7 @@ namespace Smidas.WebScraping.WebScrapers.AffarsVarlden
 
             ScrapeStockIndicators(ref stockData);
 
-            if (Index == StockIndex.OmxStockholmLargeCap)
+            if (Index == StockIndex.OMXStockholmLargeCap)
             {
                 ClickNextButton();
 
@@ -113,7 +112,7 @@ namespace Smidas.WebScraping.WebScrapers.AffarsVarlden
                 var price = cells[_priceCol].DecimalTextAsDecimal();
                 var turnover = cells[_turnoverCol].NumberTextAsDecimal();
 
-                _logger.LogTrace($"Namn = {name}\tKurs = {price}\tOmsättn. = {turnover}");
+                _logger.LogTrace($"Namn = {name}, Kurs = {price}, Omsättn. = {turnover}");
 
                 stockData.Add(new Stock
                 {
@@ -142,7 +141,7 @@ namespace Smidas.WebScraping.WebScrapers.AffarsVarlden
                 var directYield = cells[_directYieldCol].DecimalTextAsDecimal();
                 var profitPerStock = cells[_profitPerStockCol].DecimalTextAsDecimal();
 
-                _logger.LogTrace($"Namn = {stock.Name}\tJEK/aktie = {adjustedEquityPerStock}\tDir.avk. = {directYield}\tVinst/aktie = {profitPerStock}");
+                _logger.LogTrace($"JEK/aktie = {adjustedEquityPerStock}, Dir.avk. = {directYield}, Vinst/aktie = {profitPerStock}");
 
                 stock.AdjustedEquityPerStock = adjustedEquityPerStock;
                 stock.DirectYield = directYield;
