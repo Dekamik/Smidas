@@ -51,7 +51,7 @@ namespace Smidas.WebScraping.WebScrapers.AffarsVarlden
         {
         }
 
-        public override IEnumerable<Stock> Scrape()
+        public override IList<Stock> Scrape()
         {
             _logger.LogInformation($"Skrapar affärsvärlden.se");
             var stockData = new List<Stock>();
@@ -90,7 +90,7 @@ namespace Smidas.WebScraping.WebScrapers.AffarsVarlden
             SetIndustries(ref stockData);
 
             _logger.LogInformation($"Skrapning slutförd");
-            return stockData.AsEnumerable();
+            return stockData;
         }
 
         public void ClickNextButton()

@@ -5,7 +5,7 @@ namespace Smidas.WebScraping.WebScrapers
 {
     public interface IWebScraper
     {
-        IEnumerable<Stock> Scrape();
+        IList<Stock> Scrape();
 
         void NavigateTo(string url);
 

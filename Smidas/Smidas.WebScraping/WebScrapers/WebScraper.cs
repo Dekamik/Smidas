@@ -5,6 +5,7 @@ using Smidas.Core.Stocks;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Smidas.WebScraping.WebScrapers
 {
@@ -35,7 +36,7 @@ namespace Smidas.WebScraping.WebScrapers
             _webDriver.Dispose();
         }
 
-        public abstract IEnumerable<Stock> Scrape();
+        public abstract IList<Stock> Scrape();
 
         public void NavigateTo(string url)
         {
