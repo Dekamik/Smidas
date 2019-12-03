@@ -14,9 +14,9 @@ namespace Smidas.Core.Stocks
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets the Name without series letter if present
+        /// Gets the Name without series
         /// </summary>
-        public string CompanyName => Regex.Replace(Name, " [A-Z]$", "");
+        public string CompanyName => Regex.Replace(Name, " (Pref|[A-Z])$", "");
 
         [Excel(FullName = "Bransch", Column = "B")]
         public string Industry { get; set; } = OtherIndustries;
