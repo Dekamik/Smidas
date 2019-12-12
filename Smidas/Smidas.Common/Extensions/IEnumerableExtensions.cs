@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Smidas.Common.Extensions
 {
-    public static class IEnumerable
+    public static class IEnumerableExtensions
     {
         public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
         {

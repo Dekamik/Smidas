@@ -22,8 +22,6 @@ namespace Smidas.Core.Analysis
 
         private IDictionary<string, int> _industryCap;
 
-        private IEnumerable<string> _blacklist;
-
         private StockIndex _index;
 
         public StockIndex Index
@@ -42,8 +40,6 @@ namespace Smidas.Core.Analysis
                 {
                     _industryCap.Add(industry.Key, industry.Value.Cap);
                 }
-
-                _blacklist = _options.Value.AktieRea[_index.ToString()].Blacklist;
             }
         }
 
@@ -86,19 +82,6 @@ namespace Smidas.Core.Analysis
 
             foreach (var stock in stocks)
             {
-                // Blacklisted stocks
-                if (_blacklist != null)
-                {
-                    foreach (var name in _blacklist)
-                    {
-                        if (stock.Name.Contains(name))
-                        {
-                            _logger.LogTrace($"Sållade {stock.Name} - Svartlistad");
-                            //stock.Exclude("Svartlistad");
-                        }
-                    }
-                }
-                
                 if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
                     _logger.LogTrace($"Sållade {stock.Name} - Negativ vinst");
@@ -106,8 +89,8 @@ namespace Smidas.Core.Analysis
                 }
                 else if (stock.DirectYield == 0) // Stocks with zero direct yield
                 {
-                    _logger.LogTrace($"Sållade {stock.Name} - Ingen direktavkastning");
-                    stock.Exclude("Ingen direktavkastning");
+                    _logger.LogTrace($"Sållade {stock.Name} - Noll direktavkastning");
+                    stock.Exclude("Noll direktavkastning");
                 }
                 else if (Regex.IsMatch(stock.Name, ".* Pref$")) // Preferential stocks
                 {

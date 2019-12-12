@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Smidas.Common.Extensions
 {
-    public static class Enums
+    public static class EnumExtensions
     {
         public static string GetDisplayName(this Enum @enum) => GetAttribute<DisplayAttribute>(@enum)?.Name ?? @enum.ToString();
 

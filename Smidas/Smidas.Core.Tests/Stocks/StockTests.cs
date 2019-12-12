@@ -10,7 +10,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void CompanyName_NameWithSeries_ReturnsNameWithoutSeries()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock A",
             };
@@ -22,7 +22,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void CompanyName_NameWithoutSeries_ReturnsName()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock",
             };
@@ -34,7 +34,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void CompanyName_NameWithAb_ReturnsName()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock AB",
             };
@@ -46,7 +46,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void CompanyName_NameWithAbAndSeries_ReturnsNameWithAbAndWithoutSeries()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock AB A",
             };
@@ -57,7 +57,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void Ep_StockPriceTwoProfitPerStockTen_EpEqualsFive()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock",
                 Price = 2m,
@@ -70,7 +70,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void Ep_StockPriceThreeProfitPerStockTwelve_EpEqualsFour()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock",
                 Price = 3m,
@@ -83,7 +83,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void Ep_StockPriceZeroProfitPerStockOne_EpEqualsZero()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock",
                 Price = 0m,
@@ -96,7 +96,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void AbRank_ARankOneBRankOne_AbRankTwo()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock",
                 ARank = 1,
@@ -109,7 +109,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void AbRank_ARankOneBRankTwo_AbRankThree()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock",
                 ARank = 1,
@@ -122,7 +122,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void AbRank_ARankOneBRankOneActionIsExclude_AbRankTenThousandAndTwo()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock",
                 Action = Action.Exclude,
@@ -136,7 +136,7 @@ namespace Smidas.Core.Tests.Stocks
         [Fact]
         public void Exclude_AnyStock_StockIsExcludedWithComments()
         {
-            var stock = new Stock
+            Stock stock = new Stock
             {
                 Name = "AnyStock"
             };

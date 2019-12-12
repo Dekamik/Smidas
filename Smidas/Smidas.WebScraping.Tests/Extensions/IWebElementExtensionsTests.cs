@@ -20,7 +20,7 @@ namespace Smidas.WebScraping.Tests.Extensions
         {
             A.CallTo(() => _webElement.Text).Returns("1,00");
 
-            var number = _webElement.DecimalTextAsDecimal();
+            decimal number = _webElement.DecimalTextAsDecimal();
 
             number.Should().Be(1m);
         }
@@ -30,7 +30,7 @@ namespace Smidas.WebScraping.Tests.Extensions
         {
             A.CallTo(() => _webElement.Text).Returns(null);
 
-            var number = _webElement.DecimalTextAsDecimal();
+            decimal number = _webElement.DecimalTextAsDecimal();
 
             number.Should().Be(0m);
         }
@@ -40,7 +40,7 @@ namespace Smidas.WebScraping.Tests.Extensions
         {
             A.CallTo(() => _webElement.Text).Returns(string.Empty);
 
-            var number = _webElement.DecimalTextAsDecimal();
+            decimal number = _webElement.DecimalTextAsDecimal();
 
             number.Should().Be(0m);
         }
@@ -50,7 +50,7 @@ namespace Smidas.WebScraping.Tests.Extensions
         {
             A.CallTo(() => _webElement.Text).Returns("1K");
 
-            var number = _webElement.NumberTextAsDecimal();
+            decimal number = _webElement.NumberTextAsDecimal();
 
             number.Should().Be(1000m);
         }
@@ -60,7 +60,7 @@ namespace Smidas.WebScraping.Tests.Extensions
         {
             A.CallTo(() => _webElement.Text).Returns("1");
 
-            var number = _webElement.NumberTextAsDecimal();
+            decimal number = _webElement.NumberTextAsDecimal();
 
             number.Should().Be(1m);
         }
@@ -70,7 +70,7 @@ namespace Smidas.WebScraping.Tests.Extensions
         {
             A.CallTo(() => _webElement.Text).Returns("1,10");
 
-            var number = _webElement.NumberTextAsDecimal();
+            decimal number = _webElement.NumberTextAsDecimal();
 
             number.Should().Be(1.1m);
         }
@@ -80,7 +80,7 @@ namespace Smidas.WebScraping.Tests.Extensions
         {
             A.CallTo(() => _webElement.Text).Returns(null);
 
-            var number = _webElement.NumberTextAsDecimal();
+            decimal number = _webElement.NumberTextAsDecimal();
 
             number.Should().Be(0m);
         }
@@ -90,7 +90,7 @@ namespace Smidas.WebScraping.Tests.Extensions
         {
             A.CallTo(() => _webElement.Text).Returns(string.Empty);
 
-            var number = _webElement.NumberTextAsDecimal();
+            decimal number = _webElement.NumberTextAsDecimal();
 
             number.Should().Be(0m);
         }

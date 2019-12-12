@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using static FluentAssertions.FluentActions;
 using Smidas.Core.Analysis;
 using Smidas.Core.Stocks;
 using System.Collections.Generic;
@@ -19,76 +18,49 @@ namespace Smidas.Core.Tests.Analysis
 
         public AktieReaTests()
         {
-            var loggerFactory = A.Fake<ILoggerFactory>();
-            var config = A.Fake<IOptions<AppSettings>>();
+            ILoggerFactory loggerFactory = A.Fake<ILoggerFactory>();
+            IOptions<AppSettings> config = A.Fake<IOptions<AppSettings>>();
+
+            A.CallTo(() => config.Value).Returns(new AppSettings
+            {
+                AktieRea = new Dictionary<string, AppSettings.IndexSettings>
+                {
+                    {
+                        "TestIndex",
+                        new AppSettings.IndexSettings
+                        {
+                            AmountToBuy = 10,
+                            AmountToKeep = 10,
+                            CurrencyCode = "ANY",
+                            Industries = new Dictionary<string, AppSettings.IndexSettings.IndustryData>
+                            {
+                                {
+                                    "AnyIndustry",
+                                    new AppSettings.IndexSettings.IndustryData
+                                    {
+                                        Cap = 2,
+                                        Companies = new []
+                                        {
+                                            "AnyIndustryComp1",
+                                            "AnyIndustryComp2",
+                                            "AnyIndustryComp3",
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
 
             _aktieRea = new AktieRea(loggerFactory, config);
-        }
-
-        [Fact]
-        public void ExcludeDisqualifiedStocks_Blacklisted_StockIsExcluded()
-        {
-            var stocks = new List<Stock>
-            {
-                new Stock
-                {
-                    Name = "AnyBlacklistedStock",
-                    ProfitPerStock = 1m,
-                    DirectYield = 1m,
-                }
-            }.AsEnumerable();
-            var blacklist = new[] { "AnyBlacklistedStock" };
-
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
-
-            stocks.Single().Action.Should().Be(Action.Exclude);
-            stocks.Single().Comments.Should().Be("Blacklisted.");
-        }
-
-        [Fact]
-        public void ExcludeDisqualifiedStocks_BlacklistedWithSeries_StockIsExcluded()
-        {
-            var stocks = new List<Stock>
-            {
-                new Stock
-                {
-                    Name = "AnyBlacklistedStock A",
-                    ProfitPerStock = 1m,
-                    DirectYield = 1m,
-                }
-            }.AsEnumerable();
-            var blacklist = new[] { "AnyBlacklistedStock" };
-
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
-
-            stocks.Single().Action.Should().Be(Action.Exclude);
-            stocks.Single().Comments.Should().Be("Blacklisted.");
-        }
-
-        [Fact]
-        public void ExcludeDisqualifiedStocks_NotBlacklisted_StockIsntExcluded()
-        {
-            var stocks = new List<Stock>
-            {
-                new Stock
-                {
-                    Name = "AnyStock",
-                    ProfitPerStock = 1m,
-                    DirectYield = 1m,
-                }
-            }.AsEnumerable();
-            var blacklist = new[] { "AnyBlacklistedStock" };
-
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
-
-            stocks.Single().Action.Should().NotBe(Action.Exclude);
-            stocks.Single().Comments.Should().NotBe("Blacklisted.");
+            _aktieRea.Index = Common.StockIndices.StockIndex.TestIndex;
         }
 
         [Fact]
         public void ExcludeDisqualifiedStocks_NegativeProfitPerStock_StockIsExcluded()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -101,13 +73,13 @@ namespace Smidas.Core.Tests.Analysis
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
-            stocks.Single().Comments.Should().Be("Negative profit per stock.");
+            stocks.Single().Comments.Should().Be("Negativ vinst");
         }
 
         [Fact]
         public void ExcludeDisqualifiedStocks_PositiveProfitPerStock_StockIsntExcluded()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -120,13 +92,13 @@ namespace Smidas.Core.Tests.Analysis
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
-            stocks.Single().Comments.Should().NotBe("Negative profit per stock.");
+            stocks.Single().Comments.Should().NotBe("Negativ vinst");
         }
 
         [Fact]
         public void ExcludeDisqualifiedStocks_ZeroDirectYield_StockIsExcluded()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -139,13 +111,13 @@ namespace Smidas.Core.Tests.Analysis
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
-            stocks.Single().Comments.Should().Be("Zero direct yield.");
+            stocks.Single().Comments.Should().Be("Noll direktavkastning");
         }
 
         [Fact]
         public void ExcludeDisqualifiedStocks_PositiveDirectYield_StockIsntExcluded()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -158,13 +130,13 @@ namespace Smidas.Core.Tests.Analysis
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
-            stocks.Single().Comments.Should().NotBe("Zero direct yield.");
+            stocks.Single().Comments.Should().NotBe("Noll direktavkastning");
         }
 
         [Fact]
         public void ExcludeDisqualifiedStocks_PreferredStock_StockIsExcluded()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -177,13 +149,13 @@ namespace Smidas.Core.Tests.Analysis
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
-            stocks.Single().Comments.Should().Be("Preferred stock.");
+            stocks.Single().Comments.Should().Be("Preferensaktie");
         }
 
         [Fact]
         public void ExcludeDisqualifiedStocks_NonPreferredStock_StockIsntExcluded()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -196,13 +168,13 @@ namespace Smidas.Core.Tests.Analysis
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
-            stocks.Single().Comments.Should().NotBe("Preferred stock.");
+            stocks.Single().Comments.Should().NotBe("Preferensaktie");
         }
 
         [Fact]
         public void ExcludeDoubles_CompanyWithDoubles_AllStocksExcludedExceptStockWithHighestTurnover()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -231,7 +203,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDoubles_NoDoubles_NoStocksExcluded()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -253,7 +225,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDoubles_MixedCollection_OnlyDoublesExcluded()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -287,7 +259,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void CalculateARank_AnyStockCollection_StocksRankedByEp()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -324,7 +296,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void CalculateBRank_AnyStockCollection_StocksRankedByAdjustedEquityPerStock()
         {
-            var stocks = new List<Stock>
+            IEnumerable<Stock> stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -357,7 +329,8 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void DetermineActions_AllIncludedStocks_OrderedByAbRank()
         {
-            var stocks = new List<Stock>();
+            List<Stock> stocks = new List<Stock>();
+
             for (int i = 1; i <= 30; i++)
             {
                 stocks.Add(new Stock
@@ -380,7 +353,8 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void DetermineActions_AllIncludedStocks_RankingHasProperActions()
         {
-            var stocks = new List<Stock>();
+            List<Stock> stocks = new List<Stock>();
+
             for (int i = 1; i <= 30; i++)
             {
                 stocks.Add(new Stock
@@ -411,67 +385,14 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void DetermineActions_ThreeInvestmentStocksTwoAllowed_TheTwoBestAreMarkedBuyTheThirdIsExcluded()
         {
-            var stocks = new List<Stock>();
-            for (int i = 1; i <= 30; i++)
+            List<Stock> stocks = new List<Stock>();
+
+            for (int i = 1; i <= 3; i++)
             {
                 stocks.Add(new Stock
                 {
-                    Name = i.ToString(),
-                    Industry = "Investment",
-                    ARank = i,
-                    BRank = i,
-                });
-            }
-
-            // Shuffle list
-            var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
-                                   .AsEnumerable();
-
-            _aktieRea.DetermineActions(ref enumerable);
-
-            stocks.Should().BeInAscendingOrder(s => s.AbRank);
-            stocks.Take(2)
-                  .ForEach(s => s.Action.Should().Be(Action.Buy));
-            stocks.Last().Action.Should().Be(Action.Exclude);
-        }
-
-        [Fact]
-        public void DetermineActions_ThreeRealEstateStocksTwoAllowed_TheTwoBestAreMarkedBuyTheThirdIsExcluded()
-        {
-            var stocks = new List<Stock>();
-            for (int i = 1; i <= 30; i++)
-            {
-                stocks.Add(new Stock
-                {
-                    Name = i.ToString(),
-                    Industry = "RealEstate",
-                    ARank = i,
-                    BRank = i,
-                });
-            }
-
-            // Shuffle list
-            var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
-                                   .AsEnumerable();
-
-            _aktieRea.DetermineActions(ref enumerable);
-
-            stocks.Should().BeInAscendingOrder(s => s.AbRank);
-            stocks.Take(2)
-                  .ForEach(s => s.Action.Should().Be(Action.Buy));
-            stocks.Last().Action.Should().Be(Action.Exclude);
-        }
-
-        [Fact]
-        public void DetermineActions_ThreeBankingStocksTwoAllowed_TheTwoBestAreMarkedBuyTheThirdIsExcluded()
-        {
-            var stocks = new List<Stock>();
-            for (int i = 1; i <= 30; i++)
-            {
-                stocks.Add(new Stock
-                {
-                    Name = i.ToString(),
-                    Industry = "Banking",
+                    Name = $"AnyIndustryComp{i}",
+                    Industry = "AnyIndustry",
                     ARank = i,
                     BRank = i,
                 });

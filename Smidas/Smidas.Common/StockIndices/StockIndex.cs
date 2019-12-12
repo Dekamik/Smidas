@@ -2,6 +2,8 @@
 {
     public enum StockIndex
     {
+        TestIndex = -1,
+
         #region Nordics
 
         [AffarsVarldenInfo(
@@ -23,17 +25,14 @@
 
         #region Europe
 
-        [NordnetInfo(Url = "https://www.nordnet.se/marknaden/aktiekurser?exchangeCountry=DE&exchangeList=de%3Adehdax")]
         HDAX = 4,
 
         #endregion
 
         #region North America
 
-        [NordnetInfo(Url = "https://www.nordnet.se/marknaden/aktiekurser?exchangeCountry=US&exchangeList=us%3Aussp100&exchangeList=us%3Ausnas100")]
         Nasdaq100AndSnP100 = 5,
 
-        [NordnetInfo(Url = "https://www.nordnet.se/marknaden/aktiekurser?exchangeCountry=CA&exchangeList=ca%3Acatsx60")]
         TSX60 = 6,
 
         #endregion
