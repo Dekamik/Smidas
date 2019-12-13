@@ -4,10 +4,12 @@ using Microsoft.Extensions.Options;
 using Smidas.Common;
 using Smidas.Common.StockIndices;
 using Smidas.Core.Analysis;
+using Smidas.Core.Stocks;
 using Smidas.Exporting.Excel;
 using Smidas.WebScraping.WebScrapers;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -61,7 +63,7 @@ namespace Smidas.CLI
 
         public void Run()
         {
-            string input = null;
+            string input;
 
             if (Environment.UserInteractive)
             {
@@ -88,7 +90,7 @@ namespace Smidas.CLI
                 }
             }
 
-            var stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             
             IWebScraper webScraper = null;
@@ -143,8 +145,8 @@ namespace Smidas.CLI
             }
 
             // Run
-            var stockData = webScraper?.Scrape();
-            var results = _analysis?.Analyze(stockData);
+            IList<Stock> stockData = webScraper?.Scrape();
+            IEnumerable<Stock> results = _analysis?.Analyze(stockData);
 
             if (!string.IsNullOrEmpty(exportPath))
             {
