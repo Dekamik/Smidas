@@ -5,8 +5,6 @@ using Microsoft.Extensions.Logging.Console;
 using Smidas.Common;
 using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
-using Smidas.WebScraping.WebDriver;
-using Smidas.WebScraping.WebScrapers.AffarsVarlden;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System.IO;
 
@@ -43,8 +41,6 @@ namespace Smidas.CLI
             services.Configure<AppSettings>(config.GetSection("App"));
             services.Configure<ConsoleLoggerOptions>(config.GetSection("Logging"));
 
-            services.AddScoped<IWebDriverFactory, WebDriverFactory>();
-            services.AddScoped<AffarsVarldenWebScraper>();
             services.AddScoped<DagensIndustriWebScraper>();
             services.AddScoped<AktieRea>();
             services.AddScoped<ExcelExporter>();

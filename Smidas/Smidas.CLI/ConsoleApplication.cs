@@ -6,7 +6,6 @@ using Smidas.Common.StockIndices;
 using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
 using Smidas.WebScraping.WebScrapers;
-using Smidas.WebScraping.WebScrapers.AffarsVarlden;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System;
 using System.Diagnostics;
@@ -20,21 +19,16 @@ namespace Smidas.CLI
    Smidas
 
 -----------------------------------------------------
-   AktieREA-analyser (Affärsvärlden)
-
-1: OMX Stockholm Large Cap
-
------------------------------------------------------
    AktieREA-analyser (Dagens Industri)
 
    Nordeuropa
-2: OMX Stockholm Large Cap
-3: OMX Köpenhamn Large Cap
-4: OMX Helsingfors Large Cap
-5: Oslo OBX
+1: OMX Stockholm Large Cap
+2: OMX Köpenhamn Large Cap
+3: OMX Helsingfors Large Cap
+4: Oslo OBX
 
    Nordamerika
-6: S&P 500 (Nasdaq & NYSE) 
+5: S&P 500 (Nasdaq & NYSE)
 
 -----------------------------------------------------
    Övriga åtgärder
@@ -105,14 +99,6 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1":
-                    webScraper = _serviceProvider.GetService<AffarsVarldenWebScraper>();
-                    (webScraper as AffarsVarldenWebScraper).Index = StockIndex.OMXStockholmLargeCap;
-                    (_analysis as AktieRea).Index = StockIndex.OMXStockholmLargeCap;
-                    currency = _options.Value.AktieRea[StockIndex.OMXStockholmLargeCap.ToString()].CurrencyCode;
-                    exportPath = (_options.Value.AktieRea[StockIndex.OMXStockholmLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
-                    break;
-
-                case "2":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OMXStockholmLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OMXStockholmLargeCap;
@@ -120,7 +106,7 @@ namespace Smidas.CLI
                     exportPath = (_options.Value.AktieRea[StockIndex.OMXStockholmLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
-                case "3":
+                case "2":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OMXCopenhagenLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OMXCopenhagenLargeCap;
@@ -128,7 +114,7 @@ namespace Smidas.CLI
                     exportPath = (_options.Value.AktieRea[StockIndex.OMXCopenhagenLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
-                case "4":
+                case "3":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OMXHelsinkiLargeCap;
                     (_analysis as AktieRea).Index = StockIndex.OMXHelsinkiLargeCap;
@@ -136,7 +122,7 @@ namespace Smidas.CLI
                     exportPath = (_options.Value.AktieRea[StockIndex.OMXHelsinkiLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
-                case "5":
+                case "4":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.OsloOBX;
                     (_analysis as AktieRea).Index = StockIndex.OsloOBX;
@@ -144,7 +130,7 @@ namespace Smidas.CLI
                     exportPath = (_options.Value.AktieRea[StockIndex.OsloOBX.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
-                case "6":
+                case "5":
                     webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
                     (webScraper as DagensIndustriWebScraper).Index = StockIndex.Nasdaq100AndSnP100;
                     (_analysis as AktieRea).Index = StockIndex.Nasdaq100AndSnP100;

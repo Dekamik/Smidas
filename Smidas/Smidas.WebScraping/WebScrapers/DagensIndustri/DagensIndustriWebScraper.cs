@@ -1,107 +1,99 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
+using System.Text;
 using System.Threading.Tasks;
+using System.Xml.XPath;
+using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OpenQA.Selenium;
 using Smidas.Common;
 using Smidas.Common.Extensions;
 using Smidas.Common.StockIndices;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.Extensions;
-using Smidas.WebScraping.WebDriver;
 
 namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 {
-    public class DagensIndustriWebScraper : WebScraperService<DagensIndustriWebScraper>
+    public class DagensIndustriWebScraper : IWebScraper
     {
-        private IDictionary<string, AppSettings.IndexSettings.IndustryData> _industries;
+        private readonly ILogger logger;
 
-        private string _url;
+        private readonly IOptions<AppSettings> options;
 
-        private StockIndex _index;
+        private IDictionary<string, AppSettings.IndexSettings.IndustryData> industries;
+
+        private string url;
+
+        private StockIndex index;
+
+        private HtmlDocument html;
 
         public StockIndex Index
         {
-            get => _index;
+            get => index;
             set
             {
-                _index = value;
+                index = value;
 
-                _url = _index.GetDagensIndustriInfo().Url;
-                _industries = _config.Value.AktieRea[_index.ToString()].Industries;
+                url = index.GetDagensIndustriInfo().Url;
+                industries = options.Value.AktieRea[index.ToString()].Industries;
             }
         }
 
-        public DagensIndustriWebScraper(IWebDriverFactory webDriverFactory, ILoggerFactory loggerFactory, IOptions<AppSettings> config) : base(webDriverFactory, loggerFactory, config)
+        public DagensIndustriWebScraper(ILoggerFactory loggerFactory, IOptions<AppSettings> options)
         {
+            logger = loggerFactory.CreateLogger<DagensIndustriWebScraper>();
+            this.options = options;
         }
 
-        public override IList<Stock> Scrape()
+        public IList<Stock> Scrape()
         {
-            _logger.LogInformation($"Skrapar di.se");
+            logger.LogInformation($"Skrapar {url}");
 
-            NavigateTo(_url);
+            var htmlTask = new HtmlWeb().LoadFromWebAsync(url);
+            htmlTask.Wait();
+            html = htmlTask.Result;
 
-            // Get stock prices
-            _logger.LogInformation("Hämtar kurser");
+            logger.LogDebug("Skrapar sidan...");
 
             IList<string> nameElements = null;
             IList<string> priceElements = null;
             IList<string> volumeElements = null;
-
-            Parallel.Invoke(
-                () => nameElements = ScrapeNames(),
-                () => priceElements = ScrapePrices(),
-                () => volumeElements = ScrapeVolumes());
-
-            _logger.LogInformation("Kurser hämtade");
-
-            Wait();
-
-            // Get KPIs
-            ClickKpiButton();
-
-            _logger.LogInformation("Hämtar nyckeltal");
-
             IList<string> profitPerStockElements = null;
-            IList<string> adjustedEquityPerStockElement = null;
+            IList<string> adjustedEquityPerStockElements = null;
             IList<string> directYieldElements = null;
 
             Parallel.Invoke(
-                () => profitPerStockElements = ScrapeProfitPerStock(),
-                () => adjustedEquityPerStockElement = ScrapeAdjustedEquityPerStock(),
-                () => directYieldElements = ScrapeDirectYield());
+                () => nameElements = ScrapeNodes("Namn", "//div[contains(@class, 'js_Kurser')]/descendant::a[contains(@class, 'js_realtime__instrument-link')]"),
+                () => priceElements = ScrapeNodes("Priser", "//tr[contains(@class, 'js_real-time-Kurser')]/descendant::span[contains(@class, 'di_stocks-table__last-price')]"),
+                () => volumeElements = ScrapeNodes("Volymer", "//td[contains(@class, 'js_real-time__quantity')]"),
+                () => profitPerStockElements = ScrapeNodes("Vinst/aktie", "//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[4]"),
+                () => adjustedEquityPerStockElements = ScrapeNodes("Justerat eget kapital/aktie", "//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[5]"),
+                () => directYieldElements = ScrapeNodes("Direktavkastning", "//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[7]"));
 
-            _logger.LogInformation("Nyckeltal hämtade");
+            logger.LogDebug("Sida skrapad");
 
-            _logger.LogInformation("Verifierar hämtade element");
+            logger.LogDebug("Verifierar hämtade element");
 
             // All lists must hold the same amount of elements
-            if (new[] { nameElements, priceElements, volumeElements, profitPerStockElements, adjustedEquityPerStockElement, directYieldElements }
+            if (new[] { nameElements, priceElements, volumeElements, profitPerStockElements, adjustedEquityPerStockElements, directYieldElements }
                 .All(l => l.Count != nameElements.Count))
             {
-                _logger.LogError($"Elementlistorna har ej samma längd\n" +
-                    $"Namn: {nameElements.Count} st, Priser: {priceElements.Count} st, Volymer: {volumeElements.Count} st, Vinst/aktie: {profitPerStockElements.Count} st, JEK/aktie: {adjustedEquityPerStockElement.Count}, Dir.avk: {directYieldElements.Count} st");
+                logger.LogError($"Elementlistorna har ej samma längd\n" +
+                    $"Namn: {nameElements.Count} st, Priser: {priceElements.Count} st, Volymer: {volumeElements.Count} st, Vinst/aktie: {profitPerStockElements.Count} st, JEK/aktie: {adjustedEquityPerStockElements.Count}, Dir.avk: {directYieldElements.Count} st");
 
                 throw new ValidationException($"Elementlistorna har ej samma längd\n" +
-                    $"Namn: {nameElements.Count} st, Priser: {priceElements.Count} st, Volymer: {volumeElements.Count} st, Vinst/aktie: {profitPerStockElements.Count} st, JEK/aktie: {adjustedEquityPerStockElement.Count}, Dir.avk: {directYieldElements.Count} st");
+                    $"Namn: {nameElements.Count} st, Priser: {priceElements.Count} st, Volymer: {volumeElements.Count} st, Vinst/aktie: {profitPerStockElements.Count} st, JEK/aktie: {adjustedEquityPerStockElements.Count}, Dir.avk: {directYieldElements.Count} st");
             }
 
-            _logger.LogInformation("Element - OK");
+            logger.LogInformation("Element - OK");
 
-            _logger.LogDebug("Stänger ned Selenium");
+            logger.LogDebug("Tolkar och organiserar data");
 
-            // Close web driver to free up resources
-            _webDriver.Close();
-
-            _logger.LogInformation("Tolkar och organiserar data");
-
-            // Parse all values from the raw strings
-            _logger.LogDebug("Tar ut alla värden");
-
-            List<string> names = null;
+            List<string> names = nameElements.ToList();
             List<decimal> prices = null;
             List<decimal> volumes = null;
             List<decimal> profitPerStock = null;
@@ -109,17 +101,13 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             List<decimal> directYield = null;
 
             Parallel.Invoke(
-                () => names = ParseNames(nameElements).ToList(),
-                () => prices = ParsePrices(priceElements).ToList(),
-                () => volumes = ParseVolumes(volumeElements).ToList(),
-                () => profitPerStock = ParseProfitPerStock(profitPerStockElements).ToList(),
-                () => adjustedEquityPerStock = ParseAdjustedEquityPerStock(adjustedEquityPerStockElement).ToList(),
-                () => directYield = ParseDirectYield(directYieldElements).ToList());
+                () => prices = Parse("Priser", priceElements).ToList(),
+                () => volumes = Parse("Volymer", volumeElements).ToList(),
+                () => profitPerStock = Parse("Vinst/aktie", profitPerStockElements).ToList(),
+                () => adjustedEquityPerStock = Parse("Justerad eget kapital/aktie", adjustedEquityPerStockElements).ToList(),
+                () => directYield = Parse("Direktavkastning", directYieldElements, hasSymbol: true).ToList());
 
-            _logger.LogDebug("Alla värden uttagna");
-
-            // Build all stock models from the scraped data
-            _logger.LogDebug("Skapar modeller");
+            logger.LogDebug("Skapar modeller");
 
             var stocks = new List<Stock>();
 
@@ -137,181 +125,49 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 stocks.Add(stock);
             }
 
-            _logger.LogDebug("Modeller skapade");
-
             SetIndustries(ref stocks);
 
-            _logger.LogInformation($"Skrapning slutförd");
+            logger.LogInformation("Skrapning slutförd");
             return stocks;
         }
 
-        public void ClickKpiButton()
+        private IList<string> ScrapeNodes(string itemName, string xPath)
         {
-            _logger.LogInformation("Klickar in på nyckeltalsfliken");
-            _webDriver.ExecuteScript("arguments[0].click();", _webDriver.FindElement(By.XPath("//a[text()='Nyckeltal']")));
-        }
+            logger.LogDebug($"Skrapar {itemName.ToLower()}");
 
-        private IList<string> ScrapeNames()
-        {
-            _logger.LogDebug("Skrapar namn");
+            var elements = html.DocumentNode.SelectNodes(xPath)
+                                            .Select(n => WebUtility.HtmlDecode(n.InnerText))
+                                            .ToList();
 
-            var elements = _webDriver.FindElements(By.XPath("//div[contains(@class, 'js_Kurser')]/descendant::a[contains(@class, 'js_realtime__instrument-link')]"))
-                                     .Select(e => e.Text)
-                                     .ToList();
-
-            _logger.LogDebug("Namn skrapade");
+            logger.LogDebug($"{itemName} skrapade");
 
             return elements;
         }
 
-        private IList<string> ScrapePrices()
+        public IEnumerable<decimal> Parse(string itemName, IEnumerable<string> cells, bool hasSymbol = false)
         {
-            _logger.LogDebug("Skrapar priser");
-
-            var elements = _webDriver.FindElements(By.XPath("//tr[contains(@class, 'js_real-time-Kurser')]/descendant::span[contains(@class, 'di_stocks-table__last-price')]"))
-                                     .Select(e => e.Text)
-                                     .ToList();
-
-            _logger.LogDebug("Priser skrapade");
-
-            return elements;
-        }
-
-        private IList<string> ScrapeVolumes()
-        {
-            _logger.LogDebug("Skrapar volymer");
-
-            var elements = _webDriver.FindElements(By.XPath("//td[contains(@class, 'js_real-time__quantity')]"))
-                                     .Select(e => e.Text)
-                                     .ToList();
-
-            _logger.LogDebug("Volymer skrapade");
-
-            return elements;
-        }
-
-        private IList<string> ScrapeProfitPerStock()
-        {
-            _logger.LogDebug("Skrapar vinst/aktie");
-
-            var elements = _webDriver.FindElements(By.XPath("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[4]"))
-                                     .Select(e => e.Text)
-                                     .ToList();
-
-            _logger.LogDebug("Vinst/aktie skrapad");
-
-            return elements;
-        }
-
-        private IList<string> ScrapeAdjustedEquityPerStock()
-        {
-            _logger.LogDebug("Skrapar JEK/aktie");
-
-            var elements = _webDriver.FindElements(By.XPath("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[5]"))
-                                     .Select(e => e.Text)
-                                     .ToList();
-
-            _logger.LogDebug("JEK/aktie skrapad");
-
-            return elements;
-        }
-
-        private IList<string> ScrapeDirectYield()
-        {
-            _logger.LogDebug("Skrapar direktavkastningar");
-
-            var elements = _webDriver.FindElements(By.XPath("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[7]"))
-                                     .Select(e => e.Text)
-                                     .ToList();
-
-            _logger.LogDebug("Direktavkastningar skrapade");
-
-            return elements;
-        }
-
-        public IEnumerable<string> ParseNames(IEnumerable<string> cells)
-        {
-            _logger.LogDebug("Tar ut namn");
+            logger.LogDebug($"Tar ut {itemName.ToLower()}");
 
             foreach (var cell in cells)
             {
-                yield return cell;
-                _logger.LogTrace($"Namn = {cell}");
+                if (hasSymbol)
+                {
+                    yield return cell.ParseDecimalWithSymbol();
+                }
+                else
+                {
+                    yield return cell.ParseDecimal();
+                }
             }
 
-            _logger.LogDebug("Namn uttagna");
-        }
-
-        public IEnumerable<decimal> ParsePrices(IEnumerable<string> cells)
-        {
-            _logger.LogDebug("Tar ut priser");
-
-            foreach (var cell in cells)
-            {
-                yield return cell.ParseDecimal();
-                _logger.LogTrace($"Pris = {cell}");
-            }
-
-            _logger.LogDebug("Priser uttagna");
-        }
-
-        public IEnumerable<decimal> ParseVolumes(IEnumerable<string> cells)
-        {
-            _logger.LogDebug("Tar ut volymer");
-
-            foreach (var cell in cells)
-            {
-                yield return cell.ParseDecimal();
-                _logger.LogTrace($"Volym = {cell}");
-            }
-
-            _logger.LogDebug("Volymer uttagna");
-        }
-
-        private IEnumerable<decimal> ParseProfitPerStock(IEnumerable<string> cells)
-        {
-            _logger.LogDebug("Tar ut Vinst/aktie");
-
-            foreach (var cell in cells)
-            {
-                yield return cell.ParseDecimal();
-                _logger.LogTrace($"Vinst/aktie = {cell}");
-            }
-
-            _logger.LogDebug("Vinst/aktie uttagen");
-        }
-
-        private IEnumerable<decimal> ParseAdjustedEquityPerStock(IEnumerable<string> cells)
-        {
-            _logger.LogDebug("Tar ut JEK/aktie");
-
-            foreach (var cell in cells)
-            {
-                yield return cell.ParseDecimal();
-                _logger.LogTrace($"JEK/aktie = {cell}");
-            }
-
-            _logger.LogDebug("JEK/aktie uttagen");
-        }
-
-        private IEnumerable<decimal> ParseDirectYield(IEnumerable<string> cells)
-        {
-            _logger.LogDebug("Tar ut direktavkastning");
-
-            foreach (var cell in cells)
-            {
-                yield return cell.ParseDecimalWithSymbol();
-                _logger.LogTrace($"JEK/aktie = {cell}");
-            }
-
-            _logger.LogDebug("Direktavkastningar uttagna");
+            logger.LogDebug($"{itemName} uttagna");
         }
 
         public void SetIndustries(ref List<Stock> stockData)
         {
-            _logger.LogDebug($"Tillsätter branscher");
+            logger.LogDebug($"Tillsätter branscher");
 
-            foreach (var industryData in _industries)
+            foreach (var industryData in industries)
             {
                 if (industryData.Value.Companies != null)
                 {
