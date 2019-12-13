@@ -32,13 +32,13 @@ namespace Smidas.Exporting.Excel
         {
             _logger.LogInformation($"Exporterar analys om {stocks.Count()} aktier till {exportFile}");
 
-            using var excel = new ExcelPackage(new FileInfo(exportFile));
-            var worksheet = excel.Workbook.Worksheets.Add($"AktieREA {System.DateTime.Today.ToString("yyyy-MM-dd")}");
+            using ExcelPackage excel = new ExcelPackage(new FileInfo(exportFile));
+            ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add($"AktieREA {System.DateTime.Today.ToString("yyyy-MM-dd")}");
 
             // Headers
-            foreach (var prop in typeof(Stock).GetProperties())
+            foreach (PropertyInfo prop in typeof(Stock).GetProperties())
             {
-                var excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
+                ExcelAttribute excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
                 if (excelAttr != null)
                 {
                     if (prop.Name == nameof(Stock.Price))
@@ -57,9 +57,9 @@ namespace Smidas.Exporting.Excel
             }
 
             // Styling
-            var buyEndRow = 1 + stocks.Count(s => s.Action == Action.Buy);
-            var keepEndRow = buyEndRow + stocks.Count(s => s.Action == Action.Keep);
-            var sellEndRow = keepEndRow + stocks.Count(s => s.Action == Action.Sell);
+            int buyEndRow = 1 + stocks.Count(s => s.Action == Action.Buy);
+            int keepEndRow = buyEndRow + stocks.Count(s => s.Action == Action.Keep);
+            int sellEndRow = keepEndRow + stocks.Count(s => s.Action == Action.Sell);
 
             worksheet.Cells[$"A2:M{worksheet.Dimension.Rows}"].Style.Fill.PatternType = ExcelFillStyle.Solid;
             worksheet.Cells[$"A2:M{buyEndRow}"].Style.Fill.BackgroundColor.SetColor(_green); // Buy

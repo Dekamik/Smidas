@@ -10,9 +10,9 @@ namespace Smidas.Exporting.Excel
     {
         public static void InsertRowFrom<T>(this ExcelWorksheet worksheet, int row, T data)
         {
-            foreach (var prop in typeof(T).GetProperties())
+            foreach (PropertyInfo prop in typeof(T).GetProperties())
             {
-                var excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
+                ExcelAttribute excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
                 if (excelAttr != null)
                 {
                     if (prop.PropertyType.IsEnum)

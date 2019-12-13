@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.XPath;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -13,7 +10,6 @@ using Smidas.Common;
 using Smidas.Common.Extensions;
 using Smidas.Common.StockIndices;
 using Smidas.Core.Stocks;
-using Smidas.WebScraping.Extensions;
 
 namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 {
@@ -53,7 +49,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         {
             logger.LogInformation($"Skrapar {url}");
 
-            var htmlTask = new HtmlWeb().LoadFromWebAsync(url);
+            Task<HtmlDocument> htmlTask = new HtmlWeb().LoadFromWebAsync(url);
             htmlTask.Wait();
             html = htmlTask.Result;
 
@@ -109,7 +105,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 
             logger.LogDebug("Skapar modeller");
 
-            var stocks = new List<Stock>();
+            List<Stock> stocks = new List<Stock>();
 
             for (int i = 0; i < names.Count(); i++)
             {
@@ -148,7 +144,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         {
             logger.LogDebug($"Tar ut {itemName.ToLower()}");
 
-            foreach (var cell in cells)
+            foreach (string cell in cells)
             {
                 if (hasSymbol)
                 {
@@ -167,12 +163,12 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         {
             logger.LogDebug($"Tillsätter branscher");
 
-            foreach (var industryData in industries)
+            foreach (KeyValuePair<string, AppSettings.IndexSettings.IndustryData> industryData in industries)
             {
                 if (industryData.Value.Companies != null)
                 {
-                    var industry = industryData.Key;
-                    foreach (var companyName in industryData.Value.Companies)
+                    string industry = industryData.Key;
+                    foreach (string companyName in industryData.Value.Companies)
                     {
                         stockData.Where(s => s.Name.Contains(companyName))
                                  .ForEach(s => s.Industry = industry);

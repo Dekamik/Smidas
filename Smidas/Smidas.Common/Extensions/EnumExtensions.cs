@@ -18,7 +18,7 @@ namespace Smidas.Common.Extensions
 
         public static IEnumerable<T> GetAttributes<T>(object value) where T : Attribute
         {
-            var type = value.GetType();
+            Type type = value.GetType();
             if (!type.IsEnum)
             {
                 throw new ArgumentException($"Type {type} is not an enum");

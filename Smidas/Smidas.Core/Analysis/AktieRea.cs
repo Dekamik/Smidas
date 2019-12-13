@@ -36,7 +36,7 @@ namespace Smidas.Core.Analysis
 
                 _industryCap = new Dictionary<string, int>();
                 _industryCap.Add(Stock.OtherIndustries, -1);
-                foreach (var industry in _options.Value.AktieRea[_index.ToString()].Industries)
+                foreach (KeyValuePair<string, AppSettings.IndexSettings.IndustryData> industry in _options.Value.AktieRea[_index.ToString()].Industries)
                 {
                     _industryCap.Add(industry.Key, industry.Value.Cap);
                 }
@@ -80,7 +80,7 @@ namespace Smidas.Core.Analysis
         {
             _logger.LogDebug($"Sållar diskvalivicerade aktier");
 
-            foreach (var stock in stocks)
+            foreach (Stock stock in stocks)
             {
                 if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
@@ -104,24 +104,24 @@ namespace Smidas.Core.Analysis
         {
             _logger.LogDebug($"Sållar dubbletter");
 
-            var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
-            var doublesCount = new Dictionary<string, int>();
+            IEnumerable<Stock> series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
+            Dictionary<string, int> doublesCount = new Dictionary<string, int>();
 
-            foreach (var stock in series) // Count amount of doubles per series
+            foreach (Stock stock in series) // Count amount of doubles per series
             {
                 doublesCount[stock.CompanyName] = doublesCount.ContainsKey(stock.CompanyName) ? doublesCount[stock.CompanyName] + 1 : 1;
             }
 
             // Select all series that have at least two stocks
-            var doubleStocks = series.Where(s => doublesCount[s.CompanyName] > 1);
-            var doubleCompanies = doubleStocks.Select(s => s.CompanyName)
+            IEnumerable<Stock> doubleStocks = series.Where(s => doublesCount[s.CompanyName] > 1);
+            IEnumerable<string> doubleCompanies = doubleStocks.Select(s => s.CompanyName)
                                               .Distinct();
-            var stocksToExclude = new HashSet<string>();
+            HashSet<string> stocksToExclude = new HashSet<string>();
 
-            foreach (var companyName in doubleCompanies)
+            foreach (string companyName in doubleCompanies)
             {
                 // Select the company's stocks, ordered with largest turnover first
-                var company = doubleStocks.Where(s => s.Name.Contains(companyName))
+                IOrderedEnumerable<Stock> company = doubleStocks.Where(s => s.Name.Contains(companyName))
                                           .OrderByDescending(s => s.Volume);
 
                 // Keep the stock with the largest turnover (the first one). Exclude the rest.
@@ -130,7 +130,7 @@ namespace Smidas.Core.Analysis
                        .ForEach(c => stocksToExclude.Add(c.Name));
             }
 
-            foreach (var stock in stocks)
+            foreach (Stock stock in stocks)
             {
                 if (stocksToExclude.Contains(stock.Name))
                 {
@@ -162,15 +162,15 @@ namespace Smidas.Core.Analysis
         {
             _logger.LogDebug($"Beslutar åtgärder");
 
-            var index = 1;
-            var industryAmount = new Dictionary<string, int>();
+            int index = 1;
+            Dictionary<string, int> industryAmount = new Dictionary<string, int>();
 
-            foreach (var industry in _industryCap.Keys)
+            foreach (string industry in _industryCap.Keys)
             {
                 industryAmount.Add(industry, 0);
             }
 
-            foreach (var stock in stocks.OrderBy(s => s.AbRank)
+            foreach (Stock stock in stocks.OrderBy(s => s.AbRank)
                                         .ThenByDescending(s => s.DirectYield))
             {
                 if (stock.Action == Action.Exclude)
@@ -179,7 +179,7 @@ namespace Smidas.Core.Analysis
                 }
 
                 // Check if the stock belongs to a capped industry, and whether or not the cap has been reached.
-                var cap = _industryCap[stock.Industry];
+                int cap = _industryCap[stock.Industry];
 
                 if (cap != -1 && industryAmount[stock.Industry] == cap)
                 {

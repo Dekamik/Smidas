@@ -14,7 +14,7 @@ namespace Smidas.CLI
     {
         public static void Main(string[] args)
         {
-            using var serviceProvider = ConfigureServices().BuildServiceProvider();
+            using ServiceProvider serviceProvider = ConfigureServices().BuildServiceProvider();
             serviceProvider.GetService<ConsoleApplication>().Run();
         }
 
@@ -28,9 +28,9 @@ namespace Smidas.CLI
 
         private static IServiceCollection ConfigureServices()
         {
-            var config = LoadConfiguration();
+            IConfigurationRoot config = LoadConfiguration();
 
-            var services = new ServiceCollection();
+            ServiceCollection services = new ServiceCollection();
             services.AddOptions();
             services.AddLogging(logging => 
             { 
