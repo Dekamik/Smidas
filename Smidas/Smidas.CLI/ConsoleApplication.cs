@@ -1,23 +1,21 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OfficeOpenXml;
+using Smidas.Batch;
 using Smidas.Common;
 using Smidas.Common.StockIndices;
-using Smidas.Core.Analysis;
 using Smidas.Core.Stocks;
 using Smidas.Exporting.Excel;
-using Smidas.WebScraping.WebScrapers;
-using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace Smidas.CLI
 {
     public class ConsoleApplication
     {
-        private readonly string _menu = @"
+        private readonly string menu = @"
    Smidas
 
 -----------------------------------------------------
@@ -39,35 +37,35 @@ namespace Smidas.CLI
 
 -----------------------------------------------------";
 
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ILogger _logger;
-        private readonly IOptions<AppSettings> _options;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IAnalysis _analysis;
-        private readonly ExcelExporter _excelExporter;
+        private readonly ILogger logger;
+        
+        private readonly IOptions<AppSettings> options;
+        
+        private readonly AktieReaJob aktieReaJob;
+
+        private readonly ExcelExporter excelExporter;
 
         public ConsoleApplication(
             ILoggerFactory loggerFactory,
             IOptions<AppSettings> options,
-            IServiceProvider serviceProvider,
-            AktieRea aktieRea,
+            AktieReaJob aktieReaJob,
             ExcelExporter excelExporter)
         {
-            _loggerFactory = loggerFactory;
-            _logger = _loggerFactory.CreateLogger<ConsoleApplication>();
-            _options = options;
-            _serviceProvider = serviceProvider;
-            _analysis = aktieRea;
-            _excelExporter = excelExporter;
+            this.logger = loggerFactory.CreateLogger<ConsoleApplication>();
+            this.options = options;
+            this.aktieReaJob = aktieReaJob;
+            this.excelExporter = excelExporter;
         }
 
         public void Run()
         {
             string input;
+            string exportPath = null;
+            string currency = null;
 
             if (Environment.UserInteractive)
             {
-                Console.WriteLine(_menu);
+                Console.WriteLine(menu);
                 Console.Write(">> ");
                 input = Console.ReadLine();
 
@@ -85,76 +83,57 @@ namespace Smidas.CLI
 
                 if (input == "h" || input == "help")
                 {
-                    Console.WriteLine(_menu);
+                    Console.WriteLine(menu);
                     Environment.Exit(0);
                 }
             }
 
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            
-            IWebScraper webScraper = null;
-            string currency = null;
-            string exportPath = null;
-
-            // Select action
             switch (input)
             {
                 case "1":
-                    webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
-                    (webScraper as DagensIndustriWebScraper).Index = StockIndex.OMXStockholmLargeCap;
-                    (_analysis as AktieRea).Index = StockIndex.OMXStockholmLargeCap;
-                    currency = _options.Value.AktieRea[StockIndex.OMXStockholmLargeCap.ToString()].CurrencyCode;
-                    exportPath = (_options.Value.AktieRea[StockIndex.OMXStockholmLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    currency = options.Value.AktieRea[StockIndex.OMXStockholmLargeCap.ToString()].CurrencyCode;
+                    exportPath = (options.Value.AktieRea[StockIndex.OMXStockholmLargeCap.ToString()].ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "2":
-                    webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
-                    (webScraper as DagensIndustriWebScraper).Index = StockIndex.OMXCopenhagenLargeCap;
-                    (_analysis as AktieRea).Index = StockIndex.OMXCopenhagenLargeCap;
-                    currency = _options.Value.AktieRea[StockIndex.OMXCopenhagenLargeCap.ToString()].CurrencyCode;
-                    exportPath = (_options.Value.AktieRea[StockIndex.OMXCopenhagenLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    currency = options.Value.AktieRea[StockIndex.OMXCopenhagenLargeCap.ToString()].CurrencyCode;
+                    exportPath = (options.Value.AktieRea[StockIndex.OMXCopenhagenLargeCap.ToString()].ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "3":
-                    webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
-                    (webScraper as DagensIndustriWebScraper).Index = StockIndex.OMXHelsinkiLargeCap;
-                    (_analysis as AktieRea).Index = StockIndex.OMXHelsinkiLargeCap;
-                    currency = _options.Value.AktieRea[StockIndex.OMXHelsinkiLargeCap.ToString()].CurrencyCode;
-                    exportPath = (_options.Value.AktieRea[StockIndex.OMXHelsinkiLargeCap.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    currency = options.Value.AktieRea[StockIndex.OMXHelsinkiLargeCap.ToString()].CurrencyCode;
+                    exportPath = (options.Value.AktieRea[StockIndex.OMXHelsinkiLargeCap.ToString()].ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "4":
-                    webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
-                    (webScraper as DagensIndustriWebScraper).Index = StockIndex.OsloOBX;
-                    (_analysis as AktieRea).Index = StockIndex.OsloOBX;
-                    currency = _options.Value.AktieRea[StockIndex.OsloOBX.ToString()].CurrencyCode;
-                    exportPath = (_options.Value.AktieRea[StockIndex.OsloOBX.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    currency = options.Value.AktieRea[StockIndex.OsloOBX.ToString()].CurrencyCode;
+                    exportPath = (options.Value.AktieRea[StockIndex.OsloOBX.ToString()].ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "5":
-                    webScraper = _serviceProvider.GetService<DagensIndustriWebScraper>();
-                    (webScraper as DagensIndustriWebScraper).Index = StockIndex.Nasdaq100AndSnP100;
-                    (_analysis as AktieRea).Index = StockIndex.Nasdaq100AndSnP100;
-                    currency = _options.Value.AktieRea[StockIndex.Nasdaq100AndSnP100.ToString()].CurrencyCode;
-                    exportPath = (_options.Value.AktieRea[StockIndex.Nasdaq100AndSnP100.ToString()].ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_S&P_500_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    currency = options.Value.AktieRea[StockIndex.Nasdaq100AndSnP100.ToString()].CurrencyCode;
+                    exportPath = (options.Value.AktieRea[StockIndex.Nasdaq100AndSnP100.ToString()].ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_S&P_500_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 default:
                     break;
             }
 
-            // Run
-            IList<Stock> stockData = webScraper?.Scrape();
-            IEnumerable<Stock> results = _analysis?.Analyze(stockData);
+            IEnumerable<Stock> results = aktieReaJob.Run(input);
 
             if (!string.IsNullOrEmpty(exportPath))
             {
-                _excelExporter.Export(results.ToList(), exportPath, currency);
-            }
+                logger.LogInformation($"Exporterar analys om {results.Count()} aktier till {exportPath}");
 
-            stopwatch.Stop();
-            _logger.LogInformation($"Smidas avslutad. Körtid för utvald åtgärd: {stopwatch.Elapsed}");
+                using ExcelPackage excel = new ExcelPackage(new FileInfo(exportPath));
+                ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add($"AktieREA {System.DateTime.Today.ToString("yyyy-MM-dd")}");
+
+                excelExporter.ExportStocksToWorksheet(ref worksheet, results.ToList(), currency);
+
+                excel.Save();
+
+                logger.LogDebug("Exportering slutförd");
+            }
         }
     }
 }

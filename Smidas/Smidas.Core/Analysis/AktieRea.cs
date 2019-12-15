@@ -12,46 +12,43 @@ namespace Smidas.Core.Analysis
 {
     public class AktieRea : IAnalysis
     {
-        private readonly ILogger _logger;
+        private readonly ILogger logger;
+        private readonly IOptions<AppSettings> options;
 
-        private readonly IOptions<AppSettings> _options;
+        private int amountToBuy;
+        private int amountToKeep;
 
-        private int _amountToBuy;
-
-        private int _amountToKeep;
-
-        private IDictionary<string, int> _industryCap;
-
-        private StockIndex _index;
+        private IDictionary<string, int> industryCap;
+        private StockIndex index;
 
         public StockIndex Index
         {
-            get => _index;
+            get => index;
             set
             {
-                _index = value;
+                index = value;
 
-                _amountToBuy = _options.Value.AktieRea[_index.ToString()].AmountToBuy;
-                _amountToKeep = _options.Value.AktieRea[_index.ToString()].AmountToKeep;
+                amountToBuy = options.Value.AktieRea[index.ToString()].AmountToBuy;
+                amountToKeep = options.Value.AktieRea[index.ToString()].AmountToKeep;
 
-                _industryCap = new Dictionary<string, int>();
-                _industryCap.Add(Stock.OtherIndustries, -1);
-                foreach (KeyValuePair<string, AppSettings.IndexSettings.IndustryData> industry in _options.Value.AktieRea[_index.ToString()].Industries)
+                industryCap = new Dictionary<string, int>();
+                industryCap.Add(Stock.OtherIndustries, -1);
+                foreach (KeyValuePair<string, AppSettings.IndexSettings.IndustryData> industry in options.Value.AktieRea[index.ToString()].Industries)
                 {
-                    _industryCap.Add(industry.Key, industry.Value.Cap);
+                    industryCap.Add(industry.Key, industry.Value.Cap);
                 }
             }
         }
 
         public AktieRea(ILoggerFactory loggerFactory, IOptions<AppSettings> options)
         {
-            _logger = loggerFactory.CreateLogger<AktieRea>();
-            _options = options;
+            logger = loggerFactory.CreateLogger<AktieRea>();
+            this.options = options;
         }
 
         public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks)
         {
-            _logger.LogInformation($"Analyserar {stocks.Count()} aktier enligt AktieREA-metoden");
+            logger.LogInformation($"Analyserar {stocks.Count()} aktier enligt AktieREA-metoden");
 
             ExcludeDisqualifiedStocks(ref stocks);
 
@@ -63,7 +60,7 @@ namespace Smidas.Core.Analysis
 
             DetermineActions(ref stocks);
 
-            _logger.LogInformation($"Analys slutförd\n" +
+            logger.LogInformation($"Analys slutförd\n" +
                                    $"\n" +
                                    $"Köpes          : {stocks.Count(s => s.Action == Action.Buy)}\n" +
                                    $"Behålles       : {stocks.Count(s => s.Action == Action.Keep)}\n" +
@@ -78,34 +75,31 @@ namespace Smidas.Core.Analysis
 
         public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Sållar diskvalivicerade aktier");
+            logger.LogDebug($"Sållar diskvalivicerade aktier");
 
             foreach (Stock stock in stocks)
             {
                 if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
-                    _logger.LogTrace($"Sållade {stock.Name} - Negativ vinst");
-                    stock.Exclude("Negativ vinst");
+                    stock.Exclude(logger, "Negativ vinst");
                 }
                 else if (stock.DirectYield == 0) // Stocks with zero direct yield
                 {
-                    _logger.LogTrace($"Sållade {stock.Name} - Noll direktavkastning");
-                    stock.Exclude("Noll direktavkastning");
+                    stock.Exclude(logger, "Noll direktavkastning");
                 }
                 else if (Regex.IsMatch(stock.Name, ".* Pref$")) // Preferential stocks
                 {
-                    _logger.LogTrace($"Sållade {stock.Name} - Preferensaktie");
-                    stock.Exclude("Preferensaktie");
+                    stock.Exclude(logger, "Preferensaktie");
                 }
             }
         }
 
         public void ExcludeDoubles(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Sållar dubbletter");
+            logger.LogDebug($"Sållar dubbletter");
 
-            IEnumerable<Stock> series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
             Dictionary<string, int> doublesCount = new Dictionary<string, int>();
+            var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
 
             foreach (Stock stock in series) // Count amount of doubles per series
             {
@@ -113,36 +107,33 @@ namespace Smidas.Core.Analysis
             }
 
             // Select all series that have at least two stocks
-            IEnumerable<Stock> doubleStocks = series.Where(s => doublesCount[s.CompanyName] > 1);
-            IEnumerable<string> doubleCompanies = doubleStocks.Select(s => s.CompanyName)
+            var doubleStocks = series.Where(s => doublesCount[s.CompanyName] > 1);
+            var doubleCompanies = doubleStocks.Select(s => s.CompanyName)
                                               .Distinct();
             HashSet<string> stocksToExclude = new HashSet<string>();
 
             foreach (string companyName in doubleCompanies)
             {
-                // Select the company's stocks, ordered with largest turnover first
-                IOrderedEnumerable<Stock> company = doubleStocks.Where(s => s.Name.Contains(companyName))
-                                          .OrderByDescending(s => s.Volume);
-
-                // Keep the stock with the largest turnover (the first one). Exclude the rest.
-                company.Skip(1)
-                       .Take(company.Count() - 1)
-                       .ForEach(c => stocksToExclude.Add(c.Name));
+                // Select the company's stocks, ordered by turnover
+                // Then keep the stock with the largest turnover (the first one). Exclude the rest.
+                doubleStocks.Where(s => s.Name.Contains(companyName))
+                            .OrderByDescending(s => s.Volume)
+                            .Skip(1)
+                            .ForEach(c => stocksToExclude.Add(c.Name));
             }
 
             foreach (Stock stock in stocks)
             {
                 if (stocksToExclude.Contains(stock.Name))
                 {
-                    _logger.LogTrace($"Sållade {stock.Name} - Dubblett");
-                    stock.Exclude("Dubblett");
+                    stock.Exclude(logger, "Dubblett");
                 }
             }
         }
 
         public void CalculateARank(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Räknar ut A-rang");
+            logger.LogDebug($"Räknar ut A-rang");
 
             int i = 1;
             stocks.OrderByDescending(s => s.Ep)
@@ -151,7 +142,7 @@ namespace Smidas.Core.Analysis
 
         public void CalculateBRank(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Räknar ut B-rang");
+            logger.LogDebug($"Räknar ut B-rang");
 
             int i = 1;
             stocks.OrderByDescending(s => s.AdjustedEquityPerStock)
@@ -160,12 +151,12 @@ namespace Smidas.Core.Analysis
 
         public void DetermineActions(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Beslutar åtgärder");
+            logger.LogDebug($"Beslutar åtgärder");
 
             int index = 1;
             Dictionary<string, int> industryAmount = new Dictionary<string, int>();
 
-            foreach (string industry in _industryCap.Keys)
+            foreach (string industry in industryCap.Keys)
             {
                 industryAmount.Add(industry, 0);
             }
@@ -179,20 +170,19 @@ namespace Smidas.Core.Analysis
                 }
 
                 // Check if the stock belongs to a capped industry, and whether or not the cap has been reached.
-                int cap = _industryCap[stock.Industry];
+                int cap = industryCap[stock.Industry];
 
                 if (cap != -1 && industryAmount[stock.Industry] == cap)
                 {
-                    _logger.LogTrace($"Sållade {stock.Name} - Max antal bolag nådd inom branschen");
-                    stock.Exclude("Max antal bolag nådd inom branschen");
+                    stock.Exclude(logger, "Max antal bolag nådd inom branschen");
                     continue;
                 }
 
-                industryAmount[stock.Industry.ToString()]++;
+                industryAmount[stock.Industry.ToString()] += 1;
 
                 // Determine action on stock
-                stock.Action = index <= _amountToBuy ? Action.Buy :
-                               index <= _amountToBuy + _amountToKeep ? Action.Keep :
+                stock.Action = index <= amountToBuy ? Action.Buy :
+                               index <= amountToBuy + amountToKeep ? Action.Keep :
                                Action.Sell;
                 index++;
             }

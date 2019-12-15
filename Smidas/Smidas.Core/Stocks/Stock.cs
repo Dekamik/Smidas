@@ -1,4 +1,5 @@
-﻿using Smidas.Common.Excel;
+﻿using Microsoft.Extensions.Logging;
+using Smidas.Common.Excel;
 using Smidas.Common.Extensions;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -45,8 +46,7 @@ namespace Smidas.Core.Stocks
         /// </summary>
         [Excel(FullName = "Earnings-to-Price ratio", ShortName = "E/P", Column = "I")]
         [Description("Vinst/aktie delat på aktiekurs.")]
-        public decimal Ep => Price != 0m ? ProfitPerStock / Price
-                                         : 0m;
+        public decimal Ep => Price != 0m ? ProfitPerStock / Price : 0m;
 
         [Excel(FullName = "A-rang", ShortName = "A", Column = "J")]
         [Description("Rangordning efter E/P-tal.")]
@@ -57,17 +57,19 @@ namespace Smidas.Core.Stocks
         public int BRank { get; set; }
 
         [Excel(FullName = "A+B-rang", ShortName = "A+B", Column = "L")]
-        [Description("A- och B-rangordningen kombinerad. Uteslutet aktier sätts till 10000-serien.")]
+        [Description("A- och B-rangordningen kombinerad. Uteslutna aktier sätts till 10000-serien.")]
         public int AbRank => ARank + BRank + (Action == Action.Exclude ? 10000 : 0);
 
         [Excel(FullName = "Kommentarer", Column = "M")]
         [Description("Eventuella kommentarer. Anledning till bortsållning ifylles automatiskt.")]
         public string Comments { get; set; }
 
-        public void Exclude(string reason)
+        public void Exclude(ILogger logger, string reason)
         {
             Action = Action.Exclude;
             Comments = reason;
+
+            logger.LogTrace($"Sållade {Name} - {reason}");
         }
 
         public override string ToString() => $"{Name}, {CompanyName}, {Industry}, {Action.GetDisplayName()}, {Price}, {Volume}, " +

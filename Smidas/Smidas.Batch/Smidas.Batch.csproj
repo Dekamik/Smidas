@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Smidas.Exporting\Smidas.Exporting.csproj" />
+    <ProjectReference Include="..\Smidas.WebScraping\Smidas.WebScraping.csproj" />
+  </ItemGroup>
+
+</Project>

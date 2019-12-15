@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using Smidas.Batch;
 using Smidas.Common;
 using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
@@ -41,6 +42,7 @@ namespace Smidas.CLI
             services.Configure<AppSettings>(config.GetSection("App"));
             services.Configure<ConsoleLoggerOptions>(config.GetSection("Logging"));
 
+            services.AddScoped<AktieReaJob>();
             services.AddScoped<DagensIndustriWebScraper>();
             services.AddScoped<AktieRea>();
             services.AddScoped<ExcelExporter>();

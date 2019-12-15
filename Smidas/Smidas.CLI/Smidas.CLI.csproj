@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Smidas.Batch\Smidas.Batch.csproj" />
     <ProjectReference Include="..\Smidas.Core\Smidas.Core.csproj" />
     <ProjectReference Include="..\Smidas.Exporting\Smidas.Exporting.csproj" />
     <ProjectReference Include="..\Smidas.WebScraping\Smidas.WebScraping.csproj" />

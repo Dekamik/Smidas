@@ -10,19 +10,17 @@ using Smidas.Common;
 using Smidas.Common.Extensions;
 using Smidas.Common.StockIndices;
 using Smidas.Core.Stocks;
+using Smidas.WebScraping.WebScrapers.Parsing;
 
 namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 {
     public class DagensIndustriWebScraper : IWebScraper
     {
         private readonly ILogger logger;
-
         private readonly IOptions<AppSettings> options;
 
         private IDictionary<string, AppSettings.IndexSettings.IndustryData> industries;
-
         private string url;
-
         private StockIndex index;
 
         private HtmlDocument html;
@@ -53,43 +51,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             htmlTask.Wait();
             html = htmlTask.Result;
 
-            logger.LogDebug("Skrapar sidan...");
-
-            IList<string> nameElements = null;
-            IList<string> priceElements = null;
-            IList<string> volumeElements = null;
-            IList<string> profitPerStockElements = null;
-            IList<string> adjustedEquityPerStockElements = null;
-            IList<string> directYieldElements = null;
-
-            Parallel.Invoke(
-                () => nameElements = ScrapeNodes("Namn", "//div[contains(@class, 'js_Kurser')]/descendant::a[contains(@class, 'js_realtime__instrument-link')]"),
-                () => priceElements = ScrapeNodes("Priser", "//tr[contains(@class, 'js_real-time-Kurser')]/descendant::span[contains(@class, 'di_stocks-table__last-price')]"),
-                () => volumeElements = ScrapeNodes("Volymer", "//td[contains(@class, 'js_real-time__quantity')]"),
-                () => profitPerStockElements = ScrapeNodes("Vinst/aktie", "//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[4]"),
-                () => adjustedEquityPerStockElements = ScrapeNodes("Justerat eget kapital/aktie", "//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[5]"),
-                () => directYieldElements = ScrapeNodes("Direktavkastning", "//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[7]"));
-
-            logger.LogDebug("Sida skrapad");
-
-            logger.LogDebug("Verifierar hämtade element");
-
-            // All lists must hold the same amount of elements
-            if (new[] { nameElements, priceElements, volumeElements, profitPerStockElements, adjustedEquityPerStockElements, directYieldElements }
-                .All(l => l.Count != nameElements.Count))
-            {
-                logger.LogError($"Elementlistorna har ej samma längd\n" +
-                    $"Namn: {nameElements.Count} st, Priser: {priceElements.Count} st, Volymer: {volumeElements.Count} st, Vinst/aktie: {profitPerStockElements.Count} st, JEK/aktie: {adjustedEquityPerStockElements.Count}, Dir.avk: {directYieldElements.Count} st");
-
-                throw new ValidationException($"Elementlistorna har ej samma längd\n" +
-                    $"Namn: {nameElements.Count} st, Priser: {priceElements.Count} st, Volymer: {volumeElements.Count} st, Vinst/aktie: {profitPerStockElements.Count} st, JEK/aktie: {adjustedEquityPerStockElements.Count}, Dir.avk: {directYieldElements.Count} st");
-            }
-
-            logger.LogInformation("Element - OK");
-
-            logger.LogDebug("Tolkar och organiserar data");
-
-            List<string> names = nameElements.ToList();
+            List<string> names = null;
             List<decimal> prices = null;
             List<decimal> volumes = null;
             List<decimal> profitPerStock = null;
@@ -97,13 +59,41 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             List<decimal> directYield = null;
 
             Parallel.Invoke(
-                () => prices = Parse("Priser", priceElements).ToList(),
-                () => volumes = Parse("Volymer", volumeElements).ToList(),
-                () => profitPerStock = Parse("Vinst/aktie", profitPerStockElements).ToList(),
-                () => adjustedEquityPerStock = Parse("Justerad eget kapital/aktie", adjustedEquityPerStockElements).ToList(),
-                () => directYield = Parse("Direktavkastning", directYieldElements, hasSymbol: true).ToList());
+                () => names = ScrapeNodes("//div[contains(@class, 'js_Kurser')]/descendant::a[contains(@class, 'js_realtime__instrument-link')]")
+                                    .ToList(),
 
-            logger.LogDebug("Skapar modeller");
+                () => prices = ScrapeNodes("//tr[contains(@class, 'js_real-time-Kurser')]/descendant::span[contains(@class, 'di_stocks-table__last-price')]")
+                                    .Parse()
+                                    .ToList(),
+
+                () => volumes = ScrapeNodes("//td[contains(@class, 'js_real-time__quantity')]")
+                                    .Parse()
+                                    .ToList(),
+
+                () => profitPerStock = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[4]")
+                                            .Parse()
+                                            .ToList(),
+
+                () => adjustedEquityPerStock = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[5]")
+                                                    .Parse()
+                                                    .ToList(),
+
+                () => directYield = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[7]")
+                                        .Parse(hasSymbol: true)
+                                        .ToList());
+
+            // All lists must hold the same amount of elements
+            if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directYield }
+                .All(l => l.Count() != names.Count()))
+            {
+                logger.LogError($"Elementlistorna har ej samma längd\n" +
+                    $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directYield.Count()} st");
+
+                throw new ValidationException($"Elementlistorna har ej samma längd\n" +
+                    $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directYield.Count()} st");
+            }
+
+            logger.LogInformation("Element - OK");
 
             List<Stock> stocks = new List<Stock>();
 
@@ -127,42 +117,11 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             return stocks;
         }
 
-        private IList<string> ScrapeNodes(string itemName, string xPath)
-        {
-            logger.LogDebug($"Skrapar {itemName.ToLower()}");
-
-            var elements = html.DocumentNode.SelectNodes(xPath)
-                                            .Select(n => WebUtility.HtmlDecode(n.InnerText))
-                                            .ToList();
-
-            logger.LogDebug($"{itemName} skrapade");
-
-            return elements;
-        }
-
-        public IEnumerable<decimal> Parse(string itemName, IEnumerable<string> cells, bool hasSymbol = false)
-        {
-            logger.LogDebug($"Tar ut {itemName.ToLower()}");
-
-            foreach (string cell in cells)
-            {
-                if (hasSymbol)
-                {
-                    yield return cell.ParseDecimalWithSymbol();
-                }
-                else
-                {
-                    yield return cell.ParseDecimal();
-                }
-            }
-
-            logger.LogDebug($"{itemName} uttagna");
-        }
+        private IEnumerable<string> ScrapeNodes(string xPath) => html.DocumentNode.SelectNodes(xPath)
+                                                                                  .Select(n => WebUtility.HtmlDecode(n.InnerText));
 
         public void SetIndustries(ref List<Stock> stockData)
         {
-            logger.LogDebug($"Tillsätter branscher");
-
             foreach (KeyValuePair<string, AppSettings.IndexSettings.IndustryData> industryData in industries)
             {
                 if (industryData.Value.Companies != null)
