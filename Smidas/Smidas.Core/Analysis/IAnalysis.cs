@@ -1,4 +1,5 @@
-﻿using Smidas.Core.Stocks;
+﻿using Smidas.Common;
+using Smidas.Core.Stocks;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,6 @@ namespace Smidas.Core.Analysis
     /// <typeparam name="T">Data object type</typeparam>
     public interface IAnalysis
     {
-        IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks);
+        IEnumerable<Stock> Analyze(AktieReaQuery query, IEnumerable<Stock> stocks);
     }
 }

@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using FakeItEasy;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Smidas.Core.Stocks;
 using Xunit;
 
@@ -141,7 +143,7 @@ namespace Smidas.Core.Tests.Stocks
                 Name = "AnyStock"
             };
 
-            stock.Exclude("AnyReason");
+            stock.Exclude(A.Fake<ILogger>(), "AnyReason");
 
             stock.Action.Should().Be(Action.Exclude);
             stock.Comments.Should().Be("AnyReason");

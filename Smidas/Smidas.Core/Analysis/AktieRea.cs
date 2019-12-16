@@ -4,49 +4,20 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Smidas.Common.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Smidas.Common;
-using Smidas.Common.StockIndices;
 
 namespace Smidas.Core.Analysis
 {
     public class AktieRea : IAnalysis
     {
         private readonly ILogger logger;
-        private readonly IOptions<AppSettings> options;
 
-        private int amountToBuy;
-        private int amountToKeep;
-
-        private IDictionary<string, int> industryCap;
-        private StockIndex index;
-
-        public StockIndex Index
-        {
-            get => index;
-            set
-            {
-                index = value;
-
-                amountToBuy = options.Value.AktieRea[index.ToString()].AmountToBuy;
-                amountToKeep = options.Value.AktieRea[index.ToString()].AmountToKeep;
-
-                industryCap = new Dictionary<string, int>();
-                industryCap.Add(Stock.OtherIndustries, -1);
-                foreach (KeyValuePair<string, AppSettings.IndexSettings.IndustryData> industry in options.Value.AktieRea[index.ToString()].Industries)
-                {
-                    industryCap.Add(industry.Key, industry.Value.Cap);
-                }
-            }
-        }
-
-        public AktieRea(ILoggerFactory loggerFactory, IOptions<AppSettings> options)
+        public AktieRea(ILoggerFactory loggerFactory)
         {
             logger = loggerFactory.CreateLogger<AktieRea>();
-            this.options = options;
         }
 
-        public IEnumerable<Stock> Analyze(IEnumerable<Stock> stocks)
+        public IEnumerable<Stock> Analyze(AktieReaQuery query, IEnumerable<Stock> stocks)
         {
             logger.LogInformation($"Analyserar {stocks.Count()} aktier enligt AktieREA-metoden");
 
@@ -58,7 +29,7 @@ namespace Smidas.Core.Analysis
 
             CalculateBRank(ref stocks);
 
-            DetermineActions(ref stocks);
+            DetermineActions(ref stocks, query);
 
             logger.LogInformation($"Analys slutförd\n" +
                                    $"\n" +
@@ -149,12 +120,21 @@ namespace Smidas.Core.Analysis
                   .ForEach(s => s.BRank = i++);
         }
 
-        public void DetermineActions(ref IEnumerable<Stock> stocks)
+        public void DetermineActions(ref IEnumerable<Stock> stocks, AktieReaQuery query)
         {
             logger.LogDebug($"Beslutar åtgärder");
 
             int index = 1;
             Dictionary<string, int> industryAmount = new Dictionary<string, int>();
+
+            Dictionary<string, int> industryCap = new Dictionary<string, int>
+            {
+                { Stock.OtherIndustries, -1 }
+            };
+            foreach (KeyValuePair<string, AktieReaQuery.IndustryData> industry in query.Industries)
+            {
+                industryCap.Add(industry.Key, industry.Value.Cap);
+            }
 
             foreach (string industry in industryCap.Keys)
             {
@@ -181,8 +161,8 @@ namespace Smidas.Core.Analysis
                 industryAmount[stock.Industry.ToString()] += 1;
 
                 // Determine action on stock
-                stock.Action = index <= amountToBuy ? Action.Buy :
-                               index <= amountToBuy + amountToKeep ? Action.Keep :
+                stock.Action = index <= query.AmountToBuy ? Action.Buy :
+                               index <= query.AmountToBuy + query.AmountToKeep ? Action.Keep :
                                Action.Sell;
                 index++;
             }

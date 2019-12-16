@@ -1,26 +1,46 @@
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+using System.Net.Http;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Collections.Generic;
+using Smidas.Core.Stocks;
+using Newtonsoft.Json;
+using Smidas.Common;
+using Smidas.Batch;
 
 namespace Smidas.Function
 {
-    public static class HttpTriggers
+    public class HttpTriggers
     {
-        [FunctionName("GetExcel")]
-        public static async Task<IActionResult> GetExcel(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req,
-            ILogger logger)
+        private readonly AktieReaJob aktieReaJob;
+
+        public HttpTriggers(
+            AktieReaJob aktieReaJob)
         {
-            logger.LogInformation("C# HTTP trigger function processed a request.");
+            this.aktieReaJob = aktieReaJob;
+        }
 
-            string index = req.Query["index"];
+        [FunctionName(nameof(GetExcel))]
+        public async Task<HttpResponseMessage> GetExcel([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
+        {
+            AktieReaQuery query = JsonConvert.DeserializeObject<AktieReaQuery>(await req.ReadAsStringAsync());
 
-            return index != null
-                ? (ActionResult)new OkObjectResult($"{index} selected.")
-                : new BadRequestObjectResult("Please pass a number on the index string");
+            IEnumerable<Stock> results = aktieReaJob.Run(query);
+
+            byte[] xlsxBytes = null;
+
+            HttpResponseMessage result = new HttpResponseMessage(HttpStatusCode.OK);
+            result.Content = new ByteArrayContent(xlsxBytes);
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment") 
+            { 
+                FileName = "Book1.xlsx"
+            };
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            return result;
         }
     }
 }

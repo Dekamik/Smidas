@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Smidas.WebScraping.WebScrapers.Parsing
 {
@@ -8,7 +6,7 @@ namespace Smidas.WebScraping.WebScrapers.Parsing
     {
         public static decimal ParseDecimal(this string str) => decimal.Parse(!string.IsNullOrEmpty(str) ? str : "0");
 
-        public static decimal ParseDecimalWithSymbol(this string str) => decimal.Parse(str[0..^1] ?? "0");
+        public static decimal ParseDecimalWithSymbol(this string str) => decimal.Parse(str.Substring(0, str.Length - 1) ?? "0");
 
         public static IEnumerable<decimal> Parse(this IEnumerable<string> cells, bool hasSymbol = false)
         {

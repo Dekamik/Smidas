@@ -11,12 +11,9 @@ namespace Smidas.Core.DifferentialAnalysis
     {
         private readonly ILogger _logger;
 
-        private readonly IOptions<AppSettings> _options;
-
-        public DifferentialAnalysis(ILoggerFactory loggerFactory, IOptions<AppSettings> options)
+        public DifferentialAnalysis(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<DifferentialAnalysis>();
-            _options = options;
         }
     }
 }

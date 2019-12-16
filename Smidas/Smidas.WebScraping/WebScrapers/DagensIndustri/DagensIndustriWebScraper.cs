@@ -5,10 +5,8 @@ using System.Net;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Smidas.Common;
 using Smidas.Common.Extensions;
-using Smidas.Common.StockIndices;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.WebScrapers.Parsing;
 
@@ -17,37 +15,19 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
     public class DagensIndustriWebScraper : IWebScraper
     {
         private readonly ILogger logger;
-        private readonly IOptions<AppSettings> options;
-
-        private IDictionary<string, AppSettings.IndexSettings.IndustryData> industries;
-        private string url;
-        private StockIndex index;
 
         private HtmlDocument html;
 
-        public StockIndex Index
-        {
-            get => index;
-            set
-            {
-                index = value;
-
-                url = index.GetDagensIndustriInfo().Url;
-                industries = options.Value.AktieRea[index.ToString()].Industries;
-            }
-        }
-
-        public DagensIndustriWebScraper(ILoggerFactory loggerFactory, IOptions<AppSettings> options)
+        public DagensIndustriWebScraper(ILoggerFactory loggerFactory)
         {
             logger = loggerFactory.CreateLogger<DagensIndustriWebScraper>();
-            this.options = options;
         }
 
-        public IList<Stock> Scrape()
+        public IList<Stock> Scrape(AktieReaQuery query)
         {
-            logger.LogInformation($"Skrapar {url}");
+            logger.LogInformation($"Skrapar {query.IndexUrl}");
 
-            Task<HtmlDocument> htmlTask = new HtmlWeb().LoadFromWebAsync(url);
+            Task<HtmlDocument> htmlTask = new HtmlWeb().LoadFromWebAsync(query.IndexUrl);
             htmlTask.Wait();
             html = htmlTask.Result;
 
@@ -111,7 +91,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 stocks.Add(stock);
             }
 
-            SetIndustries(ref stocks);
+            SetIndustries(ref stocks, query);
 
             logger.LogInformation("Skrapning slutförd");
             return stocks;
@@ -120,9 +100,9 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         private IEnumerable<string> ScrapeNodes(string xPath) => html.DocumentNode.SelectNodes(xPath)
                                                                                   .Select(n => WebUtility.HtmlDecode(n.InnerText));
 
-        public void SetIndustries(ref List<Stock> stockData)
+        public void SetIndustries(ref List<Stock> stockData, AktieReaQuery query)
         {
-            foreach (KeyValuePair<string, AppSettings.IndexSettings.IndustryData> industryData in industries)
+            foreach (KeyValuePair<string, AktieReaQuery.IndustryData> industryData in query.Industries)
             {
                 if (industryData.Value.Companies != null)
                 {
