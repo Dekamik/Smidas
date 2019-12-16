@@ -6,6 +6,7 @@ using Smidas.Batch;
 using Smidas.Common;
 using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
+using Smidas.WebScraping.WebScrapers;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System.IO;
 
@@ -43,8 +44,8 @@ namespace Smidas.CLI
             services.Configure<ConsoleLoggerOptions>(config.GetSection("Logging"));
 
             services.AddScoped<AktieReaJob>();
-            services.AddScoped<DagensIndustriWebScraper>();
-            services.AddScoped<AktieRea>();
+            services.AddScoped<IWebScraper, DagensIndustriWebScraper>();
+            services.AddScoped<IAnalysis, AktieRea>();
             services.AddScoped<ExcelExporter>();
             services.AddScoped<ConsoleApplication>();
 

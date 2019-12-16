@@ -1,12 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Smidas.WebScraping.WebScrapers.Parsing
 {
     public static class ParsingExtensions
     {
-        public static decimal ParseDecimal(this string str) => decimal.Parse(!string.IsNullOrEmpty(str) ? str : "0");
+        public static decimal ParseDecimal(this string str)
+        {
+            try
+            {
+                return decimal.Parse(!string.IsNullOrEmpty(str) ? str.Replace(" ", "") : "0");
+            }
+            catch (FormatException)
+            {
+                throw new FormatException($"Decimal not in correct format: {str}");
+            }
+        }
 
-        public static decimal ParseDecimalWithSymbol(this string str) => decimal.Parse(str.Substring(0, str.Length - 1) ?? "0");
+        public static decimal ParseDecimalWithSymbol(this string str)
+        {
+            try
+            {
+                return decimal.Parse(str.Substring(0, str.Length - 1).Replace(" ", "") ?? "0");
+            }
+            catch
+            {
+                throw new FormatException($"Decimal not in correct format: {str}");
+            }
+        }
 
         public static IEnumerable<decimal> Parse(this IEnumerable<string> cells, bool hasSymbol = false)
         {

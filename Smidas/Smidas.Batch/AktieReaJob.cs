@@ -17,8 +17,8 @@ namespace Smidas.Batch
 
         public AktieReaJob(
             ILoggerFactory loggerFactory,
-            DagensIndustriWebScraper webScraper,
-            AktieRea aktieRea)
+            IWebScraper webScraper,
+            IAnalysis aktieRea)
         {
             logger = loggerFactory.CreateLogger<AktieReaJob>();
             this.webScraper = webScraper;
