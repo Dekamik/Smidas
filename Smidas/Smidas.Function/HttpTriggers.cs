@@ -8,7 +8,6 @@ using System.Net.Http.Headers;
 using System.Collections.Generic;
 using Smidas.Core.Stocks;
 using Newtonsoft.Json;
-using Smidas.Common;
 using Smidas.Batch;
 using OfficeOpenXml;
 using System;

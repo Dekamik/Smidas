@@ -3,7 +3,6 @@ using Smidas.Common;
 using Smidas.Core.Analysis;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.WebScrapers;
-using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System.Collections.Generic;
 using System.Diagnostics;
 

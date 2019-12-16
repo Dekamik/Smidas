@@ -40,11 +40,16 @@ namespace Smidas.Exporting.Excel
                 int keepEndRow = buyEndRow + stocks.Count(s => s.Action == Action.Keep);
                 int sellEndRow = keepEndRow + stocks.Count(s => s.Action == Action.Sell);
 
+                System.Drawing.Color green = System.Drawing.Color.FromArgb(226, 239, 218);
+                System.Drawing.Color blue = System.Drawing.Color.FromArgb(221, 235, 247);
+                System.Drawing.Color yellow = System.Drawing.Color.FromArgb(255, 242, 204);
+                System.Drawing.Color red = System.Drawing.Color.FromArgb(248, 203, 173);
+
                 worksheet.Cells[$"A2:M{worksheet.Dimension.Rows}"].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                worksheet.Cells[$"A2:M{buyEndRow}"].Style.Fill.BackgroundColor.SetColor(0, 226, 239, 218); // Buy - Green
-                worksheet.Cells[$"A{buyEndRow + 1}:M{keepEndRow}"].Style.Fill.BackgroundColor.SetColor(0, 221, 235, 247); // Keep - Blue
-                worksheet.Cells[$"A{keepEndRow + 1}:M{sellEndRow}"].Style.Fill.BackgroundColor.SetColor(0, 255, 242, 204); // Sell - Yellow
-                worksheet.Cells[$"A{sellEndRow + 1}:M{worksheet.Dimension.Rows}"].Style.Fill.BackgroundColor.SetColor(0, 248, 203, 173); // Exclude - Red
+                worksheet.Cells[$"A2:M{buyEndRow}"].Style.Fill.BackgroundColor.SetColor(green); // Buy
+                worksheet.Cells[$"A{buyEndRow + 1}:M{keepEndRow}"].Style.Fill.BackgroundColor.SetColor(blue); // Keep
+                worksheet.Cells[$"A{keepEndRow + 1}:M{sellEndRow}"].Style.Fill.BackgroundColor.SetColor(yellow); // Sell
+                worksheet.Cells[$"A{sellEndRow + 1}:M{worksheet.Dimension.Rows}"].Style.Fill.BackgroundColor.SetColor(red); // Exclude
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
             }
 
