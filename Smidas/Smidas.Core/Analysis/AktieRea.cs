@@ -21,7 +21,7 @@ namespace Smidas.Core.Analysis
         {
             logger.LogInformation($"Analyserar {stocks.Count()} aktier enligt AktieREA-metoden");
 
-            ExcludeDisqualifiedStocks(ref stocks);
+            ExcludeDisqualifiedStocks(ref stocks, query.AnalysisOptions);
 
             ExcludeDoubles(ref stocks);
 
@@ -44,21 +44,21 @@ namespace Smidas.Core.Analysis
                          .ThenByDescending(s => s.DirectDividend);
         }
 
-        public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks)
+        public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, AktieReaQuery.AnalysisOptionsData options)
         {
             logger.LogDebug($"Sållar diskvalivicerade aktier");
 
             foreach (Stock stock in stocks)
             {
-                if (stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
+                if (options.ExcludeNegativeProfitStocks && stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
                     stock.Exclude(logger, "Negativ vinst");
                 }
-                else if (stock.DirectDividend == 0) // Stocks with zero direct dividend
+                else if (options.ExcludeZeroDividendStocks && stock.DirectDividend == 0) // Stocks with zero direct dividend
                 {
                     stock.Exclude(logger, "Noll direktavkastning");
                 }
-                else if (Regex.IsMatch(stock.Name, ".* Pref$")) // Preferential stocks
+                else if (options.ExcludePreferentialStocks && Regex.IsMatch(stock.Name, ".* Pref$")) // Preferential stocks
                 {
                     stock.Exclude(logger, "Preferensaktie");
                 }

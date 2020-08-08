@@ -11,6 +11,13 @@ namespace Smidas.Common
             public string[] Companies { get; set; }
         }
 
+        public class AnalysisOptionsData
+        {
+            public bool ExcludeNegativeProfitStocks { get; set; }
+            public bool ExcludeZeroDividendStocks { get; set; }
+            public bool ExcludePreferentialStocks { get; set; }
+        }
+
         public int AmountToBuy { get; set; }
 
         public int AmountToKeep { get; set; }
@@ -20,5 +27,7 @@ namespace Smidas.Common
         public string IndexUrl { get; set; }
 
         public IDictionary<string, IndustryData> Industries { get; set; }
+
+        public AnalysisOptionsData AnalysisOptions { get; set; }
     }
 }
