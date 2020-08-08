@@ -71,7 +71,14 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
+            var options = new AktieReaQuery.AnalysisOptionsData
+            {
+                ExcludeNegativeProfitStocks = true,
+                ExcludeZeroDividendStocks = true,
+                ExcludePreferentialStocks = true
+            };
+
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
             stocks.Single().Comments.Should().Be("Negativ vinst");
@@ -90,7 +97,14 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
+            var options = new AktieReaQuery.AnalysisOptionsData
+            {
+                ExcludeNegativeProfitStocks = true,
+                ExcludeZeroDividendStocks = true,
+                ExcludePreferentialStocks = true
+            };
+
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
             stocks.Single().Comments.Should().NotBe("Negativ vinst");
@@ -109,7 +123,14 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
+            var options = new AktieReaQuery.AnalysisOptionsData
+            {
+                ExcludeNegativeProfitStocks = true,
+                ExcludeZeroDividendStocks = true,
+                ExcludePreferentialStocks = true
+            };
+
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
             stocks.Single().Comments.Should().Be("Noll direktavkastning");
@@ -128,7 +149,14 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
+            var options = new AktieReaQuery.AnalysisOptionsData
+            {
+                ExcludeNegativeProfitStocks = true,
+                ExcludeZeroDividendStocks = true,
+                ExcludePreferentialStocks = true
+            };
+
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
             stocks.Single().Comments.Should().NotBe("Noll direktavkastning");
@@ -147,7 +175,14 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
+            var options = new AktieReaQuery.AnalysisOptionsData
+            {
+                ExcludeNegativeProfitStocks = true,
+                ExcludeZeroDividendStocks = true,
+                ExcludePreferentialStocks = true
+            };
+
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
 
             stocks.Single().Action.Should().Be(Action.Exclude);
             stocks.Single().Comments.Should().Be("Preferensaktie");
@@ -166,7 +201,14 @@ namespace Smidas.Core.Tests.Analysis
                 }
             }.AsEnumerable();
 
-            _aktieRea.ExcludeDisqualifiedStocks(ref stocks);
+            var options = new AktieReaQuery.AnalysisOptionsData
+            {
+                ExcludeNegativeProfitStocks = true,
+                ExcludeZeroDividendStocks = true,
+                ExcludePreferentialStocks = true
+            };
+
+            _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
 
             stocks.Single().Action.Should().NotBe(Action.Exclude);
             stocks.Single().Comments.Should().NotBe("Preferensaktie");
@@ -346,7 +388,14 @@ namespace Smidas.Core.Tests.Analysis
             var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
                                    .AsEnumerable();
 
-            //_aktieRea.DetermineActions(ref enumerable);
+            var query = new AktieReaQuery
+            {
+                AmountToBuy = 10,
+                AmountToKeep = 10,
+                Industries = new Dictionary<string, AktieReaQuery.IndustryData>()
+            };
+
+            _aktieRea.DetermineActions(ref enumerable, query);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
         }
@@ -370,7 +419,14 @@ namespace Smidas.Core.Tests.Analysis
             var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
                                    .AsEnumerable();
 
-            //_aktieRea.DetermineActions(ref enumerable);
+            var query = new AktieReaQuery
+            {
+                AmountToBuy = 10,
+                AmountToKeep = 10,
+                Industries = new Dictionary<string, AktieReaQuery.IndustryData>()
+            };
+
+            _aktieRea.DetermineActions(ref enumerable, query);
 
             // Assert that 1 - 10 = Buy, 11 - 20 = Keep, 21> = Sell
             stocks.Take(10)
@@ -403,7 +459,29 @@ namespace Smidas.Core.Tests.Analysis
             var enumerable = stocks.OrderBy(s => System.Guid.NewGuid())
                                    .AsEnumerable();
 
-            //_aktieRea.DetermineActions(ref enumerable);
+            var query = new AktieReaQuery
+            {
+                AmountToBuy = 10,
+                AmountToKeep = 10,
+                Industries = new Dictionary<string, AktieReaQuery.IndustryData>
+                {
+                    { 
+                        "AnyIndustry", 
+                        new AktieReaQuery.IndustryData 
+                        {
+                            Cap = 2, 
+                            Companies = new string[]
+                            {
+                                "AnyIndustryComp1",
+                                "AnyIndustryComp2",
+                                "AnyIndustryComp3"
+                            }
+                        } 
+                    }
+                }
+            };
+
+            _aktieRea.DetermineActions(ref enumerable, query);
 
             stocks.Should().BeInAscendingOrder(s => s.AbRank);
             stocks.Take(2)
