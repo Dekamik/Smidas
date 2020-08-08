@@ -67,7 +67,7 @@ namespace Smidas.Core.Tests.Analysis
                 {
                     Name = "AnyStock",
                     ProfitPerStock = -1m,
-                    DirectYield = 1m,
+                    DirectDividend = 1m,
                 }
             }.AsEnumerable();
 
@@ -86,7 +86,7 @@ namespace Smidas.Core.Tests.Analysis
                 {
                     Name = "AnyStock",
                     ProfitPerStock = 1m,
-                    DirectYield = 1m,
+                    DirectDividend = 1m,
                 }
             }.AsEnumerable();
 
@@ -105,7 +105,7 @@ namespace Smidas.Core.Tests.Analysis
                 {
                     Name = "AnyStock",
                     ProfitPerStock = 1m,
-                    DirectYield = 0m,
+                    DirectDividend = 0m,
                 }
             }.AsEnumerable();
 
@@ -124,7 +124,7 @@ namespace Smidas.Core.Tests.Analysis
                 {
                     Name = "AnyStock",
                     ProfitPerStock = 1m,
-                    DirectYield = 1m,
+                    DirectDividend = 1m,
                 }
             }.AsEnumerable();
 
@@ -143,7 +143,7 @@ namespace Smidas.Core.Tests.Analysis
                 {
                     Name = "AnyStock Pref",
                     ProfitPerStock = 0m,
-                    DirectYield = 1m,
+                    DirectDividend = 1m,
                 }
             }.AsEnumerable();
 
@@ -162,7 +162,7 @@ namespace Smidas.Core.Tests.Analysis
                 {
                     Name = "AnyStock",
                     ProfitPerStock = 0m,
-                    DirectYield = 1m,
+                    DirectDividend = 1m,
                 }
             }.AsEnumerable();
 

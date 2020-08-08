@@ -35,7 +35,7 @@ namespace Smidas.Core.Stocks
         public decimal AdjustedEquityPerStock { get; set; }
 
         [Excel(FullName = "Direktavkastning", ShortName = "Dir.avk.", Column = "G")]
-        public decimal DirectYield { get; set; }
+        public decimal DirectDividend { get; set; }
 
         [Excel(FullName = "Vinst per aktie", ShortName = "Vinst/aktie", Column = "H")]
         public decimal ProfitPerStock { get; set; }
@@ -73,6 +73,6 @@ namespace Smidas.Core.Stocks
         }
 
         public override string ToString() => $"{Name}, {CompanyName}, {Industry}, {Action.GetDisplayName()}, {Price}, {Volume}, " +
-                                             $"{AdjustedEquityPerStock}, {DirectYield}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
+                                             $"{AdjustedEquityPerStock}, {DirectDividend}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
     }
 }

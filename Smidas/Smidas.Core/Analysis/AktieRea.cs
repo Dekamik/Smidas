@@ -41,7 +41,7 @@ namespace Smidas.Core.Analysis
                                    $"S:a            : {stocks.Count()}\n");
 
             return stocks.OrderBy(s => s.AbRank)
-                         .ThenByDescending(s => s.DirectYield);
+                         .ThenByDescending(s => s.DirectDividend);
         }
 
         public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks)
@@ -54,7 +54,7 @@ namespace Smidas.Core.Analysis
                 {
                     stock.Exclude(logger, "Negativ vinst");
                 }
-                else if (stock.DirectYield == 0) // Stocks with zero direct yield
+                else if (stock.DirectDividend == 0) // Stocks with zero direct dividend
                 {
                     stock.Exclude(logger, "Noll direktavkastning");
                 }
@@ -142,7 +142,7 @@ namespace Smidas.Core.Analysis
             }
 
             foreach (Stock stock in stocks.OrderBy(s => s.AbRank)
-                                        .ThenByDescending(s => s.DirectYield))
+                                        .ThenByDescending(s => s.DirectDividend))
             {
                 if (stock.Action == Action.Exclude)
                 {

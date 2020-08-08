@@ -36,7 +36,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             List<decimal> volumes = null;
             List<decimal> profitPerStock = null;
             List<decimal> adjustedEquityPerStock = null;
-            List<decimal> directYield = null;
+            List<decimal> directDividend = null;
 
             Parallel.Invoke(
                 () => names = ScrapeNodes("//div[contains(@class, 'js_Kurser')]/descendant::a[contains(@class, 'js_realtime__instrument-link')]")
@@ -58,19 +58,19 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                                                     .Parse()
                                                     .ToList(),
 
-                () => directYield = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[7]")
+                () => directDividend = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[7]")
                                         .Parse(hasSymbol: true)
                                         .ToList());
 
             // All lists must hold the same amount of elements
-            if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directYield }
+            if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directDividend }
                 .All(l => l.Count() != names.Count()))
             {
                 logger.LogError($"Elementlistorna har ej samma längd\n" +
-                    $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directYield.Count()} st");
+                    $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directDividend.Count()} st");
 
                 throw new ValidationException($"Elementlistorna har ej samma längd\n" +
-                    $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directYield.Count()} st");
+                    $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directDividend.Count()} st");
             }
 
             logger.LogInformation("Element - OK");
@@ -86,7 +86,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                     Volume = volumes[i],
                     ProfitPerStock = profitPerStock[i],
                     AdjustedEquityPerStock = adjustedEquityPerStock[i],
-                    DirectYield = directYield[i],
+                    DirectDividend = directDividend[i],
                 };
                 stocks.Add(stock);
             }
