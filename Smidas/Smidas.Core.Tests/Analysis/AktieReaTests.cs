@@ -440,7 +440,7 @@ namespace Smidas.Core.Tests.Analysis
         }
 
         [Fact]
-        public void DetermineActions_ThreeInvestmentStocksTwoAllowed_TheTwoBestAreMarkedBuyTheThirdIsExcluded()
+        public void DetermineActions_ThreeStocksInAnyIndustryTwoAllowed_TheTwoBestAreMarkedBuyTheThirdIsExcluded()
         {
             List<Stock> stocks = new List<Stock>();
 
