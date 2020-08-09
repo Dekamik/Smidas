@@ -15,7 +15,7 @@ namespace Smidas.CLI
 {
     public class ConsoleApplication
     {
-        private readonly string menu = @"
+        private readonly string _menu = @"
    Smidas
 
 -----------------------------------------------------
@@ -37,13 +37,13 @@ namespace Smidas.CLI
 
 -----------------------------------------------------";
 
-        private readonly ILogger logger;
+        private readonly ILogger _logger;
         
-        private readonly IOptions<AppSettings> options;
+        private readonly IOptions<AppSettings> _options;
         
-        private readonly AktieReaJob aktieReaJob;
+        private readonly AktieReaJob _aktieReaJob;
 
-        private readonly ExcelExporter excelExporter;
+        private readonly ExcelExporter _excelExporter;
 
         public ConsoleApplication(
             ILoggerFactory loggerFactory,
@@ -51,10 +51,10 @@ namespace Smidas.CLI
             AktieReaJob aktieReaJob,
             ExcelExporter excelExporter)
         {
-            this.logger = loggerFactory.CreateLogger<ConsoleApplication>();
-            this.options = options;
-            this.aktieReaJob = aktieReaJob;
-            this.excelExporter = excelExporter;
+            _logger = loggerFactory.CreateLogger<ConsoleApplication>();
+            _options = options;
+            _aktieReaJob = aktieReaJob;
+            _excelExporter = excelExporter;
         }
 
         public void Run()
@@ -65,7 +65,7 @@ namespace Smidas.CLI
 
             if (Environment.UserInteractive)
             {
-                Console.WriteLine(menu);
+                Console.WriteLine(_menu);
                 Console.Write(">> ");
                 input = Console.ReadLine();
 
@@ -83,7 +83,7 @@ namespace Smidas.CLI
 
                 if (input == "h" || input == "help")
                 {
-                    Console.WriteLine(menu);
+                    Console.WriteLine(_menu);
                     Environment.Exit(0);
                 }
             }
@@ -91,45 +91,45 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1":
-                    query = options.Value.AktieRea["OMXStockholmLargeCap"];
-                    exportPath = (query.ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    query = _options.Value.AktieRea["OMXStockholmLargeCap"];
+                    exportPath = (query.ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "2":
-                    query = options.Value.AktieRea["OMXCopenhagenLargeCap"];
-                    exportPath = (query.ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    query = _options.Value.AktieRea["OMXCopenhagenLargeCap"];
+                    exportPath = (query.ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "3":
-                    query = options.Value.AktieRea["OMXHelsinkiLargeCap"];
-                    exportPath = (query.ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    query = _options.Value.AktieRea["OMXHelsinkiLargeCap"];
+                    exportPath = (query.ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 case "4":
-                    query = options.Value.AktieRea["OsloOBX"];
-                    exportPath = (query.ExportDirectory ?? options.Value.DefaultExportDirectory) + $"\\AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    query = _options.Value.AktieRea["OsloOBX"];
+                    exportPath = (query.ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
                     break;
 
                 default:
                     break;
             }
 
-            Task<IEnumerable<Stock>> task = aktieReaJob.Run(query);
+            Task<IEnumerable<Stock>> task = _aktieReaJob.Run(query);
             task.Wait();
             IEnumerable<Stock> results = task.Result;
 
             if (!string.IsNullOrEmpty(exportPath))
             {
-                logger.LogInformation($"Exporterar analys om {results.Count()} aktier till {exportPath}");
+                _logger.LogInformation($"Exporterar analys om {results.Count()} aktier till {exportPath}");
 
                 using ExcelPackage excel = new ExcelPackage(new FileInfo(exportPath));
                 ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add($"AktieREA {DateTime.Today.ToString("yyyy-MM-dd")}");
 
-                excelExporter.ExportStocksToWorksheet(ref worksheet, results.ToList(), query.CurrencyCode);
+                _excelExporter.ExportStocksToWorksheet(ref worksheet, results.ToList(), query.CurrencyCode);
 
                 excel.Save();
 
-                logger.LogDebug("Exportering slutförd");
+                _logger.LogDebug("Exportering slutförd");
             }
         }
     }

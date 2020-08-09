@@ -23,16 +23,16 @@ namespace Smidas.Function
 {
     public class HttpTriggers
     {
-        private readonly AktieReaJob aktieReaJob;
-        private readonly ExcelExporter excelExporter;
+        private readonly AktieReaJob _aktieReaJob;
+        private readonly ExcelExporter _excelExporter;
 
         public HttpTriggers()
         {
             LoggerFactory loggerFactory = new LoggerFactory();
-            aktieReaJob = new AktieReaJob(loggerFactory,
+            _aktieReaJob = new AktieReaJob(loggerFactory,
                 new DagensIndustriWebScraper(loggerFactory),
                 new AktieRea(loggerFactory));
-            excelExporter = new ExcelExporter();
+            _excelExporter = new ExcelExporter();
         }
 
         [FunctionName(nameof(GetExcel))]
@@ -44,7 +44,7 @@ namespace Smidas.Function
             DateTime callTime = DateTime.Now;
 
             FunctionQuery query = JsonConvert.DeserializeObject<FunctionQuery>(await req.ReadAsStringAsync());
-            IEnumerable<Stock> results = await aktieReaJob.Run(query);
+            IEnumerable<Stock> results = await _aktieReaJob.Run(query);
 
             byte[] xlsxBytes = null;
 
@@ -52,7 +52,7 @@ namespace Smidas.Function
             {
                 ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add($"AktieREA {callTime.ToString("yyyy-MM-dd")}");
 
-                excelExporter.ExportStocksToWorksheet(ref worksheet, results.ToList(), query.CurrencyCode, doStyling: false);
+                _excelExporter.ExportStocksToWorksheet(ref worksheet, results.ToList(), query.CurrencyCode, doStyling: false);
 
                 xlsxBytes = excel.GetAsByteArray();
             }

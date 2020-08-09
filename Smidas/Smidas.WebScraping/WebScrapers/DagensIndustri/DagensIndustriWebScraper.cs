@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 using System.Xml.XPath;
@@ -17,20 +16,20 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 {
     public class DagensIndustriWebScraper : IWebScraper
     {
-        private readonly ILogger logger;
+        private readonly ILogger _logger;
 
-        private HtmlDocument html;
+        private HtmlDocument _html;
 
         public DagensIndustriWebScraper(ILoggerFactory loggerFactory)
         {
-            logger = loggerFactory.CreateLogger<DagensIndustriWebScraper>();
+            _logger = loggerFactory.CreateLogger<DagensIndustriWebScraper>();
         }
 
         public async Task<IList<Stock>> Scrape(AktieReaQuery query)
         {
-            logger.LogInformation($"Skrapar {query.IndexUrl}");
+            _logger.LogInformation($"Skrapar {query.IndexUrl}");
 
-            html = await new HtmlWeb().LoadFromWebAsync(query.IndexUrl);
+            _html = await new HtmlWeb().LoadFromWebAsync(query.IndexUrl);
 
             List<string> names = null;
             List<decimal> prices = null;
@@ -79,14 +78,14 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directDividend }
                 .All(l => l.Count() != names.Count()))
             {
-                logger.LogError($"Elementlistorna har ej samma längd\n" +
+                _logger.LogError($"Elementlistorna har ej samma längd\n" +
                     $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directDividend.Count()} st");
 
                 throw new ValidationException($"Elementlistorna har ej samma längd\n" +
                     $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directDividend.Count()} st");
             }
 
-            logger.LogInformation("Element - OK");
+            _logger.LogInformation("Element - OK");
 
             List<Stock> stocks = new List<Stock>();
 
@@ -106,7 +105,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 
             SetIndustries(ref stocks, query);
 
-            logger.LogInformation("Skrapning slutförd");
+            _logger.LogInformation("Skrapning slutförd");
             return stocks;
         }
 
@@ -114,7 +113,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         {
             try
             {
-                return html.DocumentNode.SelectNodes(xPath).Select(n => WebUtility.HtmlDecode(n.InnerText));
+                return _html.DocumentNode.SelectNodes(xPath).Select(n => WebUtility.HtmlDecode(n.InnerText));
             }
             catch (ArgumentNullException ex)
             {

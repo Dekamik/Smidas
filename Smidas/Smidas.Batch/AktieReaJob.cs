@@ -11,18 +11,18 @@ namespace Smidas.Batch
 {
     public class AktieReaJob
     {
-        private readonly ILogger logger;
-        private readonly IWebScraper webScraper;
-        private readonly IAnalysis analysis;
+        private readonly ILogger _logger;
+        private readonly IWebScraper _webScraper;
+        private readonly IAnalysis _analysis;
 
         public AktieReaJob(
             ILoggerFactory loggerFactory,
             IWebScraper webScraper,
             IAnalysis aktieRea)
         {
-            logger = loggerFactory.CreateLogger<AktieReaJob>();
-            this.webScraper = webScraper;
-            analysis = aktieRea;
+            _logger = loggerFactory.CreateLogger<AktieReaJob>();
+            this._webScraper = webScraper;
+            _analysis = aktieRea;
         }
 
         /// <summary>
@@ -37,16 +37,16 @@ namespace Smidas.Batch
         /// <returns></returns>
         public async Task<IEnumerable<Stock>> Run(AktieReaQuery query)
         {
-            logger.LogInformation($"AktieReaJob påbörjad.");
+            _logger.LogInformation($"AktieReaJob påbörjad.");
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
             // Run
-            IList<Stock> stockData = await webScraper.Scrape(query);
-            IEnumerable<Stock> results = analysis.Analyze(query, stockData);
+            IList<Stock> stockData = await _webScraper.Scrape(query);
+            IEnumerable<Stock> results = _analysis.Analyze(query, stockData);
 
             stopwatch.Stop();
-            logger.LogInformation($"AktieReaJob slutförd. Körtid: {stopwatch.Elapsed}");
+            _logger.LogInformation($"AktieReaJob slutförd. Körtid: {stopwatch.Elapsed}");
 
             return results;
         }
