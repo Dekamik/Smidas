@@ -69,7 +69,7 @@ namespace Smidas.Core.Analysis
         {
             logger.LogDebug($"Sållar dubbletter");
 
-            Dictionary<string, int> doublesCount = new Dictionary<string, int>();
+            var doublesCount = new Dictionary<string, int>();
             var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
 
             foreach (Stock stock in series) // Count amount of doubles per series
@@ -81,12 +81,12 @@ namespace Smidas.Core.Analysis
             var doubleStocks = series.Where(s => doublesCount[s.CompanyName] > 1);
             var doubleCompanies = doubleStocks.Select(s => s.CompanyName)
                                               .Distinct();
-            HashSet<string> stocksToExclude = new HashSet<string>();
+            var stocksToExclude = new HashSet<string>();
 
             foreach (string companyName in doubleCompanies)
             {
-                // Select the company's stocks, ordered by turnover
-                // Then keep the stock with the largest turnover (the first one). Exclude the rest.
+                // Select the company's stocks, ordered by volume
+                // Then keep the stock with the largest volume. Exclude the rest.
                 doubleStocks.Where(s => s.Name.Contains(companyName))
                             .OrderByDescending(s => s.Volume)
                             .Skip(1)
@@ -125,13 +125,13 @@ namespace Smidas.Core.Analysis
             logger.LogDebug($"Beslutar åtgärder");
 
             int index = 1;
-            Dictionary<string, int> industryAmount = new Dictionary<string, int>();
+            var industryAmount = new Dictionary<string, int>();
 
-            Dictionary<string, int> industryCap = new Dictionary<string, int>
+            var industryCap = new Dictionary<string, int>
             {
                 { Stock.OtherIndustries, -1 }
             };
-            foreach (KeyValuePair<string, AktieReaQuery.IndustryData> industry in query.Industries)
+            foreach (var industry in query.Industries)
             {
                 industryCap.Add(industry.Key, industry.Value.Cap);
             }
@@ -142,7 +142,7 @@ namespace Smidas.Core.Analysis
             }
 
             foreach (Stock stock in stocks.OrderBy(s => s.AbRank)
-                                        .ThenByDescending(s => s.DirectDividend))
+                                          .ThenByDescending(s => s.DirectDividend))
             {
                 if (stock.Action == Action.Exclude)
                 {
