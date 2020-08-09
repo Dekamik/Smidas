@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
@@ -36,7 +38,9 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             List<decimal> adjustedEquityPerStock = null;
             List<decimal> directDividend = null;
 
-            Parallel.Invoke(
+            try
+            {
+                Parallel.Invoke(
                 () => names = ScrapeNodes("//div[contains(@class, 'js_Kurser')]/descendant::a[contains(@class, 'js_realtime__instrument-link')]")
                                     .ToList(),
 
@@ -59,6 +63,11 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 () => directDividend = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[7]")
                                         .Parse(hasSymbol: true)
                                         .ToList());
+            }
+            catch (AggregateException ex)
+            {
+                throw new WebScrapingException("Multiple exceptions occured during parallel scraping. Check if website has been replaced.", ex);
+            }
 
             // All lists must hold the same amount of elements
             if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directDividend }

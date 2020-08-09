@@ -3,6 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Smidas.Common;
 using Smidas.Core.Stocks;
+using Smidas.WebScraping.WebScrapers;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
     public class DagensIndustriWebScraperTests
     {
         [Fact]
-        public async void Scrape_AnyCondition_ScrapingSuccessful()
+        public async void Scrape_ValidWebsite_ScrapingSuccessful()
         {
             var loggerFactory = A.Fake<ILoggerFactory>();
             var scraper = new DagensIndustriWebScraper(loggerFactory);
@@ -35,6 +36,20 @@ namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
             example.ProfitPerStock.Should().NotBe(0m);
             example.Industry.Should().NotBeNullOrEmpty();
             example.AdjustedEquityPerStock.Should().NotBe(0m);
+        }
+
+        [Fact]
+        public async void Scrape_InvalidWebsite_ScrapingUnsuccessful()
+        {
+            var loggerFactory = A.Fake<ILoggerFactory>();
+            var scraper = new DagensIndustriWebScraper(loggerFactory);
+            var query = new AktieReaQuery
+            {
+                IndexUrl = "https://www.affarsvarlden.se/bors/kurslistor/stockholm-large/kurs/",
+                Industries = new Dictionary<string, AktieReaQuery.IndustryData>()
+            };
+
+            await Assert.ThrowsAsync<WebScrapingException>(() => scraper.Scrape(query));
         }
     }
 }
