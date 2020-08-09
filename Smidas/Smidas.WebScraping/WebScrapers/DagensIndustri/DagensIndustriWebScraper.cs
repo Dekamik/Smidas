@@ -23,13 +23,11 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             logger = loggerFactory.CreateLogger<DagensIndustriWebScraper>();
         }
 
-        public IList<Stock> Scrape(AktieReaQuery query)
+        public async Task<IList<Stock>> Scrape(AktieReaQuery query)
         {
             logger.LogInformation($"Skrapar {query.IndexUrl}");
 
-            Task<HtmlDocument> htmlTask = new HtmlWeb().LoadFromWebAsync(query.IndexUrl);
-            htmlTask.Wait();
-            html = htmlTask.Result;
+            html = await new HtmlWeb().LoadFromWebAsync(query.IndexUrl);
 
             List<string> names = null;
             List<decimal> prices = null;

@@ -44,7 +44,7 @@ namespace Smidas.Function
             DateTime callTime = DateTime.Now;
 
             FunctionQuery query = JsonConvert.DeserializeObject<FunctionQuery>(await req.ReadAsStringAsync());
-            IEnumerable<Stock> results = aktieReaJob.Run(query);
+            IEnumerable<Stock> results = await aktieReaJob.Run(query);
 
             byte[] xlsxBytes = null;
 

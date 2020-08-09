@@ -5,6 +5,7 @@ using Smidas.Core.Stocks;
 using Smidas.WebScraping.WebScrapers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Smidas.Batch
 {
@@ -34,14 +35,14 @@ namespace Smidas.Batch
         /// </summary>
         /// <param name="input">The input.</param>
         /// <returns></returns>
-        public IEnumerable<Stock> Run(AktieReaQuery query)
+        public async Task<IEnumerable<Stock>> Run(AktieReaQuery query)
         {
             logger.LogInformation($"AktieReaJob påbörjad.");
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
             // Run
-            IList<Stock> stockData = webScraper.Scrape(query);
+            IList<Stock> stockData = await webScraper.Scrape(query);
             IEnumerable<Stock> results = analysis.Analyze(query, stockData);
 
             stopwatch.Stop();

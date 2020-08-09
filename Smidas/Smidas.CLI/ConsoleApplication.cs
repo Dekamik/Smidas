@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using static Smidas.CLI.AppSettings;
 
 namespace Smidas.CLI
@@ -113,7 +114,9 @@ namespace Smidas.CLI
                     break;
             }
 
-            IEnumerable<Stock> results = aktieReaJob.Run(query);
+            Task<IEnumerable<Stock>> task = aktieReaJob.Run(query);
+            task.Wait();
+            IEnumerable<Stock> results = task.Result;
 
             if (!string.IsNullOrEmpty(exportPath))
             {
