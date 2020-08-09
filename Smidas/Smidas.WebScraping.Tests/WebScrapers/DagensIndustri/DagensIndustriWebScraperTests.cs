@@ -4,10 +4,8 @@ using Microsoft.Extensions.Logging;
 using Smidas.Common;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri

@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using Smidas.Batch;
-using Smidas.Common;
 using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
 using Smidas.WebScraping.WebScrapers;

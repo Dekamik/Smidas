@@ -1,9 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Smidas.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Smidas.Core.DifferentialAnalysis
 {

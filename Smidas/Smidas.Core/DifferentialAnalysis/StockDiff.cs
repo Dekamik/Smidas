@@ -1,7 +1,4 @@
 ﻿using Smidas.Core.Stocks;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Smidas.Core.DifferentialAnalysis
 {
