@@ -125,10 +125,16 @@ namespace Smidas.Core.Analysis
             logger.LogDebug($"Beslutar åtgärder");
             
             var industryCap = new Dictionary<string, int> { { Stock.OtherIndustries, -1 } };
-            query.Industries.ForEach((industry) => { industryCap.Add(industry.Key, industry.Value.Cap); });
+            foreach (var industry in query.Industries)
+            {
+                industryCap.Add(industry.Key, industry.Value.Cap);
+            }
 
             var industryAmount = new Dictionary<string, int>();
-            industryCap.Keys.ForEach((industry) => { industryAmount.Add(industry, 0); });
+            foreach (var industry in industryCap.Keys)
+            {
+                industryAmount.Add(industry, 0);
+            }
 
             int i = 1;
             foreach (Stock stock in stocks.OrderBy(s => s.AbRank)
