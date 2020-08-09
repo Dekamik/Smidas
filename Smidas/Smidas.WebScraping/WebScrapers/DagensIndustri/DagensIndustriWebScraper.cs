@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using Smidas.Common;
@@ -66,7 +67,12 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             }
             catch (AggregateException ex)
             {
-                throw new WebScrapingException("Multiple exceptions occured during parallel scraping. Check if website has been replaced.", ex);
+                if (ex.InnerExceptions.Any((innerEx) => innerEx is XPathException))
+                {
+                    throw new WebScrapingException("One or more XPaths failed. Check if website has been redesigned.", ex);
+                }
+
+                throw;
             }
 
             // All lists must hold the same amount of elements
@@ -104,8 +110,17 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             return stocks;
         }
 
-        private IEnumerable<string> ScrapeNodes(string xPath) => html.DocumentNode.SelectNodes(xPath)
-                                                                                  .Select(n => WebUtility.HtmlDecode(n.InnerText));
+        private IEnumerable<string> ScrapeNodes(string xPath)
+        {
+            try
+            {
+                return html.DocumentNode.SelectNodes(xPath).Select(n => WebUtility.HtmlDecode(n.InnerText));
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new XPathException("Element not found on website.", ex);
+            }
+        } 
 
         public void SetIndustries(ref List<Stock> stockData, AktieReaQuery query)
         {
