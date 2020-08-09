@@ -123,24 +123,14 @@ namespace Smidas.Core.Analysis
         public void DetermineActions(ref IEnumerable<Stock> stocks, AktieReaQuery query)
         {
             logger.LogDebug($"Beslutar åtgärder");
+            
+            var industryCap = new Dictionary<string, int> { { Stock.OtherIndustries, -1 } };
+            query.Industries.ForEach((industry) => { industryCap.Add(industry.Key, industry.Value.Cap); });
 
-            int index = 1;
             var industryAmount = new Dictionary<string, int>();
+            industryCap.Keys.ForEach((industry) => { industryAmount.Add(industry, 0); });
 
-            var industryCap = new Dictionary<string, int>
-            {
-                { Stock.OtherIndustries, -1 }
-            };
-            foreach (var industry in query.Industries)
-            {
-                industryCap.Add(industry.Key, industry.Value.Cap);
-            }
-
-            foreach (string industry in industryCap.Keys)
-            {
-                industryAmount.Add(industry, 0);
-            }
-
+            int i = 1;
             foreach (Stock stock in stocks.OrderBy(s => s.AbRank)
                                           .ThenByDescending(s => s.DirectDividend))
             {
@@ -161,10 +151,10 @@ namespace Smidas.Core.Analysis
                 industryAmount[stock.Industry.ToString()] += 1;
 
                 // Determine action on stock
-                stock.Action = index <= query.AmountToBuy ? Action.Buy :
-                               index <= query.AmountToBuy + query.AmountToKeep ? Action.Keep :
+                stock.Action = i <= query.AmountToBuy ? Action.Buy :
+                               i <= query.AmountToBuy + query.AmountToKeep ? Action.Keep :
                                Action.Sell;
-                index++;
+                i++;
             }
         }
     }
