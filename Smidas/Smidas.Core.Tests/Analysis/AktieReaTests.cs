@@ -73,9 +73,7 @@ namespace Smidas.Core.Tests.Analysis
 
             var options = new AktieReaQuery.AnalysisOptionsData
             {
-                ExcludeNegativeProfitStocks = true,
-                ExcludeZeroDividendStocks = true,
-                ExcludePreferentialStocks = true
+                ExcludeNegativeProfitStocks = true
             };
 
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
@@ -99,9 +97,7 @@ namespace Smidas.Core.Tests.Analysis
 
             var options = new AktieReaQuery.AnalysisOptionsData
             {
-                ExcludeNegativeProfitStocks = true,
-                ExcludeZeroDividendStocks = true,
-                ExcludePreferentialStocks = true
+                ExcludeNegativeProfitStocks = true
             };
 
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
@@ -111,7 +107,7 @@ namespace Smidas.Core.Tests.Analysis
         }
 
         [Fact]
-        public void ExcludeDisqualifiedStocks_ZeroDirectYield_StockIsExcluded()
+        public void ExcludeDisqualifiedStocks_ZeroDirectDividend_StockIsExcluded()
         {
             IEnumerable<Stock> stocks = new List<Stock>
             {
@@ -125,9 +121,7 @@ namespace Smidas.Core.Tests.Analysis
 
             var options = new AktieReaQuery.AnalysisOptionsData
             {
-                ExcludeNegativeProfitStocks = true,
-                ExcludeZeroDividendStocks = true,
-                ExcludePreferentialStocks = true
+                ExcludeZeroDividendStocks = true
             };
 
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
@@ -137,7 +131,7 @@ namespace Smidas.Core.Tests.Analysis
         }
 
         [Fact]
-        public void ExcludeDisqualifiedStocks_PositiveDirectYield_StockIsntExcluded()
+        public void ExcludeDisqualifiedStocks_PositiveDirectDividend_StockIsntExcluded()
         {
             IEnumerable<Stock> stocks = new List<Stock>
             {
@@ -151,9 +145,7 @@ namespace Smidas.Core.Tests.Analysis
 
             var options = new AktieReaQuery.AnalysisOptionsData
             {
-                ExcludeNegativeProfitStocks = true,
-                ExcludeZeroDividendStocks = true,
-                ExcludePreferentialStocks = true
+                ExcludeZeroDividendStocks = true
             };
 
             _aktieRea.ExcludeDisqualifiedStocks(ref stocks, options);
@@ -177,8 +169,6 @@ namespace Smidas.Core.Tests.Analysis
 
             var options = new AktieReaQuery.AnalysisOptionsData
             {
-                ExcludeNegativeProfitStocks = true,
-                ExcludeZeroDividendStocks = true,
                 ExcludePreferentialStocks = true
             };
 
@@ -203,8 +193,6 @@ namespace Smidas.Core.Tests.Analysis
 
             var options = new AktieReaQuery.AnalysisOptionsData
             {
-                ExcludeNegativeProfitStocks = true,
-                ExcludeZeroDividendStocks = true,
                 ExcludePreferentialStocks = true
             };
 
