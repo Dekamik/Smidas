@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <StartupObject>Smidas.CLI.Program</StartupObject>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>

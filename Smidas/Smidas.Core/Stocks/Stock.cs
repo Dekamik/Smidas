@@ -71,7 +71,8 @@ namespace Smidas.Core.Stocks
             logger.LogTrace($"Sållade {Name} - {reason}");
         }
 
-        public override string ToString() => $"{Name}, {CompanyName}, {Industry}, {Action.GetDisplayName()}, {Price}, {Volume}, " +
-                                             $"{AdjustedEquityPerStock}, {DirectDividend}, {ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
+        public override string ToString() => $"{Name}, {CompanyName}, {Industry}, {Action.GetDisplayName()}, " +
+                                             $"{Price}, {Volume}, {AdjustedEquityPerStock}, {DirectDividend}, " +
+                                             $"{ProfitPerStock}, {Ep}, {ARank}, {BRank}, {AbRank}, {Comments}";
     }
 }
