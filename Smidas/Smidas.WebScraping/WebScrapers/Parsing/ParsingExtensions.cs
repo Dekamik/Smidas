@@ -21,7 +21,7 @@ namespace Smidas.WebScraping.WebScrapers.Parsing
         {
             try
             {
-                return decimal.Parse(str.Substring(0, str.Length - 1).Replace(" ", "") ?? "0");
+                return decimal.Parse(str[..^1].Replace(" ", ""));
             }
             catch
             {
@@ -29,12 +29,45 @@ namespace Smidas.WebScraping.WebScrapers.Parsing
             }
         }
 
-        public static IEnumerable<decimal> Parse(this IEnumerable<string> cells, bool hasSymbol = false)
+        public static decimal ParsePercentage(this string str)
         {
-            foreach (string cell in cells)
+            try
             {
-                yield return hasSymbol ? cell.ParseDecimalWithSymbol() : cell.ParseDecimal();
+                return decimal.Parse(str[..^1].Replace(",", "."));
             }
+            catch
+            {
+                throw new FormatException($"Decimal not in correct format: {str}");
+            }
+        }
+
+        public static IEnumerable<decimal> Parse(this IEnumerable<string> cells, DecimalType type = DecimalType.Normal)
+        {
+            switch (type)
+            {
+                case DecimalType.Normal:
+                default:
+                    foreach (var cell in cells)
+                    {
+                        yield return cell == "-" ? 0 : cell.ParseDecimal();
+                    }
+                    break;
+                
+                case DecimalType.WithSymbol:
+                    foreach (var cell in cells)
+                    {
+                        yield return cell == "-" ? 0 : cell.ParseDecimalWithSymbol();
+                    }
+                    break;
+                
+                case DecimalType.Percentage:
+                    foreach (var cell in cells)
+                    {
+                        yield return cell == "-" ? 0 : cell.ParsePercentage();
+                    }
+                    break;
+            }
+            
         }
     }
 }

@@ -92,22 +92,22 @@ namespace Smidas.CLI
             {
                 case "1":
                     query = _options.Value.AktieRea["OMXStockholmLargeCap"];
-                    exportPath = (query.ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = Path.Combine(query.ExportDirectory ?? _options.Value.DefaultExportDirectory, $"AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx");
                     break;
 
                 case "2":
                     query = _options.Value.AktieRea["OMXCopenhagenLargeCap"];
-                    exportPath = (query.ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = Path.Combine(query.ExportDirectory ?? _options.Value.DefaultExportDirectory, $"AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx");
                     break;
 
                 case "3":
                     query = _options.Value.AktieRea["OMXHelsinkiLargeCap"];
-                    exportPath = (query.ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = Path.Combine(query.ExportDirectory ?? _options.Value.DefaultExportDirectory, $"AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx");
                     break;
 
                 case "4":
                     query = _options.Value.AktieRea["OsloOBX"];
-                    exportPath = (query.ExportDirectory ?? _options.Value.DefaultExportDirectory) + $"\\AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx";
+                    exportPath = Path.Combine(query.ExportDirectory ?? _options.Value.DefaultExportDirectory, $"AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx");
                     break;
 
                 default:

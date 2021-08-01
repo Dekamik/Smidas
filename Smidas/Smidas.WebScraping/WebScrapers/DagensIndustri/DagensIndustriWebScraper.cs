@@ -41,27 +41,27 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             try
             {
                 Parallel.Invoke(
-                () => names = ScrapeNodes("//div[contains(@class, 'js_Kurser')]/descendant::a[contains(@class, 'js_realtime__instrument-link')]")
+                () => names = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 1]/tbody/tr/td[1]/a")
                                     .ToList(),
 
-                () => prices = ScrapeNodes("//tr[contains(@class, 'js_real-time-Kurser')]/descendant::span[contains(@class, 'di_stocks-table__last-price')]")
+                () => prices = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 1]/tbody/tr/td[2]")
                                     .Parse()
                                     .ToList(),
 
-                () => volumes = ScrapeNodes("//td[contains(@class, 'js_real-time__quantity')]")
+                () => volumes = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 1]/tbody/tr/td[7]")
                                     .Parse()
                                     .ToList(),
 
-                () => profitPerStock = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[4]")
+                () => profitPerStock = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 0]/tbody/tr/td[5]")
                                             .Parse()
                                             .ToList(),
 
-                () => adjustedEquityPerStock = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[5]")
+                () => adjustedEquityPerStock = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 0]/tbody/tr/td[6]")
                                                     .Parse()
                                                     .ToList(),
 
-                () => directDividend = ScrapeNodes("//tr[contains(@class, 'js_real-time-Nyckeltal')]/td[7]")
-                                        .Parse(hasSymbol: true)
+                () => directDividend = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 0]/tbody/tr/td[8]")
+                                        .Parse(DecimalType.Percentage)
                                         .ToList());
             }
             catch (AggregateException ex)
@@ -117,7 +117,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             }
             catch (ArgumentNullException ex)
             {
-                throw new XPathException("Element not found on website.", ex);
+                throw new XPathException($"Element not found on website. XPath: {xPath}", ex);
             }
         } 
 
