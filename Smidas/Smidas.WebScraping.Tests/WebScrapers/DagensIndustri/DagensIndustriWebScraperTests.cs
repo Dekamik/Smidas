@@ -20,7 +20,7 @@ namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
             var scraper = new DagensIndustriWebScraper(loggerFactory);
             var query = new AktieReaQuery
             {
-                IndexUrl = "https://www.di.se/bors/aktier/?Countries=SE&Lists=4&Lists=&Lists=&Lists=&Lists=&RootSectors=&RootSectors=",
+                IndexUrls = new [] { "https://www.di.se/bors/aktier/?Countries=SE&Lists=4&Lists=&Lists=&Lists=&Lists=&RootSectors=&RootSectors=" },
                 Industries = new Dictionary<string, AktieReaQuery.IndustryData>()
             };
 
@@ -45,7 +45,7 @@ namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
             var scraper = new DagensIndustriWebScraper(loggerFactory);
             var query = new AktieReaQuery
             {
-                IndexUrl = "https://www.affarsvarlden.se/bors/kurslistor/stockholm-large/kurs/",
+                IndexUrls = new [] { "https://www.affarsvarlden.se/bors/kurslistor/stockholm-large/kurs/" },
                 Industries = new Dictionary<string, AktieReaQuery.IndustryData>()
             };
 

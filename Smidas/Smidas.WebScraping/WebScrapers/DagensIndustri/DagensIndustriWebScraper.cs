@@ -18,8 +18,6 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
     {
         private readonly ILogger _logger;
 
-        private HtmlDocument _html;
-
         public DagensIndustriWebScraper(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<DagensIndustriWebScraper>();
@@ -27,62 +25,53 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 
         public async Task<IList<Stock>> Scrape(AktieReaQuery query)
         {
-            _logger.LogInformation($"Skrapar {query.IndexUrl}");
+            var names = new List<string>();
+            var prices = new List<decimal>();
+            var volumes = new List<decimal>();
+            var profitPerStock = new List<decimal>();
+            var adjustedEquityPerStock = new List<decimal>();
+            var directDividend = new List<decimal>();
 
-            _html = await new HtmlWeb().LoadFromWebAsync(query.IndexUrl);
-
-            List<string> names = null;
-            List<decimal> prices = null;
-            List<decimal> volumes = null;
-            List<decimal> profitPerStock = null;
-            List<decimal> adjustedEquityPerStock = null;
-            List<decimal> directDividend = null;
-
-            try
+            for (var i = 0; i < query.IndexUrls.Length; i++)
             {
-                Parallel.Invoke(
-                () => names = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 1]/tbody/tr/td[1]/a")
-                                    .ToList(),
-
-                () => prices = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 1]/tbody/tr/td[2]")
-                                    .Parse()
-                                    .ToList(),
-
-                () => volumes = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 1]/tbody/tr/td[7]")
-                                    .Parse()
-                                    .ToList(),
-
-                () => profitPerStock = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 0]/tbody/tr/td[5]")
-                                            .Parse()
-                                            .ToList(),
-
-                () => adjustedEquityPerStock = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 0]/tbody/tr/td[6]")
-                                                    .Parse()
-                                                    .ToList(),
-
-                () => directDividend = ScrapeNodes("/html/body/div/div/div/div/div/div/table[position() mod 3 = 0]/tbody/tr/td[8]")
-                                        .Parse(DecimalType.Percentage)
-                                        .ToList());
-            }
-            catch (AggregateException ex)
-            {
-                if (ex.InnerExceptions.Any((innerEx) => innerEx is XPathException))
+                try
                 {
-                    throw new WebScrapingException("One or more XPaths failed. Check if website has been redesigned.", ex);
-                }
+                    _logger.LogInformation($"Skrapar {query.IndexUrls[i]} ({i + 1}/{query.IndexUrls.Length})");
+                    var document = await new HtmlWeb().LoadFromWebAsync(query.IndexUrls[i]);
 
-                throw;
+                    names.AddRange(ScrapeNodes(document, query.XPathExpressions.Names));
+                    prices.AddRange(ScrapeNodes(document, query.XPathExpressions.Prices).Parse());
+                    volumes.AddRange(ScrapeNodes(document, query.XPathExpressions.Volumes).Parse());
+                    profitPerStock.AddRange(ScrapeNodes(document, query.XPathExpressions.ProfitPerStock).Parse());
+                    adjustedEquityPerStock.AddRange(ScrapeNodes(document, query.XPathExpressions.AdjustedEquityPerStock)
+                        .Parse());
+                    directDividend.AddRange(ScrapeNodes(document, query.XPathExpressions.DirectDividend)
+                        .Parse(DecimalType.Percentage));
+                }
+                catch (AggregateException ex)
+                {
+                    if (ex.InnerExceptions.Any(innerEx => innerEx is XPathException))
+                    {
+                        throw new WebScrapingException("One or more XPaths failed. Check if website has been redesigned.", ex);
+                    }
+
+                    throw;
+                }
             }
 
             // All lists must hold the same amount of elements
             if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directDividend }
-                .All(l => l.Count() != names.Count()))
+                .Any(l => l.Count != names.Count))
             {
-                _logger.LogError($"Elementlistorna har ej samma längd\n" +
-                    $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directDividend.Count()} st");
-
-                throw new ValidationException($"Elementlistorna har ej samma längd\n" +
-                    $"Namn: {names.Count()} st, Priser: {prices.Count()} st, Volymer: {volumes.Count()} st, Vinst/aktie: {profitPerStock.Count()} st, JEK/aktie: {adjustedEquityPerStock.Count()}, Dir.avk: {directDividend.Count()} st");
+                var message = $"Elementlistorna har ej samma längd\n" +
+                              $"Namn: {names.Count} st, " +
+                              $"Priser: {prices.Count} st, " +
+                              $"Volymer: {volumes.Count} st, " +
+                              $"Vinst/aktie: {profitPerStock.Count} st, " +
+                              $"JEK/aktie: {adjustedEquityPerStock.Count}, " +
+                              $"Dir.avk: {directDividend.Count} st";
+                _logger.LogError(message);
+                throw new ValidationException(message);
             }
 
             _logger.LogInformation("Element - OK");
@@ -109,17 +98,17 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             return stocks;
         }
 
-        private IEnumerable<string> ScrapeNodes(string xPath)
+        private IEnumerable<string> ScrapeNodes(HtmlDocument document, string xPath)
         {
-            try
+            var node = document.DocumentNode.SelectNodes(xPath);
+
+            if (node == null)
             {
-                return _html.DocumentNode.SelectNodes(xPath).Select(n => WebUtility.HtmlDecode(n.InnerText));
+                throw new XPathException($"Element not found on website. XPath: {xPath}");
             }
-            catch (ArgumentNullException ex)
-            {
-                throw new XPathException($"Element not found on website. XPath: {xPath}", ex);
-            }
-        } 
+            
+            return node.Select(n => WebUtility.HtmlDecode(n.InnerText));
+        }
 
         public void SetIndustries(ref List<Stock> stockData, AktieReaQuery query)
         {

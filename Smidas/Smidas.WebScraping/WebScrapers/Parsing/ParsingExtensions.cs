@@ -5,11 +5,13 @@ namespace Smidas.WebScraping.WebScrapers.Parsing
 {
     public static class ParsingExtensions
     {
+        private static string Sanitize(this string str) => str.Replace(" ", "").Replace(",", ".");
+        
         public static decimal ParseDecimal(this string str)
         {
             try
             {
-                return decimal.Parse(!string.IsNullOrEmpty(str) ? str.Replace(" ", "") : "0");
+                return decimal.Parse(!string.IsNullOrEmpty(str) ? str.Sanitize() : "0");
             }
             catch (FormatException)
             {
@@ -21,7 +23,7 @@ namespace Smidas.WebScraping.WebScrapers.Parsing
         {
             try
             {
-                return decimal.Parse(str[..^1].Replace(" ", ""));
+                return decimal.Parse(str[..^1].Sanitize());
             }
             catch
             {
@@ -33,7 +35,7 @@ namespace Smidas.WebScraping.WebScrapers.Parsing
         {
             try
             {
-                return decimal.Parse(str[..^1].Replace(",", "."));
+                return decimal.Parse(str[..^1].Sanitize());
             }
             catch
             {
