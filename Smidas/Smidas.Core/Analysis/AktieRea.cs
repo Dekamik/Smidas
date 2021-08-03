@@ -8,7 +8,7 @@ using Smidas.Common;
 
 namespace Smidas.Core.Analysis
 {
-    public class AktieRea : IAnalysis
+    public class AktieRea : IAktieRea
     {
         private readonly ILogger _logger;
 

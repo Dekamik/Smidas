@@ -41,15 +41,15 @@ namespace Smidas.CLI
         
         private readonly IOptions<AppSettings> _options;
         
-        private readonly AktieReaJob _aktieReaJob;
+        private readonly IAktieReaJob _aktieReaJob;
 
-        private readonly ExcelExporter _excelExporter;
+        private readonly IExcelExporter _excelExporter;
 
         public ConsoleApplication(
             ILoggerFactory loggerFactory,
             IOptions<AppSettings> options,
-            AktieReaJob aktieReaJob,
-            ExcelExporter excelExporter)
+            IAktieReaJob aktieReaJob,
+            IExcelExporter excelExporter)
         {
             _logger = loggerFactory.CreateLogger<ConsoleApplication>();
             _options = options;

@@ -9,20 +9,20 @@ using System.Threading.Tasks;
 
 namespace Smidas.Batch
 {
-    public class AktieReaJob
+    public class AktieReaJob : IAktieReaJob
     {
         private readonly ILogger _logger;
         private readonly IWebScraper _webScraper;
-        private readonly IAnalysis _analysis;
+        private readonly IAktieRea _aktieRea;
 
         public AktieReaJob(
             ILoggerFactory loggerFactory,
             IWebScraper webScraper,
-            IAnalysis aktieRea)
+            IAktieRea aktieRea)
         {
             _logger = loggerFactory.CreateLogger<AktieReaJob>();
             this._webScraper = webScraper;
-            _analysis = aktieRea;
+            _aktieRea = aktieRea;
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Smidas.Batch
 
             // Run
             IList<Stock> stockData = await _webScraper.Scrape(query);
-            IEnumerable<Stock> results = _analysis.Analyze(query, stockData);
+            IEnumerable<Stock> results = _aktieRea.Analyze(query, stockData);
 
             stopwatch.Stop();
             _logger.LogInformation($"AktieReaJob slutförd. Körtid: {stopwatch.Elapsed}");

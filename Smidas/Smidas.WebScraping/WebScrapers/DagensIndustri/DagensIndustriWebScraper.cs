@@ -14,7 +14,7 @@ using Smidas.WebScraping.WebScrapers.Parsing;
 
 namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 {
-    public class DagensIndustriWebScraper : IWebScraper
+    public class DagensIndustriWebScraper : IDagensIndustriWebScraper
     {
         private readonly ILogger _logger;
 
@@ -39,14 +39,40 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                     _logger.LogInformation($"Skrapar {query.IndexUrls[i]} ({i + 1}/{query.IndexUrls.Length})");
                     var document = await new HtmlWeb().LoadFromWebAsync(query.IndexUrls[i]);
 
-                    names.AddRange(ScrapeNodes(document, query.XPathExpressions.Names));
-                    prices.AddRange(ScrapeNodes(document, query.XPathExpressions.Prices).Parse());
-                    volumes.AddRange(ScrapeNodes(document, query.XPathExpressions.Volumes).Parse());
-                    profitPerStock.AddRange(ScrapeNodes(document, query.XPathExpressions.ProfitPerStock).Parse());
-                    adjustedEquityPerStock.AddRange(ScrapeNodes(document, query.XPathExpressions.AdjustedEquityPerStock)
-                        .Parse());
-                    directDividend.AddRange(ScrapeNodes(document, query.XPathExpressions.DirectDividend)
-                        .Parse(DecimalType.Percentage));
+                    var scrapedNames = ScrapeNodes(document, query.XPathExpressions.Names);
+                    var scrapedPrices = ScrapeNodes(document, query.XPathExpressions.Prices).Parse();
+                    var scrapedVolumes = ScrapeNodes(document, query.XPathExpressions.Volumes).Parse();
+                    var scrapedProfitPerStock = ScrapeNodes(document, query.XPathExpressions.ProfitPerStock).Parse();
+                    var scrapedAdjustedEquityPerStock =
+                        ScrapeNodes(document, query.XPathExpressions.AdjustedEquityPerStock).Parse();
+                    var scrapedDirectDividend = ScrapeNodes(document, query.XPathExpressions.DirectDividend)
+                        .Parse(DecimalType.Percentage);
+
+                    var nameList = scrapedNames.ToList();
+
+                    // All lists must hold the same amount of elements
+                    if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directDividend }
+                        .Any(l => l.Count != names.Count))
+                    {
+                        var message = $"Förväntade samma antal skrapade objekt i samtliga listor, men hittade en eller flera avvikelser:\n" +
+                                      $"Namn:        {nameList.Count} st, " +
+                                      $"Priser:      {scrapedPrices.Count()} st, " +
+                                      $"Volymer:     {scrapedVolumes.Count()} st, " +
+                                      $"Vinst/aktie: {scrapedProfitPerStock.Count()} st, " +
+                                      $"JEK/aktie:   {scrapedAdjustedEquityPerStock.Count()} st" +
+                                      $"Dir.avk:     {scrapedDirectDividend.Count()} st";
+                        _logger.LogError(message);
+                        throw new ValidationException(message);
+                    }
+                    
+                    _logger.LogInformation($"Skrapade {nameList.Count} rader");
+
+                    names.AddRange(nameList);
+                    prices.AddRange(scrapedPrices);
+                    volumes.AddRange(scrapedVolumes);
+                    profitPerStock.AddRange(scrapedProfitPerStock);
+                    adjustedEquityPerStock.AddRange(scrapedAdjustedEquityPerStock);
+                    directDividend.AddRange(scrapedDirectDividend);
                 }
                 catch (AggregateException ex)
                 {
@@ -59,22 +85,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 }
             }
 
-            // All lists must hold the same amount of elements
-            if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directDividend }
-                .Any(l => l.Count != names.Count))
-            {
-                var message = $"Elementlistorna har ej samma längd\n" +
-                              $"Namn: {names.Count} st, " +
-                              $"Priser: {prices.Count} st, " +
-                              $"Volymer: {volumes.Count} st, " +
-                              $"Vinst/aktie: {profitPerStock.Count} st, " +
-                              $"JEK/aktie: {adjustedEquityPerStock.Count}, " +
-                              $"Dir.avk: {directDividend.Count} st";
-                _logger.LogError(message);
-                throw new ValidationException(message);
-            }
-
-            _logger.LogInformation("Element - OK");
+            _logger.LogInformation($"{names.Count} rader skrapade totalt - OK");
 
             List<Stock> stocks = new List<Stock>();
 

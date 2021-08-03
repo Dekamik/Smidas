@@ -11,6 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Smidas.API.BatchJobs;
+using Smidas.Batch;
+using Smidas.Core.Analysis;
+using Smidas.WebScraping.WebScrapers;
+using Smidas.WebScraping.WebScrapers.DagensIndustri;
 
 namespace Smidas.API
 {
@@ -26,6 +31,14 @@ namespace Smidas.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();
+            services.Configure<AppSettings>(Configuration.GetSection("AktieRea"));
+
+            services.AddScoped<IAktieReaJob, AktieReaJob>();
+            services.AddScoped<IWebScraper, DagensIndustriWebScraper>();
+            services.AddScoped<IAktieRea, AktieRea>();
+            services.AddScoped<IBatchJobService, BatchJobService>();
+            
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {

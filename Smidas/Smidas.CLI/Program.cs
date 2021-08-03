@@ -42,10 +42,10 @@ namespace Smidas.CLI
             services.Configure<AppSettings>(config.GetSection("AktieRea"));
             services.Configure<ConsoleLoggerOptions>(config.GetSection("Logging"));
 
-            services.AddScoped<AktieReaJob>();
-            services.AddScoped<IWebScraper, DagensIndustriWebScraper>();
-            services.AddScoped<IAnalysis, AktieRea>();
-            services.AddScoped<ExcelExporter>();
+            services.AddScoped<IAktieReaJob, AktieReaJob>();
+            services.AddScoped<IDagensIndustriWebScraper, DagensIndustriWebScraper>();
+            services.AddScoped<IAktieRea, AktieRea>();
+            services.AddScoped<IExcelExporter, ExcelExporter>();
             services.AddScoped<ConsoleApplication>();
 
             return services;

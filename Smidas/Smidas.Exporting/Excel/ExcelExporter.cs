@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Smidas.Exporting.Excel
 {
-    public class ExcelExporter
+    public class ExcelExporter : IExcelExporter
     {
         public void ExportStocksToWorksheet(ref ExcelWorksheet worksheet, List<Stock> stocks, string currency, bool doStyling = true)
         {
