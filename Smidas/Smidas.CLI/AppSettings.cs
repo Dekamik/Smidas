@@ -11,7 +11,5 @@ namespace Smidas.CLI
         }
 
         public IDictionary<string, AktieReaLocalQuery> AktieRea { get; set; }
-
-        public string DefaultExportDirectory { get; set; }
     }
 }
