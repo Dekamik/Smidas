@@ -14,6 +14,7 @@ using Microsoft.OpenApi.Models;
 using Smidas.API.BatchJobs;
 using Smidas.Batch;
 using Smidas.Core.Analysis;
+using Smidas.Exporting.Excel;
 using Smidas.WebScraping.WebScrapers;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
 
@@ -37,6 +38,7 @@ namespace Smidas.API
             services.AddScoped<IAktieReaJob, AktieReaJob>();
             services.AddScoped<IWebScraper, DagensIndustriWebScraper>();
             services.AddScoped<IAktieRea, AktieRea>();
+            services.AddScoped<IExcelExporter, ExcelExporter>();
             services.AddScoped<IBatchJobService, BatchJobService>();
             
             services.AddControllers();
