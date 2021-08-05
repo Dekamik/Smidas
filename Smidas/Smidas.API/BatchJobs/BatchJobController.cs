@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Smidas.API.BatchJobs
 {
@@ -8,25 +9,21 @@ namespace Smidas.API.BatchJobs
     [Route("[controller]")]
     public class BatchJobController : ControllerBase
     {
-        private readonly BatchJobService _batchJobService;
+        private readonly IBatchJobService _batchJobService;
+        private ILogger<BatchJobController> _logger;
 
-        public BatchJobController(BatchJobService batchJobService)
+        public BatchJobController(IBatchJobService batchJobService,
+            ILogger<BatchJobController> logger)
         {
+            _logger = logger;
             _batchJobService = batchJobService;
         }
         
         [HttpGet, Route("{index}")]
         public async Task<IActionResult> Index(string index)
         {
-            try
-            {
-                await _batchJobService.RunOnIndex(index);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return Problem(ex.StackTrace, null, 500, ex.Message, ex.GetType().Name);
-            }
+            await _batchJobService.RunOnIndex(index);
+            return Ok();
         }
     }
 }

@@ -25,6 +25,9 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 
         public async Task<IList<Stock>> Scrape(AktieReaQuery query)
         {
+            var htmlWeb = new HtmlWeb();
+            _logger.LogInformation($"UserAgent: {htmlWeb.UserAgent}");
+            
             var names = new List<string>();
             var prices = new List<decimal>();
             var volumes = new List<decimal>();
@@ -37,7 +40,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 try
                 {
                     _logger.LogInformation($"Skrapar {query.IndexUrls[i]} ({i + 1}/{query.IndexUrls.Length})");
-                    var document = await new HtmlWeb().LoadFromWebAsync(query.IndexUrls[i]);
+                    var document = await htmlWeb.LoadFromWebAsync(query.IndexUrls[i]);
 
                     var scrapedNames = ScrapeNodes(document, query.XPathExpressions.Names);
                     var scrapedPrices = ScrapeNodes(document, query.XPathExpressions.Prices).Parse();
