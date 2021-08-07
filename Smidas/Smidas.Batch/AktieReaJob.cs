@@ -27,7 +27,7 @@ namespace Smidas.Batch
         
         public async Task<IEnumerable<Stock>> Run(AktieReaQuery query)
         {
-            _logger.LogInformation($"AktieReaJob påbörjad.");
+            _logger.LogInformation($"AktieReaJob start.");
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -36,7 +36,7 @@ namespace Smidas.Batch
             IEnumerable<Stock> results = _aktieRea.Analyze(query, stockData);
 
             stopwatch.Stop();
-            _logger.LogInformation($"AktieReaJob slutförd. Körtid: {stopwatch.Elapsed}");
+            _logger.LogInformation($"AktieReaJob end. Runtime: {stopwatch.ElapsedMilliseconds}ms");
 
             return results;
         }
