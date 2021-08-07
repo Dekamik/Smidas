@@ -12,7 +12,7 @@ namespace Smidas.API.BatchJobs
 {
     public class BatchJobService : IBatchJobService
     {
-        private readonly IOptionsSnapshot<AktieReaSettings> _settings;
+        private readonly AktieReaSettings _settings;
         private readonly IAktieReaJob _aktieReaJob;
         private readonly IExcelExporter _excelExporter;
         private readonly ILogger<BatchJobService> _logger;
@@ -26,15 +26,15 @@ namespace Smidas.API.BatchJobs
             _logger = logger;
             _excelExporter = excelExporter;
             _aktieReaJob = aktieReaJob;
-            _settings = settings;
+            _settings = settings.Value;
         }
 
         public async Task RunOnIndex(string index)
         {
-            if (!_settings.Value.ScrapingSets.ContainsKey(index))
+            if (!_settings.ScrapingSets.ContainsKey(index))
                 throw new NullReferenceException($"{index} couldn't resolve to a predefined AktieRea index");
             
-            var query = _settings.Value.ScrapingSets
+            var query = _settings.ScrapingSets
                 .Single(i => i.Key == index)
                 .Value;
 
