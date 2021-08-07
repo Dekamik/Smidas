@@ -154,7 +154,7 @@ namespace Smidas.Core.Analysis
                     continue;
                 }
 
-                industryAmount[stock.Industry.ToString()] += 1;
+                industryAmount[stock.Industry] += 1;
 
                 // Determine action on stock
                 stock.Action = i <= query.AmountToBuy ? Action.Buy :

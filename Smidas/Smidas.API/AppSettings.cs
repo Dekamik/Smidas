@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Smidas.API
 {
-    public class AktieReaSettings
+    public class AppSettings
     {
         public class AktieReaLocalQuery : AktieReaQuery
         {

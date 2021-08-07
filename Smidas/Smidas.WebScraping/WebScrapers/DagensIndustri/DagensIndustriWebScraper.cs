@@ -16,11 +16,11 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 {
     public class DagensIndustriWebScraper : IDagensIndustriWebScraper
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<DagensIndustriWebScraper> _logger;
 
-        public DagensIndustriWebScraper(ILoggerFactory loggerFactory)
+        public DagensIndustriWebScraper(ILogger<DagensIndustriWebScraper> logger)
         {
-            _logger = loggerFactory.CreateLogger<DagensIndustriWebScraper>();
+            _logger = logger;
         }
 
         public async Task<IList<Stock>> Scrape(AktieReaQuery query)

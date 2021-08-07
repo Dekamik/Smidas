@@ -12,13 +12,13 @@ namespace Smidas.API.BatchJobs
 {
     public class BatchJobService : IBatchJobService
     {
-        private readonly AktieReaSettings _settings;
+        private readonly AppSettings _settings;
         private readonly IAktieReaJob _aktieReaJob;
         private readonly IExcelExporter _excelExporter;
         private readonly ILogger<BatchJobService> _logger;
 
         public BatchJobService(
-            IOptionsSnapshot<AktieReaSettings> settings, 
+            IOptions<AppSettings> settings, 
             IAktieReaJob aktieReaJob, 
             IExcelExporter excelExporter,
             ILogger<BatchJobService> logger)
@@ -39,7 +39,7 @@ namespace Smidas.API.BatchJobs
                 .Value;
 
             var exportPath = Path.Combine(query.ExportDirectory ?? "~",
-                $"AktieREA_{index}_{DateTime.UtcNow:yyyy-MM-dd_HHmm}.xlsx");
+                $"AktieREA {index} {DateTimeOffset.Now:u}.xlsx");
 
             var stocks = (await _aktieReaJob.Run(query)).ToList();
             

@@ -21,20 +21,10 @@ namespace Smidas.Batch
             IAktieRea aktieRea)
         {
             _logger = loggerFactory.CreateLogger<AktieReaJob>();
-            this._webScraper = webScraper;
+            _webScraper = webScraper;
             _aktieRea = aktieRea;
         }
-
-        /// <summary>
-        /// Runs analysis based on the specified input.
-        /// 
-        /// 1 = OMX Stockholm
-        /// 2 = OMX Copenhagen
-        /// 3 = OMX Helsinki
-        /// 4 = Oslo OBX
-        /// </summary>
-        /// <param name="input">The input.</param>
-        /// <returns></returns>
+        
         public async Task<IEnumerable<Stock>> Run(AktieReaQuery query)
         {
             _logger.LogInformation($"AktieReaJob påbörjad.");
