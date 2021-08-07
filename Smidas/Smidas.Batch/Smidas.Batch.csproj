@@ -9,8 +9,4 @@
     <ProjectReference Include="..\Smidas.WebScraping\Smidas.WebScraping.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.10.1-dev-01343" />
-  </ItemGroup>
-
 </Project>
