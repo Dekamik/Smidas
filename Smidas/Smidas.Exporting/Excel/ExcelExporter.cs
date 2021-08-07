@@ -5,11 +5,13 @@ using Smidas.Core.Stocks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Smidas.Common.Attributes;
 
 namespace Smidas.Exporting.Excel
 {
     public class ExcelExporter : IExcelExporter
     {
+        [StandardLogging]
         public void ExportStocksToWorksheet(ref ExcelWorksheet worksheet, List<Stock> stocks, string currency, bool doStyling = true)
         {
             // Headers

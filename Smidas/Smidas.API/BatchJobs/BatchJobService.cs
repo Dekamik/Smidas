@@ -43,7 +43,7 @@ namespace Smidas.API.BatchJobs
 
             var stocks = (await _aktieReaJob.Run(query)).ToList();
             
-            _logger.LogInformation($"Exporterar analys om {stocks.Count} aktier till {exportPath}");
+            _logger.LogInformation($"Exporting analysis on {stocks.Count} stocks to {exportPath}");
 
             using ExcelPackage excel = new ExcelPackage(new FileInfo(exportPath));
             ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add($"AktieREA {DateTime.Today:yyyy-MM-dd}");
@@ -51,8 +51,6 @@ namespace Smidas.API.BatchJobs
             _excelExporter.ExportStocksToWorksheet(ref worksheet, stocks, query.CurrencyCode);
             
             excel.Save();
-            
-            _logger.LogInformation("Exportering slutförd");
         }
     }
 }

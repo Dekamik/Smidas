@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Smidas.Common.Extensions;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
 using Smidas.Common;
+using Smidas.Common.Attributes;
 
 namespace Smidas.Core.Analysis
 {
@@ -17,9 +19,10 @@ namespace Smidas.Core.Analysis
             _logger = loggerFactory.CreateLogger<AktieRea>();
         }
 
+        [StandardLogging]
         public IEnumerable<Stock> Analyze(AktieReaQuery query, IEnumerable<Stock> stocks)
         {
-            _logger.LogInformation($"Analyserar {stocks.Count()} aktier enligt AktieREA-metoden");
+            _logger.LogInformation($"Analyzing {stocks.Count()} stocks according to the AktieREA metod");
 
             ExcludeDisqualifiedStocks(ref stocks, query.AnalysisOptions);
 
@@ -31,23 +34,22 @@ namespace Smidas.Core.Analysis
 
             DetermineActions(ref stocks, query);
 
-            _logger.LogInformation($"Analys slutförd\n" +
+            _logger.LogInformation($"Analysis complete\n" +
                                    $"\n" +
-                                   $"Köpes          : {stocks.Count(s => s.Action == Action.Buy)}\n" +
-                                   $"Behålles       : {stocks.Count(s => s.Action == Action.Keep)}\n" +
-                                   $"Säljes         : {stocks.Count(s => s.Action == Action.Sell)}\n" +
-                                   $"Bortsållade    : {stocks.Count(s => s.Action == Action.Exclude)}\n" +
+                                   $"Buy            : {stocks.Count(s => s.Action == Action.Buy)}\n" +
+                                   $"Hold           : {stocks.Count(s => s.Action == Action.Keep)}\n" +
+                                   $"Sell           : {stocks.Count(s => s.Action == Action.Sell)}\n" +
+                                   $"Excluded       : {stocks.Count(s => s.Action == Action.Exclude)}\n" +
                                    $"\n" +
-                                   $"S:a            : {stocks.Count()}\n");
+                                   $"Sum            : {stocks.Count()}\n");
 
             return stocks.OrderBy(s => s.AbRank)
                          .ThenByDescending(s => s.DirectDividend);
         }
 
+        [StandardLogging(Level = LogEventLevel.Debug)]
         public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, AktieReaQuery.AnalysisOptionsData options)
         {
-            _logger.LogDebug($"Sållar diskvalivicerade aktier");
-
             foreach (Stock stock in stocks)
             {
                 if (options.ExcludeNegativeProfitStocks && stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
@@ -65,10 +67,9 @@ namespace Smidas.Core.Analysis
             }
         }
 
+        [StandardLogging(Level = LogEventLevel.Debug)]
         public void ExcludeDoubles(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Sållar dubbletter");
-
             var doublesCount = new Dictionary<string, int>();
             var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
 
@@ -102,28 +103,25 @@ namespace Smidas.Core.Analysis
             }
         }
 
+        [StandardLogging(Level = LogEventLevel.Debug)]
         public void CalculateARank(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Räknar ut A-rang");
-
             int i = 1;
             stocks.OrderByDescending(s => s.Ep)
                   .ForEach(s => s.ARank = i++);
         }
 
+        [StandardLogging(Level = LogEventLevel.Debug)]
         public void CalculateBRank(ref IEnumerable<Stock> stocks)
         {
-            _logger.LogDebug($"Räknar ut B-rang");
-
             int i = 1;
             stocks.OrderByDescending(s => s.AdjustedEquityPerStock)
                   .ForEach(s => s.BRank = i++);
         }
 
+        [StandardLogging(Level = LogEventLevel.Debug)]
         public void DetermineActions(ref IEnumerable<Stock> stocks, AktieReaQuery query)
         {
-            _logger.LogDebug($"Beslutar åtgärder");
-            
             var industryCap = new Dictionary<string, int> { { Stock.OtherIndustries, -1 } };
             foreach (var industry in query.Industries)
             {

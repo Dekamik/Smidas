@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using System.Xml.XPath;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
 using Smidas.Common;
+using Smidas.Common.Attributes;
 using Smidas.Common.Extensions;
 using Smidas.Core.Stocks;
 using Smidas.WebScraping.WebScrapers.Parsing;
@@ -23,10 +25,10 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             _logger = logger;
         }
 
+        [StandardLogging]
         public async Task<IList<Stock>> Scrape(AktieReaQuery query)
         {
             var htmlWeb = new HtmlWeb();
-            _logger.LogInformation($"UserAgent: {htmlWeb.UserAgent}");
             
             var names = new List<string>();
             var prices = new List<decimal>();
@@ -39,7 +41,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             {
                 try
                 {
-                    _logger.LogInformation($"Skrapar {query.IndexUrls[i]} ({i + 1}/{query.IndexUrls.Length})");
+                    _logger.LogInformation($"Scraping {query.IndexUrls[i]} ({i + 1}/{query.IndexUrls.Length})");
                     var document = await htmlWeb.LoadFromWebAsync(query.IndexUrls[i]);
 
                     var scrapedNames = ScrapeNodes(document, query.XPathExpressions.Names);
@@ -57,18 +59,18 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                     if (new[] { prices, volumes, profitPerStock, adjustedEquityPerStock, directDividend }
                         .Any(l => l.Count != names.Count))
                     {
-                        var message = $"Förväntade samma antal skrapade objekt i samtliga listor, men hittade en eller flera avvikelser:\n" +
-                                      $"Namn:        {nameList.Count} st, " +
-                                      $"Priser:      {scrapedPrices.Count()} st, " +
-                                      $"Volymer:     {scrapedVolumes.Count()} st, " +
-                                      $"Vinst/aktie: {scrapedProfitPerStock.Count()} st, " +
-                                      $"JEK/aktie:   {scrapedAdjustedEquityPerStock.Count()} st" +
-                                      $"Dir.avk:     {scrapedDirectDividend.Count()} st";
+                        var message = $"Expected same count in all lists, but found one or more discrepancies:\n" +
+                                      $"Name:                   {nameList.Count}, " +
+                                      $"Prices:                 {scrapedPrices.Count()}, " +
+                                      $"Volumes:                {scrapedVolumes.Count()}, " +
+                                      $"Profit/stock:           {scrapedProfitPerStock.Count()}, " +
+                                      $"Adjusted equity/stock:  {scrapedAdjustedEquityPerStock.Count()}, " +
+                                      $"Direct dividend:        {scrapedDirectDividend.Count()}";
                         _logger.LogError(message);
                         throw new ValidationException(message);
                     }
                     
-                    _logger.LogInformation($"Skrapade {nameList.Count} rader");
+                    _logger.LogInformation($"Scraped {nameList.Count} rows");
 
                     names.AddRange(nameList);
                     prices.AddRange(scrapedPrices);
@@ -88,7 +90,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 }
             }
 
-            _logger.LogInformation($"{names.Count} rader skrapade totalt - OK");
+            _logger.LogInformation($"{names.Count} rows total - OK");
 
             List<Stock> stocks = new List<Stock>();
 
@@ -108,10 +110,10 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 
             SetIndustries(ref stocks, query);
 
-            _logger.LogInformation("Skrapning slutförd");
             return stocks;
         }
 
+        [StandardLogging(Level = LogEventLevel.Verbose)]
         private IEnumerable<string> ScrapeNodes(HtmlDocument document, string xPath)
         {
             var node = document.DocumentNode.SelectNodes(xPath);
@@ -124,6 +126,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             return node.Select(n => WebUtility.HtmlDecode(n.InnerText));
         }
 
+        [StandardLogging(Level = LogEventLevel.Verbose)]
         public void SetIndustries(ref List<Stock> stockData, AktieReaQuery query)
         {
             foreach (KeyValuePair<string, AktieReaQuery.IndustryData> industryData in query.Industries)
