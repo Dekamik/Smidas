@@ -22,7 +22,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
         
       - name: Build test runner
-        run: docker build --target testrunner -t ${{ secrets.DOCKER_HUB_USERNAME }}/smidas-tests:latest .
+        run: docker build --target testrunner -t ${{ secrets.DOCKER_HUB_USERNAME }}/smidas-tests:latest -f Smidas/Smidas.API/Dockerfile ./Smidas
         
       - name: Run tests
         run: docker run ${{ secrets.DOCKER_HUB_USERNAME }}/smidas-tests:latest
