@@ -1,10 +1,7 @@
-using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Serilog.Events;
-using Smidas.Common.Attributes;
 
 namespace Smidas.API.BatchJobs
 {
@@ -13,17 +10,26 @@ namespace Smidas.API.BatchJobs
     public class BatchJobController : ControllerBase
     {
         private readonly IBatchJobService _batchJobService;
+        private readonly ILogger<BatchJobController> _logger;
 
-        public BatchJobController(IBatchJobService batchJobService)
+        public BatchJobController(IBatchJobService batchJobService,
+            ILogger<BatchJobController> logger)
         {
+            _logger = logger;
             _batchJobService = batchJobService;
         }
         
-        [StandardLogging(EntryMessage = "ENDPOINT /BatchJob called", ExitMessage = "ENDPOINT /BatchJob - 200 OK", Level = LogEventLevel.Information)]
         [HttpGet, Route("{index}")]
         public async Task<IActionResult> Index(string index)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            _logger.LogInformation($"ENDPOINT /BatchJob/OMXStockholmLargeCap");
+            
             await _batchJobService.RunOnIndex(index);
+            
+            stopwatch.Stop();
+            _logger.LogInformation($"ENDPOINT /BatchJob/OMXStockholmLargeCap - 200 OK ({stopwatch.ElapsedMilliseconds}ms)");
             return Ok();
         }
     }
