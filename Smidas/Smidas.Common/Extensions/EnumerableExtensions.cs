@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace Smidas.Common.Extensions
 {
-    public static class IEnumerableExtensions
+    public static class EnumerableExtensions
     {
         public static void ForEach<T>(this IEnumerable<T> source, Action<T> action)
         {
-            foreach (T element in source)
+            foreach (var element in source)
             {
                 action(element);
             }

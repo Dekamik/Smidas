@@ -5,7 +5,6 @@ using System.Reflection;
 using MethodDecorator.Fody.Interfaces;
 using Serilog;
 using Serilog.Events;
-using Smidas.Common.Extensions;
 
 namespace Smidas.Common.Attributes
 {
