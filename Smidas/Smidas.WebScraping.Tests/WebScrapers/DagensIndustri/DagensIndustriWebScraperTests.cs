@@ -11,6 +11,7 @@ using Xunit;
 
 namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
 {
+    // TODO: Fix tests
     public class DagensIndustriWebScraperTests
     {
         private readonly IDagensIndustriWebScraper _scraper;
