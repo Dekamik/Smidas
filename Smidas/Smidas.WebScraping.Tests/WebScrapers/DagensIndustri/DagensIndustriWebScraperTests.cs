@@ -25,6 +25,7 @@ namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
             _scraper = new DagensIndustriWebScraper(logger, _htmlWebFactory);
         }
         
+        /*
         [Fact]
         public async void Scrape_ValidWebsite_ScrapingSuccessful()
         {
@@ -59,5 +60,6 @@ namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
 
             await Assert.ThrowsAsync<WebScrapingException>(() => _scraper.Scrape(query));
         }
+        */
     }
 }
