@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Smidas.API.BatchJobs;
-using Smidas.Batch;
 using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
 using Smidas.WebScraping.WebScrapers;
@@ -36,7 +35,6 @@ namespace Smidas.API
         {
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
 
-            services.AddScoped<IAktieReaJob, AktieReaJob>();
             services.AddScoped<IWebScraper, DagensIndustriWebScraper>();
             services.AddScoped<IAktieRea, AktieRea>();
             services.AddScoped<IExcelExporter, ExcelExporter>();
