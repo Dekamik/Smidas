@@ -11,7 +11,7 @@ namespace Smidas.Core.Stocks
         Buy = 1,
 
         [Display(Name = "Behåll")]
-        Keep = 2,
+        Hold = 2,
 
         [Display(Name = "Sälj")]
         Sell = 3,

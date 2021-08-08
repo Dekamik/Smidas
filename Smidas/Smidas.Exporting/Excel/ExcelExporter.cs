@@ -39,7 +39,7 @@ namespace Smidas.Exporting.Excel
             if (doStyling)
             {
                 int buyEndRow = 1 + stocks.Count(s => s.Action == Action.Buy);
-                int keepEndRow = buyEndRow + stocks.Count(s => s.Action == Action.Keep);
+                int keepEndRow = buyEndRow + stocks.Count(s => s.Action == Action.Hold);
                 int sellEndRow = keepEndRow + stocks.Count(s => s.Action == Action.Sell);
 
                 System.Drawing.Color green = System.Drawing.Color.FromArgb(226, 239, 218);

@@ -91,7 +91,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 }
             }
 
-            _logger.LogInformation($"{names.Count} rows total - OK");
+            _logger.LogDebug($"{names.Count} rows total - OK");
 
             List<Stock> stocks = new List<Stock>();
 

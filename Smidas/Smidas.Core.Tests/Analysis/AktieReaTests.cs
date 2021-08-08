@@ -20,8 +20,8 @@ namespace Smidas.Core.Tests.Analysis
 
         public AktieReaTests()
         {
-            ILoggerFactory loggerFactory = A.Fake<ILoggerFactory>();
-            IOptions<AppSettings> config = A.Fake<IOptions<AppSettings>>();
+            var logger = A.Fake<ILogger<AktieRea>>();
+            var config = A.Fake<IOptions<AppSettings>>();
 
             A.CallTo(() => config.Value).Returns(new AppSettings
             {
@@ -55,7 +55,7 @@ namespace Smidas.Core.Tests.Analysis
                 }
             });
 
-            _aktieRea = new AktieRea(loggerFactory);
+            _aktieRea = new AktieRea(logger);
         }
 
         [Fact]
@@ -421,7 +421,7 @@ namespace Smidas.Core.Tests.Analysis
                   .ForEach(s => s.Action.Should().Be(Action.Buy));
             stocks.Skip(10)
                   .Take(10)
-                  .ForEach(s => s.Action.Should().Be(Action.Keep));
+                  .ForEach(s => s.Action.Should().Be(Action.Hold));
             stocks.Skip(20)
                   .Take(10)
                   .ForEach(s => s.Action.Should().Be(Action.Sell));

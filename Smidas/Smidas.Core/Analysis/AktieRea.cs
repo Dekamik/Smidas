@@ -12,18 +12,16 @@ namespace Smidas.Core.Analysis
 {
     public class AktieRea : IAktieRea
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<AktieRea> _logger;
 
-        public AktieRea(ILoggerFactory loggerFactory)
+        public AktieRea(ILogger<AktieRea> logger)
         {
-            _logger = loggerFactory.CreateLogger<AktieRea>();
+            _logger = logger;
         }
 
         [StandardLogging]
         public IEnumerable<Stock> Analyze(AktieReaQuery query, IEnumerable<Stock> stocks)
         {
-            _logger.LogInformation($"Analyzing {stocks.Count()} stocks according to the AktieREA metod");
-
             ExcludeDisqualifiedStocks(ref stocks, query.AnalysisOptions);
 
             ExcludeDoubles(ref stocks);
@@ -37,7 +35,7 @@ namespace Smidas.Core.Analysis
             _logger.LogInformation($"Analysis complete\n" +
                                    $"\n" +
                                    $"Buy            : {stocks.Count(s => s.Action == Action.Buy)}\n" +
-                                   $"Hold           : {stocks.Count(s => s.Action == Action.Keep)}\n" +
+                                   $"Hold           : {stocks.Count(s => s.Action == Action.Hold)}\n" +
                                    $"Sell           : {stocks.Count(s => s.Action == Action.Sell)}\n" +
                                    $"Excluded       : {stocks.Count(s => s.Action == Action.Exclude)}\n" +
                                    $"\n" +
@@ -156,7 +154,7 @@ namespace Smidas.Core.Analysis
 
                 // Determine action on stock
                 stock.Action = i <= query.AmountToBuy ? Action.Buy :
-                               i <= query.AmountToBuy + query.AmountToKeep ? Action.Keep :
+                               i <= query.AmountToBuy + query.AmountToKeep ? Action.Hold :
                                Action.Sell;
                 i++;
             }

@@ -33,8 +33,7 @@ namespace Smidas.API.BatchJobs
             _excelExporter = excelExporter;
             _settings = settings.Value;
         }
-
-        [StandardLogging]
+        
         public async Task RunOnIndex(string index)
         {
             if (!_settings.ScrapingSets.ContainsKey(index))
@@ -50,7 +49,7 @@ namespace Smidas.API.BatchJobs
             var stockData = await _webScraper.Scrape(query);
             var analysisResult = _aktieRea.Analyze(query, stockData).ToList();
             
-            _logger.LogInformation($"Exporting analysis on {analysisResult.Count} stocks to {exportPath}");
+            _logger.LogInformation($"Exporting analysis to {exportPath}");
 
             using ExcelPackage excel = new ExcelPackage(new FileInfo(exportPath));
             ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add($"AktieREA {DateTime.Today:yyyy-MM-dd}");
