@@ -9,6 +9,7 @@ using Smidas.API.BatchJobs;
 using Smidas.Core.Analysis;
 using Smidas.Exporting.Excel;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
+using Smidas.WebScraping.WebScrapers.Html;
 
 namespace Smidas.API
 {
@@ -34,6 +35,7 @@ namespace Smidas.API
         {
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
 
+            services.AddScoped<IHtmlWebFactory, HtmlWebFactory>();
             services.AddScoped<IDagensIndustriWebScraper, DagensIndustriWebScraper>();
             services.AddScoped<IAktieRea, AktieRea>();
             services.AddScoped<IExcelExporter, ExcelExporter>();
