@@ -22,20 +22,20 @@ jobs:
           driver-opts: network=host
           
       - name: Build test test
-          id: docker_build_test
-          uses: docker/build-push-action@v2
-          with:
-            context: Smidas
-            file: Smidas/Smidas.API/Dockerfile
-            builder: ${{ steps.buildx.outputs.name }}
-            push: false
-            tags: localhost:5000/smidas-tests:latest
-            cache-from: type=local,src=/tmp/.buildx-cache
-            cache-to: type=local,dest=/tmp/.buildx.cache
-            target: testrunner
+        id: docker_build_test
+        uses: docker/build-push-action@v2
+        with:
+          context: Smidas
+          file: Smidas/Smidas.API/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: false
+          tags: localhost:5000/smidas-tests:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx.cache
+          target: testrunner
             
       - name: Run tests
-          run: docker run localhost:5000/smidas-tests:latest
+        run: docker run localhost:5000/smidas-tests:latest
       
   build:
     runs-on: ubuntu-latest
