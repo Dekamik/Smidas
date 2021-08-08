@@ -12,6 +12,7 @@ using Smidas.Common;
 using Smidas.Common.Attributes;
 using Smidas.Common.Extensions;
 using Smidas.Core.Stocks;
+using Smidas.WebScraping.WebScrapers.Html;
 using Smidas.WebScraping.WebScrapers.Parsing;
 
 namespace Smidas.WebScraping.WebScrapers.DagensIndustri
@@ -19,16 +20,19 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
     public class DagensIndustriWebScraper : IDagensIndustriWebScraper
     {
         private readonly ILogger<DagensIndustriWebScraper> _logger;
+        private readonly IHtmlWebFactory _htmlWebFactory;
 
-        public DagensIndustriWebScraper(ILogger<DagensIndustriWebScraper> logger)
+        public DagensIndustriWebScraper(ILogger<DagensIndustriWebScraper> logger,
+            IHtmlWebFactory htmlWebFactory)
         {
+            _htmlWebFactory = htmlWebFactory;
             _logger = logger;
         }
 
         [StandardLogging]
         public async Task<IList<Stock>> Scrape(AktieReaQuery query)
         {
-            var htmlWeb = new HtmlWeb();
+            var htmlWeb = _htmlWebFactory.Create();
             _logger.LogDebug($"UserAgent: {htmlWeb.UserAgent}");
             
             var names = new List<string>();
