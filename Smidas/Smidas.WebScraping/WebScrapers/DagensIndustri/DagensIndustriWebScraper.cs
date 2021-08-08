@@ -119,7 +119,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         }
 
         [StandardLogging(Level = LogEventLevel.Verbose)]
-        private IEnumerable<string> ScrapeNodes(HtmlDocument document, string xPath)
+        private static IEnumerable<string> ScrapeNodes(HtmlDocument document, string xPath)
         {
             var node = document.DocumentNode.SelectNodes(xPath);
 
@@ -132,7 +132,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         }
 
         [StandardLogging(Level = LogEventLevel.Verbose)]
-        public void SetIndustries(ref List<Stock> stockData, AktieReaQuery query)
+        private static void SetIndustries(ref List<Stock> stockData, AktieReaQuery query)
         {
             foreach (KeyValuePair<string, AktieReaQuery.IndustryData> industryData in query.Industries)
             {
