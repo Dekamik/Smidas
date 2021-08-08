@@ -22,8 +22,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Smidas.Batch\Smidas.Batch.csproj" />
       <ProjectReference Include="..\Smidas.Common\Smidas.Common.csproj" />
+      <ProjectReference Include="..\Smidas.Exporting\Smidas.Exporting.csproj" />
+      <ProjectReference Include="..\Smidas.WebScraping\Smidas.WebScraping.csproj" />
     </ItemGroup>
 
 </Project>
