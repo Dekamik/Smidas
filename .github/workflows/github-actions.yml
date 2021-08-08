@@ -28,7 +28,7 @@ jobs:
           context: Smidas
           file: Smidas/Smidas.API/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
-          push: false
+          push: true
           tags: localhost:5000/smidas-tests:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx.cache
