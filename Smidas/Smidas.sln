@@ -25,6 +25,7 @@ ProjectSection(SolutionItems) = preProject
 	..\README.md = ..\README.md
 	..\.gitignore = ..\.gitignore
 	..\.github\workflows\github-actions.yml = ..\.github\workflows\github-actions.yml
+	..\docker-compose.example.yml = ..\docker-compose.example.yml
 EndProjectSection
 EndProject
 Global

@@ -1,0 +1,14 @@
+version: "3"
+services: 
+  web:
+    image: dekamik/smidas:latest
+    restart: always
+    ports:
+      - "5000:80"
+      - "5001:443"
+    volumes:
+      - "~/Smidas/appsettings.json:/app/appsettings.json"
+      - "~/Smidas/Logs:/app/Logs"
+      - "~/AktieREA:/app/Analyses"
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
