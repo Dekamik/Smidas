@@ -68,7 +68,7 @@ namespace Smidas.Core.Stocks
             Action = Action.Exclude;
             Comments = reason;
 
-            logger.LogTrace($"Sållade {Name} - {reason}");
+            logger.LogTrace($"Excluded {Name} - {reason}");
         }
 
         public override string ToString() => $"{Name}, {CompanyName}, {Industry}, {Action.GetDisplayName()}, " +

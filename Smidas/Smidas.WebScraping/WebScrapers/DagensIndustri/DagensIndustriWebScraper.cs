@@ -42,7 +42,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
             {
                 try
                 {
-                    _logger.LogDebug($"Scraping {query.IndexUrls[i]} ({i + 1}/{query.IndexUrls.Length})");
+                    _logger.LogTrace($"Scraping {query.IndexUrls[i]} ({i + 1}/{query.IndexUrls.Length})");
                     var document = await htmlWeb.LoadFromWebAsync(query.IndexUrls[i]);
 
                     var scrapedNames = ScrapeNodes(document, query.XPathExpressions.Names);
@@ -71,7 +71,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                         throw new ValidationException(message);
                     }
                     
-                    _logger.LogDebug($"Scraped {nameList.Count} rows");
+                    _logger.LogTrace($"Scraped {nameList.Count} rows");
 
                     names.AddRange(nameList);
                     prices.AddRange(scrapedPrices);
@@ -91,7 +91,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 }
             }
 
-            _logger.LogDebug($"{names.Count} rows total - OK");
+            _logger.LogTrace($"{names.Count} rows total - OK");
 
             List<Stock> stocks = new List<Stock>();
 

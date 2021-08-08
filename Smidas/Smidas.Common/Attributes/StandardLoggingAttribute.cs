@@ -15,7 +15,10 @@ namespace Smidas.Common.Attributes
         private object[] _args;
         private readonly Stopwatch _stopwatch = new();
         
-        public LogEventLevel Level { get; set; } = LogEventLevel.Information;
+        public string EntryMessage { get; set; }
+        public string ExitMessage { get; set; }
+        public string ExceptionMessage { get; set; }
+        public LogEventLevel Level { get; set; } = LogEventLevel.Debug;
 
         public void Init(object instance, MethodBase method, object[] args)
         {
@@ -26,19 +29,22 @@ namespace Smidas.Common.Attributes
         public void OnEntry()
         {
             _stopwatch.Start();
-            Log.Write(Level, $"{_method} with args {string.Join(", ", _args.Select(a => a.ToString()))}");
+            var message = EntryMessage ?? $"{_method} with args {string.Join(", ", _args.Select(a => a.ToString()))}";
+            Log.Write(Level, message);
         }
 
         public void OnExit()
         {
             _stopwatch.Stop();
-            Log.Write(Level, $"{_method} - OK ({_stopwatch.ElapsedMilliseconds}ms)");
+            var message = ExitMessage ?? $"{_method} - OK";
+            Log.Write(Level, $"{message} ({_stopwatch.ElapsedMilliseconds}ms)");
         }
 
         public void OnException(Exception exception)
         {
             _stopwatch.Stop();
-            Log.Error(exception, $"{_method} - ERROR ({_stopwatch.ElapsedMilliseconds}ms)");
+            var message = ExceptionMessage ?? $"{_method} - ERROR";
+            Log.Error(exception, ExceptionMessage ?? $"{message} ({_stopwatch.ElapsedMilliseconds}ms)");
         }
     }
 }

@@ -45,7 +45,7 @@ namespace Smidas.Core.Analysis
                          .ThenByDescending(s => s.DirectDividend);
         }
 
-        [StandardLogging(Level = LogEventLevel.Debug)]
+        [StandardLogging(Level = LogEventLevel.Verbose)]
         public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, AktieReaQuery.AnalysisOptionsData options)
         {
             foreach (Stock stock in stocks)
@@ -65,7 +65,7 @@ namespace Smidas.Core.Analysis
             }
         }
 
-        [StandardLogging(Level = LogEventLevel.Debug)]
+        [StandardLogging(Level = LogEventLevel.Verbose)]
         public void ExcludeDoubles(ref IEnumerable<Stock> stocks)
         {
             var doublesCount = new Dictionary<string, int>();
@@ -101,7 +101,7 @@ namespace Smidas.Core.Analysis
             }
         }
 
-        [StandardLogging(Level = LogEventLevel.Debug)]
+        [StandardLogging(Level = LogEventLevel.Verbose)]
         public void CalculateARank(ref IEnumerable<Stock> stocks)
         {
             int i = 1;
@@ -109,7 +109,7 @@ namespace Smidas.Core.Analysis
                   .ForEach(s => s.ARank = i++);
         }
 
-        [StandardLogging(Level = LogEventLevel.Debug)]
+        [StandardLogging(Level = LogEventLevel.Verbose)]
         public void CalculateBRank(ref IEnumerable<Stock> stocks)
         {
             int i = 1;
@@ -117,7 +117,7 @@ namespace Smidas.Core.Analysis
                   .ForEach(s => s.BRank = i++);
         }
 
-        [StandardLogging(Level = LogEventLevel.Debug)]
+        [StandardLogging(Level = LogEventLevel.Verbose)]
         public void DetermineActions(ref IEnumerable<Stock> stocks, AktieReaQuery query)
         {
             var industryCap = new Dictionary<string, int> { { Stock.OtherIndustries, -1 } };
