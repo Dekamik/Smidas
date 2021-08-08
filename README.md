@@ -33,9 +33,9 @@ AmountToBuy | Max amount of stock to buy | integer | 10
 AmountToKeep | Max amount of stock to hold | integer | 10
 CurrencyCode | CurrencyCode of your index | string | USD
 ExportDirectory | Export location of Excel file | string | ~
-IndexUrls | List of URLs to scrape index data | List<string> | N/A
+IndexUrls | List of URLs to scrape index data | List\<string> | N/A
 AnalysisOptions | Options for controlling AktieREA | AnalysisOptionsObject | N/A
-XPathExpressions | XPath values for finding data to scrape | XPathExpressionsObject | N/A
+XPathExpressions | XPath values for finding data to scrape from all IndexUrls | XPathExpressionsObject | N/A
 Industries | Dictionary of IndustryObjects for metadata on which stock belong to which industry. The key denotes industry name | Dictionary<string, IndustryObject> | N/A
 
 #### AnalysisOptionsObject
@@ -59,5 +59,5 @@ DirectDividend | XPath for stock's direct dividend value | string | N/A
 Setting | Description | Type | Default
 --- | --- | --- | ---
 Cap | Maximum amount of stocks to buy or hold within this industry | integer | 2
-Companies | Name list of companies that belong to this industry | List<string> | N/A
+Companies | Name list of companies that belong to this industry | List\<string> | N/A
 

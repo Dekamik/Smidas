@@ -26,6 +26,7 @@ ProjectSection(SolutionItems) = preProject
 	..\.gitignore = ..\.gitignore
 	..\.github\workflows\github-actions.yml = ..\.github\workflows\github-actions.yml
 	..\docker-compose.example.yml = ..\docker-compose.example.yml
+	..\LICENSE = ..\LICENSE
 EndProjectSection
 EndProject
 Global
