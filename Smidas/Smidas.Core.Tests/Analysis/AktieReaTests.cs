@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using FakeItEasy;
 using Smidas.Common;
 using Microsoft.Extensions.Options;
-using Smidas.CLI;
+using Smidas.API;
 
 namespace Smidas.Core.Tests.Analysis
 {
@@ -25,7 +25,7 @@ namespace Smidas.Core.Tests.Analysis
 
             A.CallTo(() => config.Value).Returns(new AppSettings
             {
-                AktieRea = new Dictionary<string, AppSettings.AktieReaLocalQuery>
+                ScrapingSets = new Dictionary<string, AppSettings.AktieReaLocalQuery>
                 {
                     {
                         "TestIndex",

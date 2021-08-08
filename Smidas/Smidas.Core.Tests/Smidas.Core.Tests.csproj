@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Smidas.API\Smidas.API.csproj" />
     <ProjectReference Include="..\Smidas.CLI\Smidas.CLI.csproj" />
     <ProjectReference Include="..\Smidas.Core\Smidas.Core.csproj" />
   </ItemGroup>
