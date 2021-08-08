@@ -2,14 +2,13 @@ name: CI to Docker Hub
 
 on:
   push:
-    tags:
-      - "*.*.*"
+    branches: [ master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v2
         
       - name: Login to Docker Hub
@@ -26,8 +25,8 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./Smidas/Smidas.API/
-          file: ./Smidas/Smidas.API/Dockerfile
+          context: .
+          file: Smidas/Smidas.API/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/smidas:latest
           

@@ -20,6 +20,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Smidas.Exporting", "Smidas.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Smidas.API", "Smidas.API\Smidas.API.csproj", "{9C2560B3-78CE-46A5-81A5-0453F83B5FF3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{000FF81C-8FCD-48B7-B8BF-13B915EE752D}"
+ProjectSection(SolutionItems) = preProject
+	..\README.md = ..\README.md
+	..\.gitignore = ..\.gitignore
+	..\.github\workflows\github-actions.yml = ..\.github\workflows\github-actions.yml
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
