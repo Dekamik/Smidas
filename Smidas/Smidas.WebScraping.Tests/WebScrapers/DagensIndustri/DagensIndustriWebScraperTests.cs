@@ -7,6 +7,7 @@ using Smidas.WebScraping.WebScrapers;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System.Collections.Generic;
 using System.Linq;
+using Smidas.WebScraping.WebScrapers.Html;
 using Xunit;
 
 namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
@@ -14,12 +15,14 @@ namespace Smidas.WebScraping.Tests.WebScrapers.DagensIndustri
     // TODO: Fix tests
     public class DagensIndustriWebScraperTests
     {
+        private readonly IHtmlWebFactory _htmlWebFactory;
         private readonly IDagensIndustriWebScraper _scraper;
 
         public DagensIndustriWebScraperTests()
         {
             var logger = A.Fake<ILogger<DagensIndustriWebScraper>>();
-            _scraper = new DagensIndustriWebScraper(logger);
+            _htmlWebFactory = A.Fake<IHtmlWebFactory>();
+            _scraper = new DagensIndustriWebScraper(logger, _htmlWebFactory);
         }
         
         [Fact]
