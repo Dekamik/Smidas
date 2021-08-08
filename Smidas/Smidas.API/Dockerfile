@@ -11,6 +11,10 @@ COPY . .
 WORKDIR "/src/Smidas.API"
 RUN dotnet build "Smidas.API.csproj" -c Release -o /app/build
 
+FROM build AS testrunner
+WORKDIR /src
+CMD ["dotnet", "test", "--logger:trx"]
+
 FROM build AS publish
 RUN dotnet publish "Smidas.API.csproj" -c Release -o /app/publish
 
