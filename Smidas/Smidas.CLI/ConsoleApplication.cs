@@ -1,14 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OfficeOpenXml;
-using Smidas.Batch;
-using Smidas.Core.Stocks;
 using Smidas.Exporting.Excel;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Smidas.Core.Analysis;
+using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using static Smidas.CLI.AppSettings;
 
 namespace Smidas.CLI
@@ -38,26 +37,26 @@ namespace Smidas.CLI
 -----------------------------------------------------";
 
         private readonly ILogger _logger;
-        
-        private readonly IOptions<AppSettings> _options;
-        
-        private readonly IAktieReaJob _aktieReaJob;
-
+        private readonly AppSettings _options;
         private readonly IExcelExporter _excelExporter;
+        private readonly IDagensIndustriWebScraper _webScraper;
+        private readonly IAktieRea _aktieRea;
 
         public ConsoleApplication(
             ILoggerFactory loggerFactory,
             IOptions<AppSettings> options,
-            IAktieReaJob aktieReaJob,
-            IExcelExporter excelExporter)
+            IExcelExporter excelExporter,
+            IDagensIndustriWebScraper webScraper,
+            IAktieRea aktieRea)
         {
+            _aktieRea = aktieRea;
+            _webScraper = webScraper;
             _logger = loggerFactory.CreateLogger<ConsoleApplication>();
-            _options = options;
-            _aktieReaJob = aktieReaJob;
+            _options = options.Value;
             _excelExporter = excelExporter;
         }
 
-        public void Run()
+        public async Task Run()
         {
             string input;
             string exportPath = null;
@@ -91,22 +90,22 @@ namespace Smidas.CLI
             switch (input)
             {
                 case "1":
-                    query = _options.Value.AktieRea["OMXStockholmLargeCap"];
+                    query = _options.AktieRea["OMXStockholmLargeCap"];
                     exportPath = Path.Combine(query.ExportDirectory ?? "~", $"AktieREA_OMX_Stockholm_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx");
                     break;
 
                 case "2":
-                    query = _options.Value.AktieRea["OMXCopenhagenLargeCap"];
+                    query = _options.AktieRea["OMXCopenhagenLargeCap"];
                     exportPath = Path.Combine(query.ExportDirectory ?? "~", $"AktieREA_OMX_Köpenhamn_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx");
                     break;
 
                 case "3":
-                    query = _options.Value.AktieRea["OMXHelsinkiLargeCap"];
+                    query = _options.AktieRea["OMXHelsinkiLargeCap"];
                     exportPath = Path.Combine(query.ExportDirectory ?? "~", $"AktieREA_OMX_Helsingfors_Large_Cap_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx");
                     break;
 
                 case "4":
-                    query = _options.Value.AktieRea["OsloOBX"];
+                    query = _options.AktieRea["OsloOBX"];
                     exportPath = Path.Combine(query.ExportDirectory ?? "~", $"AktieREA_Oslo_OBX_{DateTime.Now.ToString("yyyy-MM-dd_HHmm")}.xlsx");
                     break;
 
@@ -114,18 +113,17 @@ namespace Smidas.CLI
                     break;
             }
 
-            Task<IEnumerable<Stock>> task = _aktieReaJob.Run(query);
-            task.Wait();
-            IEnumerable<Stock> results = task.Result;
+            var stockData = await _webScraper.Scrape(query);
+            var analysisResult = _aktieRea.Analyze(query, stockData);
 
             if (!string.IsNullOrEmpty(exportPath))
             {
-                _logger.LogInformation($"Exporterar analys om {results.Count()} aktier till {exportPath}");
+                _logger.LogInformation($"Exporterar analys om {analysisResult.Count()} aktier till {exportPath}");
 
                 using ExcelPackage excel = new ExcelPackage(new FileInfo(exportPath));
                 ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add($"AktieREA {DateTime.Today.ToString("yyyy-MM-dd")}");
 
-                _excelExporter.ExportStocksToWorksheet(ref worksheet, results.ToList(), query.CurrencyCode);
+                _excelExporter.ExportStocksToWorksheet(ref worksheet, analysisResult.ToList(), query.CurrencyCode);
 
                 excel.Save();
 

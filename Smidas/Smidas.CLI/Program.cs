@@ -8,15 +8,16 @@ using Smidas.Exporting.Excel;
 using Smidas.WebScraping.WebScrapers;
 using Smidas.WebScraping.WebScrapers.DagensIndustri;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Smidas.CLI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            using ServiceProvider serviceProvider = ConfigureServices().BuildServiceProvider();
-            serviceProvider.GetService<ConsoleApplication>().Run();
+            await using ServiceProvider serviceProvider = ConfigureServices().BuildServiceProvider();
+            await serviceProvider.GetService<ConsoleApplication>().Run();
         }
 
         private static IConfigurationRoot LoadConfiguration()
