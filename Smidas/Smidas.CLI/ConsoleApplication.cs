@@ -14,7 +14,7 @@ namespace Smidas.CLI
 {
     public class ConsoleApplication
     {
-        private readonly string _menu = @"
+        private const string Menu = @"
    Smidas
 
 -----------------------------------------------------
@@ -64,7 +64,7 @@ namespace Smidas.CLI
 
             if (Environment.UserInteractive)
             {
-                Console.WriteLine(_menu);
+                Console.WriteLine(Menu);
                 Console.Write(">> ");
                 input = Console.ReadLine();
 
@@ -82,7 +82,7 @@ namespace Smidas.CLI
 
                 if (input == "h" || input == "help")
                 {
-                    Console.WriteLine(_menu);
+                    Console.WriteLine(Menu);
                     Environment.Exit(0);
                 }
             }
