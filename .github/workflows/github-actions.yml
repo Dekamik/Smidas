@@ -7,33 +7,23 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      registry:
-        image: registry:2
-        ports:
-          - 5000:5000
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1.7.2
+        with:
+          dotnet-version: '5.0.x'
+      
+      - name: Install dependencies
+        run: dotnet restore
         
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        with:
-          driver-opts: network=host
-          
-      - name: Build test test
-        id: docker_build_test
-        uses: docker/build-push-action@v2
-        with:
-          context: Smidas
-          file: Smidas/Smidas.API/Dockerfile
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: localhost:5000/smidas-tests:latest
-          target: testrunner
-            
-      - name: Run tests
-        run: docker run localhost:5000/smidas-tests:latest
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+        
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal
       
   build-and-push:
     runs-on: ubuntu-latest
