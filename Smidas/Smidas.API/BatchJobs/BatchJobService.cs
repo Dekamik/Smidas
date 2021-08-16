@@ -34,7 +34,7 @@ namespace Smidas.API.BatchJobs
             _settings = settings.Value;
         }
         
-        public async Task RunOnIndex(string index)
+        public void RunOnIndex(string index)
         {
             if (!_settings.ScrapingSets.ContainsKey(index))
                 throw new NullReferenceException($"{index} couldn't resolve to a predefined AktieRea index");
@@ -46,7 +46,7 @@ namespace Smidas.API.BatchJobs
             var exportPath = Path.Combine(query.ExportDirectory ?? "~",
                 $"AktieREA {index} {DateTimeOffset.Now:u}.xlsx");
 
-            var stockData = await _webScraper.Scrape(query);
+            var stockData = _webScraper.Scrape(query);
             var analysisResult = _aktieRea.Analyze(query, stockData).ToList();
             
             _logger.LogInformation($"Exporting analysis to {exportPath}");

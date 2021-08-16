@@ -4,6 +4,6 @@ namespace Smidas.API.BatchJobs
 {
     public interface IBatchJobService
     {
-        Task RunOnIndex(string index);
+        void RunOnIndex(string index);
     }
 }

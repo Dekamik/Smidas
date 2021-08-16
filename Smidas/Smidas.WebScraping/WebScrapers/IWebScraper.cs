@@ -7,6 +7,6 @@ namespace Smidas.WebScraping.WebScrapers
 {
     public interface IWebScraper
     {
-        Task<IList<Stock>> Scrape(AktieReaQuery query);
+        IList<Stock> Scrape(AktieReaQuery query);
     }
 }

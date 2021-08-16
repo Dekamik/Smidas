@@ -30,7 +30,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         }
 
         [StandardLogging]
-        public async Task<IList<Stock>> Scrape(AktieReaQuery query)
+        public IList<Stock> Scrape(AktieReaQuery query)
         {
             var htmlWeb = _htmlWebFactory.Create();
             _logger.LogDebug($"UserAgent: {htmlWeb.UserAgent}");
@@ -47,7 +47,7 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
                 try
                 {
                     _logger.LogTrace($"Scraping {query.IndexUrls[i]} ({i + 1}/{query.IndexUrls.Length})");
-                    var document = await htmlWeb.LoadFromWebAsync(query.IndexUrls[i]);
+                    var document = htmlWeb.Load(query.IndexUrls[i]);
 
                     var scrapedNames = ScrapeNodes(document, query.XPathExpressions.Names);
                     var scrapedPrices = ScrapeNodes(document, query.XPathExpressions.Prices).Parse();
@@ -97,21 +97,16 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
 
             _logger.LogTrace($"{names.Count} rows total - OK");
 
-            List<Stock> stocks = new List<Stock>();
-
-            for (int i = 0; i < names.Count(); i++)
-            {
-                var stock = new Stock
+            var stocks = names.Select((t, i) => new Stock
                 {
-                    Name = names[i],
+                    Name = t,
                     Price = prices[i],
                     Volume = volumes[i],
                     ProfitPerStock = profitPerStock[i],
                     AdjustedEquityPerStock = adjustedEquityPerStock[i],
                     DirectDividend = directDividend[i],
-                };
-                stocks.Add(stock);
-            }
+                })
+                .ToList();
 
             SetIndustries(ref stocks, query);
 
@@ -134,16 +129,15 @@ namespace Smidas.WebScraping.WebScrapers.DagensIndustri
         [StandardLogging(Level = LogEventLevel.Verbose)]
         private static void SetIndustries(ref List<Stock> stockData, AktieReaQuery query)
         {
-            foreach (KeyValuePair<string, AktieReaQuery.IndustryData> industryData in query.Industries)
+            foreach (var (industry, value) in query.Industries)
             {
-                if (industryData.Value.Companies != null)
+                if (value.Companies == null) 
+                    continue;
+
+                foreach (var companyName in value.Companies)
                 {
-                    string industry = industryData.Key;
-                    foreach (string companyName in industryData.Value.Companies)
-                    {
-                        stockData.Where(s => s.Name.Contains(companyName))
-                                 .ForEach(s => s.Industry = industry);
-                    }
+                    stockData.Where(s => s.Name.Contains(companyName))
+                        .ForEach(s => s.Industry = industry);
                 }
             }
         }

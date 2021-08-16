@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Serilog.Events;
+using Smidas.Common.Attributes;
 
 namespace Smidas.API.BatchJobs
 {
@@ -19,17 +21,12 @@ namespace Smidas.API.BatchJobs
             _batchJobService = batchJobService;
         }
         
+        [ControllerLogging]
         [HttpGet, Route("{index}")]
-        public async Task<IActionResult> Index(string index)
+        public IActionResult Index(string index)
         {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            _logger.LogInformation($"ENDPOINT /BatchJob/OMXStockholmLargeCap");
+            _batchJobService.RunOnIndex(index);
             
-            await _batchJobService.RunOnIndex(index);
-            
-            stopwatch.Stop();
-            _logger.LogInformation($"ENDPOINT /BatchJob/OMXStockholmLargeCap - 200 OK ({stopwatch.ElapsedMilliseconds}ms)");
             return Ok();
         }
     }
