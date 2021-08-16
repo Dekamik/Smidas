@@ -21,7 +21,7 @@ namespace Smidas.API.BatchJobs
             _batchJobService = batchJobService;
         }
         
-        [ControllerLogging]
+        [ControllerLogging(EndpointName = "BatchJob")]
         [HttpGet, Route("{index}")]
         public IActionResult Index(string index)
         {
