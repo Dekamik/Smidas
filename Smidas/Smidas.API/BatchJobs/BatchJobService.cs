@@ -51,8 +51,8 @@ namespace Smidas.API.BatchJobs
             
             _logger.LogInformation($"Exporting analysis to {exportPath}");
 
-            using ExcelPackage excel = new ExcelPackage(new FileInfo(exportPath));
-            ExcelWorksheet worksheet = excel.Workbook.Worksheets.Add($"AktieREA {DateTime.Today:yyyy-MM-dd}");
+            using var excel = new ExcelPackage(new FileInfo(exportPath));
+            var worksheet = excel.Workbook.Worksheets.Add($"AktieREA {DateTime.Today:yyyy-MM-dd}");
             
             _excelExporter.ExportStocksToWorksheet(ref worksheet, analysisResult, query.CurrencyCode);
             
