@@ -3,6 +3,8 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+HEALTHCHECK CMD curl --fail http://localhost:5000/health || exit
+
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["Smidas.API/Smidas.API.csproj", "Smidas.API/"]
