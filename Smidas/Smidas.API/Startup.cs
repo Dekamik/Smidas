@@ -34,6 +34,7 @@ namespace Smidas.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AppSettings>(Configuration.GetSection(nameof(AppSettings)));
+            services.AddHealthChecks();
 
             services.AddScoped<IHtmlWebFactory, HtmlWebFactory>();
             services.AddScoped<IDagensIndustriWebScraper, DagensIndustriWebScraper>();
