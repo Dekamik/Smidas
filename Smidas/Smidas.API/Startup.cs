@@ -64,7 +64,11 @@ namespace Smidas.API
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health");
+                endpoints.MapControllers();
+            });
         }
     }
 }
