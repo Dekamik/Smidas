@@ -4,7 +4,8 @@ using Smidas.Common.Extensions;
 using System;
 using System.Reflection;
 
-namespace Smidas.Exporting.Excel
+namespace Smidas.Exporting.Excel 
+
 {
     public static class EPPlusExtensions
     {
