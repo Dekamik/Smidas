@@ -23,7 +23,6 @@ namespace Smidas.API.BatchJobs
         public IActionResult Index(string index)
         {
             _batchJobService.RunOnIndex(index);
-            
             return Ok();
         }
     }
