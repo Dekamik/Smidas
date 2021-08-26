@@ -15,22 +15,23 @@ namespace Smidas.Exporting.Excel
         public void ExportStocksToWorksheet(ref ExcelWorksheet worksheet, List<Stock> stocks, string currency, bool doStyling = true)
         {
             // Headers
-            foreach (PropertyInfo prop in typeof(Stock).GetProperties())
+            foreach (var prop in typeof(Stock).GetProperties())
             {
-                ExcelAttribute excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
-                if (excelAttr != null)
+                var excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
+                
+                if (excelAttr == null) 
+                    continue;
+                
+                if (prop.Name == nameof(Stock.Price))
                 {
-                    if (prop.Name == nameof(Stock.Price))
-                    {
-                        worksheet.Cells[excelAttr.Column + "1"].Value = string.Format(excelAttr.ShortName ?? excelAttr.FullName ?? "{0}", currency);
-                        continue;
-                    }
-                    worksheet.Cells[excelAttr.Column + "1"].Value = excelAttr.ShortName ?? excelAttr.FullName;
+                    worksheet.Cells[excelAttr.Column + "1"].Value = string.Format(excelAttr.ShortName ?? excelAttr.FullName ?? "{0}", currency);
+                    continue;
                 }
+                worksheet.Cells[excelAttr.Column + "1"].Value = excelAttr.ShortName ?? excelAttr.FullName;
             }
 
             // Data
-            for (int i = 0; i < stocks.Count; i++)
+            for (var i = 0; i < stocks.Count; i++)
             {
                 worksheet.InsertRowFrom(i + 2, stocks[i]);
             }
@@ -38,14 +39,14 @@ namespace Smidas.Exporting.Excel
             // Styling
             if (doStyling)
             {
-                int buyEndRow = 1 + stocks.Count(s => s.Action == Action.Buy);
-                int keepEndRow = buyEndRow + stocks.Count(s => s.Action == Action.Hold);
-                int sellEndRow = keepEndRow + stocks.Count(s => s.Action == Action.Sell);
+                var buyEndRow = 1 + stocks.Count(s => s.Action == Action.Buy);
+                var keepEndRow = buyEndRow + stocks.Count(s => s.Action == Action.Hold);
+                var sellEndRow = keepEndRow + stocks.Count(s => s.Action == Action.Sell);
 
-                System.Drawing.Color green = System.Drawing.Color.FromArgb(226, 239, 218);
-                System.Drawing.Color blue = System.Drawing.Color.FromArgb(221, 235, 247);
-                System.Drawing.Color yellow = System.Drawing.Color.FromArgb(255, 242, 204);
-                System.Drawing.Color red = System.Drawing.Color.FromArgb(248, 203, 173);
+                var green = System.Drawing.Color.FromArgb(226, 239, 218);
+                var blue = System.Drawing.Color.FromArgb(221, 235, 247);
+                var yellow = System.Drawing.Color.FromArgb(255, 242, 204);
+                var red = System.Drawing.Color.FromArgb(248, 203, 173);
 
                 worksheet.Cells[$"A2:M{worksheet.Dimension.Rows}"].Style.Fill.PatternType = ExcelFillStyle.Solid;
                 worksheet.Cells[$"A2:M{buyEndRow}"].Style.Fill.BackgroundColor.SetColor(green); // Buy

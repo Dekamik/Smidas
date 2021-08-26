@@ -10,19 +10,20 @@ namespace Smidas.Exporting.Excel
     {
         public static void InsertRowFrom<T>(this ExcelWorksheet worksheet, int row, T data)
         {
-            foreach (PropertyInfo prop in typeof(T).GetProperties())
+            foreach (var prop in typeof(T).GetProperties())
             {
-                ExcelAttribute excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
-                if (excelAttr != null)
+                var excelAttr = prop.GetCustomAttribute<ExcelAttribute>();
+                
+                if (excelAttr == null) 
+                    continue;
+                
+                if (prop.PropertyType.IsEnum)
                 {
-                    if (prop.PropertyType.IsEnum)
-                    {
-                        worksheet.Cells[excelAttr.Column + row].Value = (prop.GetValue(data) as Enum).GetDisplayName() ?? prop.GetValue(data);
-                    }
-                    else
-                    {
-                        worksheet.Cells[excelAttr.Column + row].Value = prop.GetValue(data);
-                    }
+                    worksheet.Cells[excelAttr.Column + row].Value = (prop.GetValue(data) as Enum).GetDisplayName() ?? prop.GetValue(data);
+                }
+                else
+                {
+                    worksheet.Cells[excelAttr.Column + row].Value = prop.GetValue(data);
                 }
             }
         }

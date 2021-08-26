@@ -12,12 +12,9 @@ namespace Smidas.API.BatchJobs
     public class BatchJobController : ControllerBase
     {
         private readonly IBatchJobService _batchJobService;
-        private readonly ILogger<BatchJobController> _logger;
 
-        public BatchJobController(IBatchJobService batchJobService,
-            ILogger<BatchJobController> logger)
+        public BatchJobController(IBatchJobService batchJobService)
         {
-            _logger = logger;
             _batchJobService = batchJobService;
         }
         

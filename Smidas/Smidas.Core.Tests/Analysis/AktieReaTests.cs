@@ -61,7 +61,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDisqualifiedStocks_NegativeProfitPerStock_StockIsExcluded()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -85,7 +85,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDisqualifiedStocks_PositiveProfitPerStock_StockIsntExcluded()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -109,7 +109,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDisqualifiedStocks_ZeroDirectDividend_StockIsExcluded()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -133,7 +133,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDisqualifiedStocks_PositiveDirectDividend_StockIsntExcluded()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -157,7 +157,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDisqualifiedStocks_PreferredStock_StockIsExcluded()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -181,7 +181,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDisqualifiedStocks_NonPreferredStock_StockIsntExcluded()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -205,7 +205,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDoubles_CompanyWithDoubles_AllStocksExcludedExceptStockWithHighestTurnover()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -234,7 +234,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDoubles_NoDoubles_NoStocksExcluded()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -256,7 +256,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void ExcludeDoubles_MixedCollection_OnlyDoublesExcluded()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -290,7 +290,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void CalculateARank_AnyStockCollection_StocksRankedByEp()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -327,7 +327,7 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void CalculateBRank_AnyStockCollection_StocksRankedByAdjustedEquityPerStock()
         {
-            IEnumerable<Stock> stocks = new List<Stock>
+            var stocks = new List<Stock>
             {
                 new Stock
                 {
@@ -360,9 +360,9 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void DetermineActions_AllIncludedStocks_OrderedByAbRank()
         {
-            List<Stock> stocks = new List<Stock>();
+            var stocks = new List<Stock>();
 
-            for (int i = 1; i <= 30; i++)
+            for (var i = 1; i <= 30; i++)
             {
                 stocks.Add(new Stock
                 {
@@ -391,9 +391,9 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void DetermineActions_AllIncludedStocks_RankingHasProperActions()
         {
-            List<Stock> stocks = new List<Stock>();
+            var stocks = new List<Stock>();
 
-            for (int i = 1; i <= 30; i++)
+            for (var i = 1; i <= 30; i++)
             {
                 stocks.Add(new Stock
                 {
@@ -430,9 +430,9 @@ namespace Smidas.Core.Tests.Analysis
         [Fact]
         public void DetermineActions_ThreeStocksInAnyIndustryTwoAllowed_TheTwoBestAreMarkedBuyTheThirdIsExcluded()
         {
-            List<Stock> stocks = new List<Stock>();
+            var stocks = new List<Stock>();
 
-            for (int i = 1; i <= 3; i++)
+            for (var i = 1; i <= 3; i++)
             {
                 stocks.Add(new Stock
                 {

@@ -48,7 +48,7 @@ namespace Smidas.Core.Analysis
         [StandardLogging(Level = LogEventLevel.Verbose)]
         public void ExcludeDisqualifiedStocks(ref IEnumerable<Stock> stocks, AktieReaQuery.AnalysisOptionsData options)
         {
-            foreach (Stock stock in stocks)
+            foreach (var stock in stocks)
             {
                 if (options.ExcludeNegativeProfitStocks && stock.ProfitPerStock < 0m) // Stocks with negative profit per stock
                 {
@@ -71,7 +71,7 @@ namespace Smidas.Core.Analysis
             var doublesCount = new Dictionary<string, int>();
             var series = stocks.Where(s => Regex.IsMatch(s.Name, ".* [A-Z]$"));
 
-            foreach (Stock stock in series) // Count amount of doubles per series
+            foreach (var stock in series) // Count amount of doubles per series
             {
                 doublesCount[stock.CompanyName] = doublesCount.ContainsKey(stock.CompanyName) ? doublesCount[stock.CompanyName] + 1 : 1;
             }
@@ -82,7 +82,7 @@ namespace Smidas.Core.Analysis
                                               .Distinct();
             var stocksToExclude = new HashSet<string>();
 
-            foreach (string companyName in doubleCompanies)
+            foreach (var companyName in doubleCompanies)
             {
                 // Select the company's stocks, ordered by volume
                 // Then keep the stock with the largest volume. Exclude the rest.
@@ -92,7 +92,7 @@ namespace Smidas.Core.Analysis
                             .ForEach(c => stocksToExclude.Add(c.Name));
             }
 
-            foreach (Stock stock in stocks)
+            foreach (var stock in stocks)
             {
                 if (stocksToExclude.Contains(stock.Name))
                 {
@@ -104,7 +104,7 @@ namespace Smidas.Core.Analysis
         [StandardLogging(Level = LogEventLevel.Verbose)]
         public void CalculateARank(ref IEnumerable<Stock> stocks)
         {
-            int i = 1;
+            var i = 1;
             stocks.OrderByDescending(s => s.Ep)
                   .ForEach(s => s.ARank = i++);
         }
@@ -112,7 +112,7 @@ namespace Smidas.Core.Analysis
         [StandardLogging(Level = LogEventLevel.Verbose)]
         public void CalculateBRank(ref IEnumerable<Stock> stocks)
         {
-            int i = 1;
+            var i = 1;
             stocks.OrderByDescending(s => s.AdjustedEquityPerStock)
                   .ForEach(s => s.BRank = i++);
         }
@@ -132,8 +132,8 @@ namespace Smidas.Core.Analysis
                 industryAmount.Add(industry, 0);
             }
 
-            int i = 1;
-            foreach (Stock stock in stocks.OrderBy(s => s.AbRank)
+            var i = 1;
+            foreach (var stock in stocks.OrderBy(s => s.AbRank)
                                           .ThenByDescending(s => s.DirectDividend))
             {
                 if (stock.Action == Action.Exclude)
@@ -142,7 +142,7 @@ namespace Smidas.Core.Analysis
                 }
 
                 // Check if the stock belongs to a capped industry, and whether or not the cap has been reached.
-                int cap = industryCap[stock.Industry];
+                var cap = industryCap[stock.Industry];
 
                 if (cap != -1 && industryAmount[stock.Industry] == cap)
                 {
