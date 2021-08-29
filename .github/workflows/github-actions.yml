@@ -1,9 +1,8 @@
 name: CI to Docker Hub
 
 on:
-  push: 
-    tags:
-      - '*'
+  release: 
+    types: [ published ]
 
 jobs:
   test:
@@ -54,7 +53,7 @@ jobs:
           file: Smidas/Smidas.API/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/smidas:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/smidas:${{ github.event.release.tag_name }}
           
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
