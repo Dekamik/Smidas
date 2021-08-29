@@ -54,7 +54,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: [ 
-            ${{ secrets.DOCKER_HUB_USERNAME }}/smidas:${{ github.event.release.tag_name }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/smidas:${{ github.event.release.tag_name }},
             ${{ secrets.DOCKER_HUB_USERNAME }}/smidas:latest
           ]
           
