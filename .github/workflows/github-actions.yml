@@ -35,6 +35,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ secrets.DOCKER_HUB_USERNAME }}
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+        
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
@@ -53,10 +66,8 @@ jobs:
           file: Smidas/Smidas.API/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: [ 
-            ${{ secrets.DOCKER_HUB_USERNAME }}/smidas:${{ github.event.release.tag_name }},
-            ${{ secrets.DOCKER_HUB_USERNAME }}/smidas:latest
-          ]
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
