@@ -1,8 +1,4 @@
-using System.Diagnostics;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Serilog.Events;
 using Smidas.Common.Attributes;
 
 namespace Smidas.API.BatchJobs
